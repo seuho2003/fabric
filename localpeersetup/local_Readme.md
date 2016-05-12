@@ -5,6 +5,8 @@ Please follow below commands before execute local_fabric.sh script in outside va
 - sudo ufw status
 - sudo ufw disable
 
+Incase if peers are not launching please clear iptables rules and re-start docker daemon.
+
 ####Launching peers in local machine (Inside and Outside Vagrant environments)
 
 Copy or curl `local_fabric.sh` [**local_fabric.sh**](https://github.com/rameshthoomu/obc-test/blob/network_spinup/localpeersetup/local_fabric.sh) file into local machine and follow below instructions to run the script.
@@ -21,10 +23,10 @@ curl -L https://raw.githubusercontent.com/rameshthoomu/obc-test/network_spinup/l
 2. Make sure Docker Daemon is up and running. If not, please execute `sudo service docker start`
 3. Execute `chmod +x local_fabric.sh` `dos2unix ./local_fabric.sh` to make sure file is good to execute in unix environment.
 4. Execute `./local_fabric.sh -n 4 -s` (Enabled Security, Privacy with Consensus for 4 peers)
-5. To launch peers with security and without Consensus, please comment out `CONSENSUS=pbft` and `PBFT_MODE=sieve` lines or change the value to noops in `local_fabric.sh`.
+5. To launch peers with security and without Consensus, please comment out `CONSENSUS=pbft` and `PBFT_MODE=batch` lines or change the value to noops in `local_fabric.sh`.
 
 -n indicates number of peers you want 
--s indicates running peers with Security, Privacy and Consensus enabled. (If you don't pass any arguments, by default, script launches 4 peers with security, Privacy and Consensus=PBFT enabled) 
+-s indicates running peers with Security, Privacy and Consensus enabled. (If you don't pass any arguments, by default, script launches 5 peers without security, Privacy and Consensus) 
 
 **Pulling Docker Images:**
 
