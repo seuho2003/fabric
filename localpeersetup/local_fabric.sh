@@ -8,7 +8,7 @@ USE_PORT=30000
 #OBCCA_IMAGE=pushdocker/obcca:vagrant2
 
 CONSENSUS=pbft
-PBFT_MODE=sieve
+PBFT_MODE=batch
 WORKDIR=$(pwd)
 
 #
@@ -132,9 +132,9 @@ docker ps -aq -f status=exited | xargs docker rm 1>/dev/null 2>&1
 rm LOG*
 
 
-echo "--------> Setting default command line Arg values to without security and 4 networkcredentials"
+echo "--------> Setting default command line Arg values to without security & consensus and starts 5 peers"
 : ${SECURITY:="N"}
-: ${NUM_PEERS="4"}
+: ${NUM_PEERS="5"}
 SECURITY=$(echo $SECURITY | tr a-z A-Z)
 
 echo "Number of PEERS are $NUM_PEERS"
@@ -149,9 +149,9 @@ Dockerps_ID=$(ps -ef | grep docker | grep daemon | awk '{print $3}')
 echo $Dockerps_ID
 if [[ $Dockerps_ID -ne 1 ]] ; then echo " Docker daemon is not running " ; exit 1 ; else echo "Docker daemon is running" ; fi
 
-
 echo "--------> Pulling Docker Images from Docker Hub"
 docker pull rameshthoomu/working:baseimagelatest
+docker tag rameshthoomu/working:baseimagelatest hyperledger/fabric-baseimage:latest
 #curl -L https://github.com/rameshthoomu/fabric/blob/master/scripts/provision/common.sh -o common.sh
 #curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/master/scripts/provision/docker.sh -o docker.sh
 #chmod +x docker.sh
@@ -191,8 +191,6 @@ do
     #    echo "-----------> Printing Log file in detached mode for Container"$CONTAINER_ID
         docker logs -f $CONTAINER_ID > "LOGFILE_"$CONTAINER_ID &
 done
-
-
 
 # Writing Peer data into a file for Go SDK
 cd $WORKDIR
