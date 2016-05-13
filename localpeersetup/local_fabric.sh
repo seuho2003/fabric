@@ -42,7 +42,7 @@ docker run -d --name=PEER0 -it \
                 -e CORE_PEER_LOGGING_LEVEL=error \
                 -e CORE_VM_DOCKER_TLS_ENABLED=false \
                 -e CORE_SECURITY_ENROLLID=test_vp0 \
-                -e CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT $PEER_IMAGE peer peer
+                -e CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT $PEER_IMAGE peer node start
 
 CONTAINERID=$(docker ps | awk 'NR>1 && $NF!~/caserv/ {print $1}')
 PEER_IP_ADDRESS=$(docker inspect --format '{{.NetworkSettings.IPAddress}}' $CONTAINERID)
@@ -76,7 +76,7 @@ docker run  -d --name=PEER$peer_id -it \
                 -e CORE_VM_DOCKER_TLS_ENABLED=false \
                 -e CORE_VM_DOCKER_TLS_ENABLED=false \
                 -e CORE_SECURITY_ENROLLID=$USER_NAME \
-                -e CORE_SECURITY_ENROLLSECRET=$SECRET_KEY $PEER_IMAGE peer peer
+                -e CORE_SECURITY_ENROLLSECRET=$SECRET_KEY $PEER_IMAGE peer node start
 done
 }
 
@@ -116,7 +116,7 @@ docker run -d -it --name=PEER$peer_id \
                 -e CORE_PEER_DISCOVERY_ROOTNODE=$IP:30001 \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
                 -e CORE_PEER_LOGGING_LEVEL=error \
-                -e CORE_VM_DOCKER_TLS_ENABLED=false $PEER_IMAGE peer peer
+                -e CORE_VM_DOCKER_TLS_ENABLED=false $PEER_IMAGE peer node start
 done
 }
 
