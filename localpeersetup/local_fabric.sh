@@ -38,6 +38,8 @@ docker run -d --name=PEER0 -it \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
                 -e CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=$CONSENSUS \
                 -e CORE_PBFT_GENERAL_MODE=$PBFT_MODE \
+                -e CORE_PBFT_GENERAL_TIMEOUT_REQUEST=10s \
+                -e CORE_PEER_LOGGING_LEVEL=error \
                 -e CORE_VM_DOCKER_TLS_ENABLED=false \
                 -e CORE_SECURITY_ENROLLID=test_vp0 \
                 -e CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT $PEER_IMAGE peer peer
@@ -69,6 +71,9 @@ docker run  -d --name=PEER$peer_id -it \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
                 -e CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=$CONSENSUS \
                 -e CORE_PBFT_GENERAL_MODE=$PBFT_MODE \
+                -e CORE_PEER_LOGGING_LEVEL=error \
+                -e CORE_PBFT_GENERAL_TIMEOUT_REQUEST=10s \
+                -e CORE_VM_DOCKER_TLS_ENABLED=false \
                 -e CORE_VM_DOCKER_TLS_ENABLED=false \
                 -e CORE_SECURITY_ENROLLID=$USER_NAME \
                 -e CORE_SECURITY_ENROLLSECRET=$SECRET_KEY $PEER_IMAGE peer peer
@@ -89,6 +94,7 @@ docker run -d  -it --name=PEER0 \
                 -p $REST_PORT:5000 -p `expr $USE_PORT + 1`:30303 \
                 -e CORE_PEER_ADDRESSAUTODETECT=true \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
+                -e CORE_PEER_LOGGING_LEVEL=error \
                 -e CORE_VM_DOCKER_TLS_ENABLED=false $PEER_IMAGE peer peer
 
 CONTAINERID=$(docker ps | awk 'NR>1 && $NF!~/caserv/ {print $1}')
@@ -109,6 +115,7 @@ docker run -d -it --name=PEER$peer_id \
                 -e CORE_PEER_ADDRESS=$IP:`expr $USE_PORT + 1` \
                 -e CORE_PEER_DISCOVERY_ROOTNODE=$IP:30001 \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
+                -e CORE_PEER_LOGGING_LEVEL=error \
                 -e CORE_VM_DOCKER_TLS_ENABLED=false $PEER_IMAGE peer peer
 done
 }
@@ -164,7 +171,7 @@ if [ "$SECURITY" == "Y" ] ; then
         echo "--------> Fetching PORT number"
         PORT="$(sudo netstat -tunlp | grep docker | awk '{print $4'} | cut -d ":" -f 4)"
         echo "PORT NUMBER IS $PORT"
-        echo "--------> Calling OBCCA function"
+        echo "--------> Calling membersrvc_setup function"
         membersrvc_setup $NUM_PEERS $IP $PORT
 
 else
