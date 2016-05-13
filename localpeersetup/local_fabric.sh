@@ -95,7 +95,7 @@ docker run -d  -it --name=PEER0 \
                 -e CORE_PEER_ADDRESSAUTODETECT=true \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
                 -e CORE_PEER_LOGGING_LEVEL=error \
-                -e CORE_VM_DOCKER_TLS_ENABLED=false $PEER_IMAGE peer peer
+                -e CORE_VM_DOCKER_TLS_ENABLED=false $PEER_IMAGE peer node start
 
 CONTAINERID=$(docker ps | awk 'NR>1 && $NF!~/caserv/ {print $1}')
 PEER_IP_ADDRESS=$(docker inspect --format '{{.NetworkSettings.IPAddress}}' $CONTAINERID)
