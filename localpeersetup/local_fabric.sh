@@ -281,7 +281,7 @@ done
         username=$(docker inspect $CONTAINER_ID | awk '/CORE_SECURITY_ENROLLID/ {sub(/.*=/,""); sub(/".*/,""); print}')
 
         secret=$(docker inspect $CONTAINER_ID | awk '/CORE_SECURITY_ENROLLSECRET/ {sub(/.*=/,""); sub(/".*/,""); print}')
-echo "   { \"username\" : \"$username\", \"secret\" : \"$secret\" } " >> $WORKDIR/networkcredentials
+echo "   { \"Peer_username\" : \"$username\", \"secret\" : \"$secret\" } " >> $WORKDIR/networkcredentials
 
 echo "   ],"  >> $WORKDIR/networkcredentials
 
