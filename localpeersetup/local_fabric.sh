@@ -196,9 +196,10 @@ echo $NUM_CONTAINERS
 for (( container_id=1; $container_id<="$((NUM_CONTAINERS))"; container_id++ ))
 do
         CONTAINER_ID=$(echo $CONTAINERS | awk -v con_id=$container_id '{print $con_id}')
+        CONTAINER_NAME=$(docker inspect --format '{{.Name}}' $CONTAINER_ID |  sed 's/\///')
     #    echo "Container ID $CONTAINER_ID"
     #    echo "-----------> Printing Log file in detached mode for Container"$CONTAINER_ID
-        docker logs -f $CONTAINER_ID > "LOGFILE_"$CONTAINER_ID &
+        docker logs -f $CONTAINER_ID > "LOGFILE_$CONTAINER_NAME"_"$CONTAINER_ID" &
 done
 
 # Writing Peer data into a file for Go SDK
@@ -251,7 +252,7 @@ done
         api_port=$(docker inspect --format='{{(index (index .NetworkSettings.Ports "5000/tcp") 0).HostPort}}' $CONTAINER_ID)
 
 echo "   { \"api_host\" : \"$api_host\", \"api_port\" : \"$api_port\" }  " >> $WORKDIR/networkcredentials
-echo "   ]"  >> $WORKDIR/networkcredentials
+echo "   ],"  >> $WORKDIR/networkcredentials
 
 echo "} "  >> $WORKDIR/networkcredentials
 
@@ -269,8 +270,8 @@ do
         username=$(docker inspect $CONTAINER_ID | awk '/CORE_SECURITY_ENROLLID/ {sub(/.*=/,""); sub(/".*/,""); print}')
         secret=$(docker inspect $CONTAINER_ID | awk '/CORE_SECURITY_ENROLLSECRET/ {sub(/.*=/,""); sub(/".*/,""); print}')
 
-echo "Peer_username: $username secret: $secret "
-        echo "   { \"Peer_username\" : \"$Peer_username\", \"secret\" : \"$secret\" } , " >> $WORKDIR/networkcredentials
+        echo "Peer_username: $username secret: $secret "
+        echo "   { \"Peer_username\" : \"$username\", \"secret\" : \"$secret\" } , " >> $WORKDIR/networkcredentials
 
 done
         container_id=1
@@ -282,6 +283,6 @@ done
         secret=$(docker inspect $CONTAINER_ID | awk '/CORE_SECURITY_ENROLLSECRET/ {sub(/.*=/,""); sub(/".*/,""); print}')
 echo "   { \"username\" : \"$username\", \"secret\" : \"$secret\" } " >> $WORKDIR/networkcredentials
 
-echo "   ]"  >> $WORKDIR/networkcredentials
+echo "   ],"  >> $WORKDIR/networkcredentials
 
 echo "} "  >> $WORKDIR/networkcredentials
