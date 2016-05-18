@@ -151,7 +151,7 @@ fi
 
 echo "Is Security and Privacy enabled $SECURITY"
 
-Dockerps_ID=$(ps -ef | grep docker | grep daemon | awk '{print $3}')
+Dockerps_ID=$(ps -ef | grep "tcp://" | grep 2375 | awk '{print $3}')
 echo $Dockerps_ID
 if [[ $Dockerps_ID -ne 1 ]] ; then echo " Docker daemon is not running " ; exit 1 ; else echo "Docker daemon is running" ; fi
 
