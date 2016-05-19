@@ -210,7 +210,7 @@ echo " "
 echo "PeerData : "
 
 echo "----------> Printing Container ID's with IP Address and PORT numbers"
-
+REST_PORT=5000
 
 for (( container_id=$NUM_CONTAINERS; $container_id>=1; container_id-- ))
 do
@@ -222,7 +222,7 @@ do
         peer_http_ip=$(docker inspect --format '{{.NetworkSettings.IPAddress}}' $CONTAINER_ID)
         api_host=$peer_http_ip
         api_port=$(docker inspect --format='{{(index (index .NetworkSettings.Ports "5000/tcp") 0).HostPort}}' $CONTAINER_ID)
-        echo "   { \"name\" : \"$CONTAINER_NAME\", \"api-host\" : \"$api_host\", \"api-port\" : \"$api_port\" } , " >> $WORKDIR/networkcredentials
+        echo "   { \"name\" : \"$CONTAINER_NAME\", \"api-host\" : \"$api_host\", \"api-port\" : \"$REST_PORT\" } , " >> $WORKDIR/networkcredentials
         echo " REST_EndPoint : $api_host:$api_port"
         api_port_grpc=$(docker inspect --format='{{(index (index .NetworkSettings.Ports "30303/tcp") 0).HostPort}}' $CONTAINER_ID)
         echo " GRPC_EndPoint : $api_host:$api_port_grpc"
