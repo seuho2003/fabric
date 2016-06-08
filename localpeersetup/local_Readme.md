@@ -50,7 +50,7 @@ Above script automatically pulls latest Docker Images of Hyperledger-peer and me
 2. Remove all exited containers
   - `docker ps -aq -f status=exited | xargs docker rm`
 3. Remove all Images except 'openblockchain/baseimage'
-  - `docker rmi $(docker images | grep -v 'openblockchain/baseimage' | awk {'print $3'})`
+  - `docker rmi $(docker images | grep -v 'hyperledger/fabric-baseimage:latest' | awk {'print $3'})`
 4. Stop Docker container
   - `docker stop <Container ID>`
 5. Start Docker container
