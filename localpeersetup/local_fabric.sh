@@ -157,8 +157,8 @@ echo $Dockerps_ID
 if [[ $Dockerps_ID -ne 1 ]] ; then echo " Docker daemon is not running " ; exit 1 ; else echo "Docker daemon is running" ; fi
 
 echo "--------> Pulling Base Docker Images from Docker Hub"
-docker pull rameshthoomu/working:baseimagelatest
-docker tag rameshthoomu/working:baseimagelatest hyperledger/fabric-baseimage:latest
+docker pull rameshthoomu/baseimage:latest
+docker tag rameshthoomu/baseimage:latest hyperledger/fabric-baseimage:latest
 docker pull rameshthoomu/peer:latest
 docker pull rameshthoomu/membersrvc:latest
 #curl -L https://github.com/rameshthoomu/fabric/blob/master/scripts/provision/common.sh -o common.sh
