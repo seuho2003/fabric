@@ -9,13 +9,13 @@ Incase if peers are not launching please clear iptables rules and re-start docke
 
 ####Launching peers in local machine (Inside and Outside Vagrant environments)
 
-Copy or curl `local_fabric.sh` [**local_fabric.sh**](https://github.com/rameshthoomu/obc-test/blob/network_spinup/localpeersetup/local_fabric.sh) file into local machine and follow below instructions to run the script.
+Copy or curl `local_fabric.sh` [**local_fabric.sh**](https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh) file into local machine and follow below instructions to run the script.
 
 To curl, click on Raw link and copy the link from address bar and curl it or copy and paste the below link in your local machine.
 
 Example:
 
-curl -L https://raw.githubusercontent.com/rameshthoomu/obc-test/network_spinup/localpeersetup/local_faric.sh?token=AQPtBmIVdXR6py4hpc9L63TuWgsUs_Y9ks5XMlOHwA%3D%3D -o local_fabric.sh
+curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh -o local_fabric.sh
 
 *Follow below steps:*
 
@@ -30,15 +30,15 @@ curl -L https://raw.githubusercontent.com/rameshthoomu/obc-test/network_spinup/l
 
 **Pulling Docker Images:**
 
-Above script automatically pulls latest Docker Images of Hyperledger-peer and membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc).
+Above script automatically pulls latest Docker Images of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub accounts).
 
-**Building openblockchain/baseimage:latest Image** (Outside vagrant)
+**Building hyperledger/fabric-baseimage:latest Image** (Outside vagrant)
 
 - Perform `git pull https://github.com/hyperledger/fabric.git master`
 - run `cd $GOPATH/src/gihub.com/hyperledger/fabric/scripts/provision`
-- run `./docker.sh 0.0.9` (this will generate openblockchain/baseimage:latest Image)
+- run `./docker.sh x86_64-0.0.10` (this will generate hyperledger/fabric-baseimage:latest Image)
 
-**Building openblockchain/baseimage:latest Image** (Inside vagrant)
+**Building hyperledger/fabric-baseimage:latest Image** (Inside vagrant)
 
 - Perform `vagrant halt/destroy`
 - run `vagrant up` command
