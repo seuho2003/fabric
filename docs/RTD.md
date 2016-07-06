@@ -56,5 +56,5 @@ Once webhooks and configuration file is setup in git repository, RTD automatical
 4. **Python Interpreter:** Select CPython 2.x
 
 **Reference**
-![Fabric RTD](docs/images/RTD.png)
+![Fabric RTD](images/RTD.png)
 
