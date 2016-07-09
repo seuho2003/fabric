@@ -16,7 +16,7 @@ Follow the below process to create ReadTheDocs webhooks in git repository.
 2. Click on `Settings` - `Webhooks & Services` - `Add Service` - Search for `ReadTheDocs` service and add it.
 3. If the service is added and webhook is successfully created, you see a Green tick mark beside `ReadThedocs` service. 
 
-Reference: ![webhooks](images/weebhook.png)
+Reference: ![webhooks](images/webhook.png)
 
 **Configuring yaml configuration**:
 
