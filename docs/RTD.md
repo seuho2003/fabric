@@ -16,6 +16,8 @@ Follow the below process to create ReadTheDocs webhooks in git repository.
 2. Click on `Settings` - `Webhooks & Services` - `Add Service` - Search for `ReadTheDocs` service and add it.
 3. If the service is added and webhook is successfully created, you see a Green tick mark beside `ReadThedocs` service. 
 
+Reference: ![webhooks](images/weebhook.png)
+
 **Configuring yaml configuration**:
 
 Once create the webhooks, configure `mkdocs.yaml` configruation file in root of the fabric repository and also create `index.md` file in docs folder. See the fabric [`mkdocs.yaml`](https://github.com/hyperledger/fabric/blob/master/mkdocs.yml) file for reference. ReadTheDocs always look for mkdocs.yaml file and `index.md` file in git repository before it builds the documentation.
