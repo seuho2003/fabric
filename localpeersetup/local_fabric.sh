@@ -244,8 +244,8 @@ echo "Client Credentials : "
 echo " "
         for ((i=0; i<=$NUM_CONTAINERS-1;i++))
         do
-        CLIENT_USER=$(awk '/users:/,/^[^ ]/' membersrvc.yaml | egrep "test_user$((i)):" | cut -d ":" -f 1 | tr -d " ")
-        CLIENT_SECRET_KEY=$(awk '/users:/,/^[^ ]/' membersrvc.yaml | egrep "test_user$((i)):" | cut -d ":" -f 2 | cut -d " " -f 3)
+        CLIENT_USER=$(awk '/users:/,/^[^ #]/' membersrvc.yaml | egrep "test_user$((i)):" | cut -d ":" -f 1 | tr -d " ")
+        CLIENT_SECRET_KEY=$(awk '/users:/,/^[^ #]/' membersrvc.yaml | egrep "test_user$((i)):" | cut -d ":" -f 2 | cut -d " " -f 3)
         echo "username: $CLIENT_USER  secretkey : $CLIENT_SECRET_KEY"
         echo "   { \"username\" : \"$CLIENT_USER\", \"secret\" : \"$CLIENT_SECRET_KEY\" } , " >> $WORKDIR/networkcredentials
 
