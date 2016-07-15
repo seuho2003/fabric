@@ -5,6 +5,10 @@ sudo: required
 services:
  - docker
 
+env:
+    - TEST_TARGET=node-sdk-unit-tests
+#   - TEST_TARGET=behave
+    
 before_install:
 
  - echo "Starting Docker Daemon "
@@ -39,14 +43,16 @@ before_script:
  - sudo rm -rf /var/hyperledger/ && sudo mkdir /var/hyperledger/ && sudo chown $USER:$USER /var/hyperledger
  - cd /$HOME/gopath/src/github.com/hyperledger/fabric
  - make linter
- - make unit-test
 
 script:
 
  - echo "Executing Behave test scripts"
  - cd $HOME/gopath/src/github.com/hyperledger/fabric
  - sed -i -e 's/172.17.0.1:2375\b/'"$ip:$port"'/g' $HOME/gopath/src/github.com/hyperledger/fabric/bddtests/compose-defaults.yml
- - make behave BEHAVE_OPTS="-D logs=Y -o testsummary.log"
+ - export BEHAVE_OPTS="-D logs=Y -o testsummary.log"
+ - make $TEST_TARGET
+ - cd scripts
+ - chmod +x nodesdk.sh && sudo ./nodesdk.sh
 
 after_failure:
 
@@ -56,8 +62,12 @@ after_failure:
    chmod +x scripts/containerlogs.sh
    sudo ./scripts/containerlogs.sh
 
-notifications:
+after_success:
 
-  slack: 'hyperledgerproject:azMP8Mw3cfGigXkqi5RujZXr'
-  on_success: always
-  on_failure: always
+ - npm publish
+
+#notifications:
+
+# slack: 'hyperledgerproject:azMP8Mw3cfGigXkqi5RujZXr'
+# on_success: always
+# on_failure: always
