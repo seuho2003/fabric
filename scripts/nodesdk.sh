@@ -1,4 +1,6 @@
 #!/bin/bash
+git diff
+git diff --name-status -- sdk/node
 export NUM_FILES_CHANGED=`git diff --name-status -- sdk/node | wc -l`
 echo "Number of files changed in sdk/node directory:" $NUM_FILES_CHANGED
 export NUM_PROTO_FILES_CHANGED=`git diff --name-status -- protos | wc -l`
@@ -13,7 +15,7 @@ echo "Version Number in Production is:" $NPM_PROD_PACKAGE_VERSION
 cd sdk/node
 export NPM_PR_PACKAGE_VERSION=`cat package.json | grep version | awk -F\" '{ print $4 }'`
 echo "Version number in PR is:" $NPM_PR_PACKAGE_VERSION
-if [[ "$NPM_PROD_PACKAGE_VERSION" = "$NPM_PR_PACKAGE_VERSION" || NPM_PR_PACKAGE_VERSION -lt $NPM_PROD_PACKAGE_VERSION ]];  then
+if [[ "$NPM_PROD_PACKAGE_VERSION" = "$NPM_PR_PACKAGE_VERSION" || "$NPM_PR_PACKAGE_VERSION" -lt "$NPM_PROD_PACKAGE_VERSION" ]];  then
  echo "Package Version has to change, Please run npm version <major> <minor> <patch>"
  exit 1
 fi

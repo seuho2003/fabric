@@ -340,13 +340,13 @@ test('Deploy a chaincode by enrolled user', function(t) {
     args: ["a", initA, "b", initB]
   };
 
-  if (mode === 'dev') {
+//  if (mode === 'dev') {
       // Name required for deploy in development mode
-      deployRequest.chaincodeName = testChaincodeName;
-  } else {
+//      deployRequest.chaincodeName = testChaincodeName;
+//  } else {
       // Path (under $GOPATH) required for deploy in network mode
-      deployRequest.chaincodePath = testChaincodePath;
-  }
+//      deployRequest.chaincodePath = testChaincodePath;
+//  }
 
   // Trigger the deploy transaction
   var deployTx = test_user_Member1.deploy(deployRequest);
