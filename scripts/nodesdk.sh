@@ -1,5 +1,4 @@
 #!/bin/bash -x
-git diff
 NUM_FILES_CHANGED=$(git diff --name-status -- sdk/node | wc -l)
 echo "Number of files changed in sdk/node directory:" $NUM_FILES_CHANGED
 NUM_PROTO_FILES_CHANGED=$(git diff --name-status -- protos | wc -l)
