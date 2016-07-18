@@ -2,7 +2,7 @@
 #NUM_FILES_CHANGED=$(git diff --name-status -- sdk/node | wc -l)
 #git show --name-only --oneline --relative=sdk/node
 #NUM_FILES_CHANGED=$(git show --name-only --oneline --relative=sdk/node | wc -l)
-git log $TRAVIS_COMMIT_RANGE
+git log --name-only $TRAVIS_COMMIT_RANGE
 git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master)
 NUM_FILES_CHANGED=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master)) | grep "sdk/node" | wc -l
 echo "Number of files changed in sdk/node directory:" $NUM_FILES_CHANGED
