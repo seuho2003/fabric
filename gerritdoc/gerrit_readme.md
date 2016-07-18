@@ -38,7 +38,7 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
     - Execute `git review -s` //Submits changes to gerrit server as patch set.
     
 Reference:
-![Gerrit_Reference](images/Gerrit_merge.png)
+![Gerrit_Reference](Gerrit_merge.png)
     
     
 
