@@ -39,6 +39,8 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
     
 Reference:
 ![Gerrit_Reference](Gerrit_merge.png)
+[Gerrit_Reference_link](https://gerrit.hyperledger.org/r/Documentation/intro-quick.html)
+
     
     
 
