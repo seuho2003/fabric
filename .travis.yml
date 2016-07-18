@@ -5,8 +5,8 @@ sudo: required
 services:
  - docker
 env:
-    - TEST_TARGET=unit-test
-    - TEST_TARGET=behave
+    - TEST_TARGET=node-sdk-unit-tests
+#   - TEST_TARGET=behave
 
 before_install:
 
@@ -42,6 +42,8 @@ before_script:
  - sudo rm -rf /var/hyperledger/ && sudo mkdir /var/hyperledger/ && sudo chown $USER:$USER /var/hyperledger
  - cd /$HOME/gopath/src/github.com/hyperledger/fabric
  - make linter
+ - cd scripts
+ - chmod +x nodesdk.sh && ./nodesdk.sh
 
 script:
 

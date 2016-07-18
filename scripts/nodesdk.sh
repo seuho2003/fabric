@@ -3,9 +3,9 @@
 #git show --name-only --oneline --relative=sdk/node
 #NUM_FILES_CHANGED=$(git show --name-only --oneline --relative=sdk/node | wc -l)
 git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master)
-NUM_FILES_CHANGED=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master) | grep "sdk/node" | wc -l
+NUM_FILES_CHANGED=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master)) | grep "sdk/node" | wc -l
 echo "Number of files changed in sdk/node directory:" $NUM_FILES_CHANGED
-NUM_PROTO_FILES_CHANGED=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master) | grep "protos" | wc -l
+NUM_PROTO_FILES_CHANGED=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master)) | grep "protos" | wc -l
 echo "Number of Proto files changed are:" $NUM_PROTO_FILES_CHANGED
 if [[ "$NUM_FILES_CHANGED" -eq 0 && "$NUM_PROTO_FILES_CHANGED" -eq 0 ]]; then
 echo "Node sdk files are not changed!";
