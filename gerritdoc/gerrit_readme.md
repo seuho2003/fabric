@@ -24,7 +24,7 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
  
  Execute below command to install git-review `sudo apt-get install git-review`. After install git-review, execute git review -s and provide user name.
  
- configure git config settings with below commands: 
+ ######configure git config settings with below commands: 
  
  git config --global --add gitreview.username "rameshthoomu"
  
