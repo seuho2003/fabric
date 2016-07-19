@@ -1,5 +1,4 @@
-###Welcome to Gerrit Introduction:
-
+#Welcome to Gerrit Introduction:
 Create an Linux Foundation ID in below link
 [Linux Foundation](https://identity.linuxfoundation.org/)
 Once account is created - Login to [Gerrit](https://gerrit.hyperledger.org/r/#/admin/projects/lf-sandbox ) with your credentials
