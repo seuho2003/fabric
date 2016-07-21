@@ -18,7 +18,8 @@ apt-get install --yes python-setuptools
 apt-get install --yes python-pip
 pip install behave
 pip install nose
-pip install protobuf
+
+pip install -U protobuf==3.0.0a3
 
 # updater-server, update-engine, and update-service-common dependencies (for running locally)
 pip install -I flask==0.10.1 python-dateutil==2.2 pytz==2014.3 pyyaml==3.10 couchdb==1.0 flask-cors==2.0.1 requests==2.4.3
