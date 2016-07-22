@@ -10,10 +10,10 @@ This model allows developers to leverage their favorite OS/editors and execute t
 - Note that your Host should not run within a VM. If you attempt this, the VM within your Host may fail to boot with a message indicating that VT-x is not available.
 
 ### Prerequisites
-* [Git client](https://git-scm.com/downloads)
-* [Go](https://golang.org/) - 1.6 or later
-* [Vagrant](https://www.vagrantup.com/) - 1.7.4 or later
-* [VirtualBox](https://www.virtualbox.org/) - 5.0 or later
+* <a href="https://git-scm.com/downloads" target="_blank">Git client</a>
+* <a href="https://golang.org/)" target="_blank"> Go - 1.6 or later</a>
+* <a href="https://www.vagrantup.com/" target="_blank"> Vagrant - 1.7.4 or later</a>
+* <a href="https://www.virtualbox.org/">VirtualBox- 5.0 or later</a>
 * BIOS Enabled Virtualization - Varies based on hardware
 
 - Note: The BIOS Enabled Virtualization may be within the CPU or Security settings of the BIOS
