@@ -26,7 +26,10 @@ all: hfc
 hfc:
 	cp ../../protos/*.proto ./lib/protos
 	cp ../../membersrvc/protos/*.proto ./lib/protos
-	npm install && sudo npm install -g typescript && sudo npm install typings --global && typings install
+	npm install
+	npm ls -g | grep 'typings' || sudo npm install -g typings
+	npm ls -g | grep 'typescript' || sudo npm install -g typescript
+	typings install
 	tsc
 	./makedoc.sh
 
