@@ -9,6 +9,7 @@ pages:
 - Glossary: glossary.md
 - Protocol Spec: protocol-spec.md
 - Usecases: biz/usecases.md
+- Protocol Spec_zh: protocol-spec_zh.md
 
 - Setup:
   - Fabric Developer Setup: dev-setup/devenv.md
