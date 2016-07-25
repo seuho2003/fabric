@@ -63,6 +63,7 @@ Above script automatically pulls latest Docker Images of hyperledger/fabric-peer
   - `docker inspect <Container ID>`
 10. To View Logs of a Container
   - `docker logs -f <Container ID>`
+
 ## Testing Chaincode in CLI mode:
 
 Enter into the container
