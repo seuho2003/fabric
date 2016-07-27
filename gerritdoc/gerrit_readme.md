@@ -1,4 +1,7 @@
 #Welcome to Gerrit Introduction:
+
+Gerrit is a free, web-based collaborative code review tool that integrates with Git.
+
 Create an Linux Foundation ID in below link
 [Linux Foundation](https://identity.linuxfoundation.org/)
 Once account is created - Login to [Gerrit](https://gerrit.hyperledger.org/r/#/admin/projects/lf-sandbox ) with your credentials
@@ -22,9 +25,9 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
  
 #####Install git-review:
  
- Execute below command to install git-review `sudo apt-get install git-review`. After install git-review, execute git review -s and provide user name.
+ Execute below command to install git-review `sudo apt-get install git-review`. After install git-review, execute `git review -s` and provide user name.
  
- ######configure git config settings with below commands: 
+#####configure git config settings with below commands: 
  
  git config --global --add gitreview.username "rameshthoomu"
  
@@ -34,17 +37,23 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
  - git commit -s -m "test commit" //Adds signoff signature and adds commit
  - git commit -s --amend //Commit amends with previous signoff id
  - Once you submit all changes in your work area - 
-    - Execute `git review -s` //Submits changes to gerrit server as patch set.
-    
+    - Execute `git review -s` //Submits changes to gerrit server as patch set or submit your changes to `git push origin HEAD:refs/for/master`
+
+##### More about Gerrit:
+
+- Do your work on a separate branch when your previous commits are waiting for merge.
+- Gerrit accepts evey change is a commit.
+- There is no pull request concept in Gerrit..
+
+#### Gerrit Development Workflow:
+- Create Branch:
+`git checkout -b local-topic-branch origin/master` - `Make and commit your change` - synchronize your change set with any changes that may have occurred in master while you've been working - `git rebase -i upstream/master # fix up commits` - `git push origin HEAD:refs/for/<branch name>`
+
 Reference:
 ![Gerrit_Reference](Gerrit_merge.png)
 [Gerrit_Reference_link](https://gerrit.hyperledger.org/r/Documentation/intro-quick.html)
 
-    
-    
 
-  
- 
  
  
 
