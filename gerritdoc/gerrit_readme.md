@@ -21,7 +21,7 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
 
  - Click on Projects - General - "Clone with commit-msg hook" and choose "SSH" option. Copy the message hook command and paste in your local machine.
  
- ex: git clone ssh://rameshthoomu@gerrit.hyperledger.org:29418/lf-sandbox && scp -p -P 29418 rameshthoomu@gerrit.hyperledger.org:hooks/commit-msg lf-sandbox/.git/hooks/
+ ex: `git clone ssh://rameshthoomu@gerrit.hyperledger.org:29418/lf-sandbox && scp -p -P 29418 rameshthoomu@gerrit.hyperledger.org:hooks/commit-msg lf-sandbox/.git/hooks/`
  
 #####Install git-review:
  
@@ -33,9 +33,9 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
  
 #####Gerrit commands:
  
- - git commit -s //Adds signoff signature
- - git commit -s -m "test commit" //Adds signoff signature and adds commit
- - git commit -s --amend //Commit amends with previous signoff id
+ - `git commit -s` //Adds signoff signature
+ - `git commit -s -m "test commit"` //Adds signoff signature and adds commit
+ - `git commit -s --amend` //Commit amends with previous signoff id
  - Once you submit all changes in your work area - 
     - Execute `git review -s` //Submits changes to gerrit server as patch set or submit your changes to `git push origin HEAD:refs/for/master`
 
@@ -95,7 +95,7 @@ Integrated Jenkins and Gerrit together to test and verify each commit and update
 
 Add Core reviewer from Gerrit UI, the reviewer reviews the code and once he/she satisfies with the changes, he approves the patch set (commit) with score `Code-Review +2` and clicks on submit button will merge the change into the main part of the repository so that it becomes an accepted part of the project. After this anyone fetching the git repository will receive this change as a part of the master branch.
 
-![CI with Gerrit](Jenkins.png)
+![CI Process with Gerrit](Jenkins.png)
 
 Reference:
 [Gerrit_Reference_link](https://gerrit.hyperledger.org/r/Documentation/intro-quick.html)
