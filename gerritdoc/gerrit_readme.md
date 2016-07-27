@@ -45,18 +45,55 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
 - Gerrit accepts evey change is a commit.
 - There is no pull request concept in Gerrit..
 
-#### Gerrit Development Workflow:
+##### Gerrit Development Workflow:
+
 - Create Branch:
-`git checkout -b local-topic-branch origin/master` - `Make and commit your change` - synchronize your change set with any changes that may have occurred in master while you've been working - `git rebase -i upstream/master # fix up commits` - `git push origin HEAD:refs/for/<branch name>`
+`git checkout -b local-topic-branch origin/master` - `Make and commit your change` - synchronize your change set with any changes that may have occurred in master while you've been working with `git rebase -i upstream/master # fix up commits` - `git push origin HEAD:refs/for/<branch name>`
+
+- Squash Commits:
+Merge or squash multiple commits into a single commit is easy process in gerrit. If you made several related commits to your local repository prior to wanting to submit for review, you should squash (merge) those commits into one single commit.
+
+List out changes in your current working branch  `git rebase -i origin/master` or `git rebase -i HEAD~2` (It shows you the last 2 commits in window with multiple options like below)
+
+```
+
+pick efb7c45 Fix 'system_type' find command bug
+pick c012b31 update scm for gerrit changes
+
+# Rebase e802cd4..c012b31 onto e802cd4
+#
+# Commands:
+#  p, pick = use commit
+#  r, reword = use commit, but edit the commit message
+#  e, edit = use commit, but stop for amending
+#  s, squash = use commit, but meld into previous commit
+#  f, fixup = like "squash", but discard this commit's log message
+#  x, exec = run command (the rest of the line) using shell
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+#
+# If you remove a line here THAT COMMIT WILL BE LOST.
+#
+# However, if you remove everything, the rebase will be aborted.
+#
+# Note that empty commits are commented out
+
+```
+Choose the commit you want to squash and change it from pick to sqash beside that commit in the above file. When you finished picking and squashing and saved the file, another file will open in your text editor to allow you to get to edit and merge your commit messages. Modify your summary commit message (Optional) in the commit.
+
+```
+vagrant@hyperledger-devenv:v0.0.10-f7697c1:/opt/gopath/ci-management$ git rebase -i HEAD~2
+Successfully rebased and updated refs/heads/fix-hyp-gerrit.
+```
+Submit `git review` - once changes are submitted and rebased properly.
+
+####CI (Jenkins) integration with Gerrit:
+
+Integrated Jenkins and Gerrit together to test and verify each commit and update the status in Gerrit commit request. Jenkins job updates gerrit commit request with `Verified +1` if the build is successfully verifyed by Jenkins CI otherwise it publishes  `Verified -1`.
+
+Add Core reviewer from Gerrit UI, the reviewer reviews the code and once it satisfies with the patch set changes he gives `Code-Review +2` and then Submit these changes to github by clicking on `Submit` button on gerrit UI.
 
 Reference:
 ![Gerrit_Reference](Gerrit_merge.png)
+
 [Gerrit_Reference_link](https://gerrit.hyperledger.org/r/Documentation/intro-quick.html)
-
-
- 
- 
-
-
-
-
