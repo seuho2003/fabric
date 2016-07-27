@@ -39,6 +39,8 @@ Once SSH keys are added successfully in gerrit server, it's time to clone the ge
  - Once you submit all changes in your work area - 
     - Execute `git review -s` //Submits changes to gerrit server as patch set or submit your changes to `git push origin HEAD:refs/for/master`
 
+![Gerrit_Reference](Gerrit_merge.png)
+
 ##### More about Gerrit:
 
 - Do your work on a separate branch when your previous commits are waiting for merge.
@@ -91,9 +93,9 @@ Submit `git review` - once changes are submitted and rebased properly.
 
 Integrated Jenkins and Gerrit together to test and verify each commit and update the status in Gerrit commit request. Jenkins job updates gerrit commit request with `Verified +1` if the build is successfully verifyed by Jenkins CI otherwise it publishes  `Verified -1`.
 
-Add Core reviewer from Gerrit UI, the reviewer reviews the code and once it satisfies with the patch set changes he gives `Code-Review +2` and then Submit these changes to github by clicking on `Submit` button on gerrit UI.
+Add Core reviewer from Gerrit UI, the reviewer reviews the code and once he/she satisfies with the changes, he approves the patch set (commit) with score `Code-Review +2` and clicks on submit button will merge the change into the main part of the repository so that it becomes an accepted part of the project. After this anyone fetching the git repository will receive this change as a part of the master branch.
+
+![CI with Gerrit](Jenkins.png)
 
 Reference:
-![Gerrit_Reference](Gerrit_merge.png)
-
 [Gerrit_Reference_link](https://gerrit.hyperledger.org/r/Documentation/intro-quick.html)
