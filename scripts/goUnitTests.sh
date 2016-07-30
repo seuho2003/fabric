@@ -19,4 +19,5 @@ trap cleanup 0
 echo "DONE!"
 
 echo "Running tests..."
-go test -cover -p 1 -timeout=20m $PKGS
+gocov test -cover -p 1 -timeout=20 $PKGS gocov-xml > coverage.xml
+#go test -cover -p 1 -timeout=20m $PKGS
