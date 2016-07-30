@@ -19,6 +19,6 @@ trap cleanup 0
 echo "DONE!"
 
 echo "Running tests..."
-go test -cover -p 1 -timeout=20m $PKGS | go-junit-report > report.xml
+go test -cover -p 1 -timeout=20m $PKGS | go-junit-report > coverage.xml
 #gocov test -cover -p 1 -timeout=20 $PKGS gocov-xml > coverage.xml
 #go test -cover -p 1 -timeout=20m $PKGS
