@@ -10,6 +10,7 @@ pages:
 - Protocol Spec: protocol-spec.md
 - Usecases: biz/usecases.md
 - Protocol Spec_zh: protocol-spec_zh.md
+- Art Auction: art.md
 
 - Setup:
   - Fabric Developer Setup: dev-setup/devenv.md
