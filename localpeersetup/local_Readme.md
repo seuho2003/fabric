@@ -24,6 +24,10 @@ Before execute local_fabric.sh script in your system, make sure your system sati
   - make images
   - docker tag <imagename>:<tagname> <newimagename>:<newtagname> //usually newtagname will be a commit number
 
+###Pulling Docker Images:
+
+Fabric script automatically pulls specified commits of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated to the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub). [Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
+
 ###Spinup peers in local network:
 
 curl [local_fabric.sh](https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh) file into local machine and follow below instructions to run the script.
@@ -53,10 +57,6 @@ OPTIONS:
  Example: 
 ./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft
 ```
-
-###Pulling Docker Images:
-
-Fabric script automatically pulls specified commits of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated to the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub). [Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
 
 ![4 peer network](peers.png)
 
