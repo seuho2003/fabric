@@ -49,7 +49,7 @@ OPTIONS:
 
 Fabric script automatically pulls specified commits of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated to the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub). [Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
 
-![4 peer network](docs/images/peers.png)
+![4 peer network](peers.png)
 
 ###Useful Docker Commands:
 
