@@ -57,12 +57,6 @@ OPTIONS:
 ./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft
 
 ```
--n number of peers 
--s enable Security and Privacy
--c commit number
--l sets log level
--m consensus mode
-```
 **Pulling Docker Images:**
 
 Above script automatically pulls latest Docker Images of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub).[Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
@@ -119,9 +113,12 @@ Enter password for user 'test_user0': ************
 Once the user is registered in PEER0, execute the below command to deploy chaincode on PEER0. Below command is to deploy chaincode on PEER0 when peer is running with Security enabled.
 
 ```
+
 peer chaincode deploy -u test_user0 -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 -c '{"Function":"init", "Args": ["a","100", "b", "200"]}'
+
 ```
 Chaincode ID creates after successful deploy and displays as output of the above command.
+
 ```
 root@7efbae933829:/opt/gopath/src/github.com/hyperledger/fabric# peer chaincode deploy -u test_user0 -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 -c '{"Function":"init", "Args": ["a","100", "b", "200"]}'
 
@@ -129,6 +126,7 @@ root@7efbae933829:/opt/gopath/src/github.com/hyperledger/fabric# peer chaincode 
 00:51:44.627 [crypto] main -> INFO 002 Log level recognized 'info', set to INFO
 a5389f7dfb9efae379900a41db1503fea2199fe400272b61ac5fe7bd0c6b97cf10ce3aa8dd00cd7626ce02f18accc7e5f2059dae6eb0786838042958352b89fb
 ```
+
 ### Invoke Chaincode inside Container:
 
 Submit Invoke transaction using the above chaincode ID:
@@ -140,6 +138,7 @@ peer chaincode invoke -u test_user0 -n a5389f7dfb9efae379900a41db1503fea2199fe40
 ```
 
 Example:
+
 ```
 root@7efbae933829:/opt/gopath/src/github.com/hyperledger/fabric# peer chaincode invoke -u test_user0 -n a5389f7dfb9efae379900a41db1503fea2199fe400272b61ac5fe7bd0c6b97cf10ce3aa8dd00cd7626ce02f18accc7e5f2059dae6eb0786838042958352b89fb -c '{"Function": "invoke", "Args": ["a", "b", "10"]}'
 2016/07/23 00:55:30 Load docker HostConfig: %+v &{[] [] []  [] false map[] [] false [] [] [] [] host    { 0} [] { map[]} false []  0 0 0 false 0    0 0 0 []}
@@ -154,7 +153,9 @@ Submit Query Transaction using the deploy chaincode
 ```
 peer chaincode query -n a5389f7dfb9efae379900a41db1503fea2199fe400272b61ac5fe7bd0c6b97cf10ce3aa8dd00cd7626ce02f18accc7e5f2059dae6eb0786838042958352b89fb -c '{"Function": "query", "Args": ["a"]}'
 ```
+
 Example:
+
 ```
 root@7efbae933829:/opt/gopath/src/github.com/hyperledger/fabric# peer chaincode query -u test_user0 -n a5389f7dfb9efae379900a41db1503fea2199fe400272b61ac5fe7bd0c6b97cf10ce3aa8dd00cd7626ce02f18accc7e5f2059dae6eb0786838042958352b89fb -c '{"Function": "query", "Args": ["a"]}'
 2016/07/23 00:52:29 Load docker HostConfig: %+v &{[] [] []  [] false map[] [] false [] [] [] [] host    { 0} [] { map[]} false []  0 0 0 false 0    0 0 0 []}
@@ -169,14 +170,17 @@ Follow the below steps to achieve this.
 ### 1. Pull images from DockerHub
 
 First, pull the latest images published by the Hyperledger fabric project from [Docker Hub](https://hub.docker.com/u/rameshthoomu/)
+
 ```
   docker pull rameshthoomu/peer:latest
   docker pull rameshthoomu/membersrvc:latest
 
 Note:You can provide specific commit build available in [Docker Hub](https://hub.docker.com/u/rameshthoomu)
 ```
+
 Once images are pulled from dockerhub, follow below process, if you want to modify configuration peer or membersrvc images.
 List out all the docker images available in your system:
+
 `docker images`
 
 ```
