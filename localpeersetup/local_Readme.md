@@ -4,7 +4,7 @@ The purpose of this script is to spinup peers in local machine using docker. Scr
 
 Before execute local_fabric.sh script in your system, make sure your system satisfies the below requirements.
 
-1. Install docker [Docker installation in ubuntu] (https://docs.docker.com/engine/installation/linux/ubuntulinux/)and run docker service.
+1. Install docker [Docker installation in ubuntu](https://docs.docker.com/engine/installation/linux/ubuntulinux/) and run docker service.
 
 2. If applicable, verify ufw firewall status in non-vagrant environment. Disable firewall if it is enabled.
 
@@ -25,11 +25,12 @@ Example:
 
 `curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh -o local_fabric.sh`
 
-###Follow below steps:
+####Follow below steps:
 
 1. `chmod +x local_fabric.sh` `dos2unix ./local_fabric.sh` to make sure file is good to execute in unix environment.
 2. `./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft`
 
+####USAGE:
 ```
 ./local_fabric.sh -n <number of peers> -s <enable security and Privacy> -c <Specific Commit> -l <Enable Logging method> -m <Consensus Mode>
 
@@ -45,7 +46,7 @@ OPTIONS:
 ./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft
 ```
 
-**Pulling Docker Images:**
+###Pulling Docker Images:
 
 Fabric script automatically pulls specified commits of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated to the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub). [Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
 
