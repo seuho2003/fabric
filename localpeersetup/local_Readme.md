@@ -1,44 +1,35 @@
-# Peer network setup in local machine
-Please follow below commands before execute `local_fabric.sh` script in outside vagrant environment.
+# Spinup Local Peer Network
 
-(Below commands applicable only for non-vagrant environment: tested in Linux 14.04 LTS version)
+The purpose of this script is to spinup peers in local machine using docker. Peers launches on tested peer and membersrvc docker images and latest hyperledger/fabric base image. Local fabric script pulls peer, membersrvc and base images from rameshthoomu docker hub account. Look for the commit numbers of peer and membersrvc docker hub docker images from rameshthoomu docker hub account. (https://hub.docker.com/u/rameshthoomu)
+
+Before execute local_fabric.sh script in your system, make sure your system satisfies below requirements.
+
+1. Install docker and run docker service
+
+2. Verify ufw firewall status in non-vagrant environment. If enable, disable with below command
 
 - sudo ufw status
 - sudo ufw disable
 
-Incase if peers are not launching please clear `iptables` rules (Delete Reject rule) and re-start docker daemon.
+3. Clear `iptables` rules (if firewall rules are rejecting docker application) and re-start docker daemon.
 
-`iptables -L` (to view)
+`iptables -L` (to view iptable rules)
 
-`iptables -D INPUT 4` (ex: to delete Reject rule from INPUT policy)
+`iptables -D INPUT 4` (ex: to delete Reject rules from INPUT policy. 4 is the row number to delete)
 
-####Launching peers in local machine (Inside and Outside Vagrant environments)
+####Spingup peers in local environment:
 
 Copy or curl [**local_fabric.sh**](https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh) file into local machine and follow below instructions to run the script.
 
 Example:
 
-curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh -o local_fabric.sh
+`curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh -o local_fabric.sh`
 
 ###Follow below steps:
 
-1. Make sure hyperledger/fabric-baseimage:latest Docker Image is available in your system. (Please see below section to generate baseImage)
-
-**Building hyperledger/fabric-baseimage:latest Image** (Outside vagrant)
-
-- `git pull https://github.com/hyperledger/fabric.git master`
-- `cd $GOPATH/src/gihub.com/hyperledger/fabric/scripts/provision`
-- `./docker.sh x86_64-0.0.10` //this will generate hyperledger/fabric-baseimage:latest Image
-
-**Building hyperledger/fabric-baseimage:latest Image** (Inside vagrant)
-
-- `vagrant halt/destroy`
-- `vagrant up`
-
-2. Make sure Docker Daemon is up and running. If not, start docker service `sudo service docker start`
-3. `chmod +x local_fabric.sh` `dos2unix ./local_fabric.sh` to make sure file is good to execute in unix environment.
-4. `./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft`
-5. To launch peers with security and without Consensus, execute `./local_fabric.sh -n 4 -c 346f9fb -l debug -m noops`
+1. `chmod +x local_fabric.sh` `dos2unix ./local_fabric.sh` to make sure file is good to execute in unix environment.
+2. `./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft`
+3. To launch peers with security and without Consensus, execute `./local_fabric.sh -n 4 -c 346f9fb -l debug -m noops`
 
 ```
 ./local_fabric.sh -n <number of peers> -s <enable security and Privacy> -c <Specific Commit> -l <Enable Logging method> -m <Consensus Mode>
@@ -56,7 +47,7 @@ OPTIONS:
 
 **Pulling Docker Images:**
 
-Above script automatically pulls latest Docker Images of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub). [Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
+Fabric script automatically pulls specified commit of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub). [Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
 
 ###Useful Docker Commands:
 
@@ -160,7 +151,7 @@ root@7efbae933829:/opt/gopath/src/github.com/hyperledger/fabric# peer chaincode 
 100
 
 ```
-## Use Case: Modify existing configuration settings of core.yaml in the image:
+## Use Case: Modify existing configuration settings of core.yaml in peer docker image:
 
 Follow the below steps to achieve this. 
 
