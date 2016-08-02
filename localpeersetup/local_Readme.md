@@ -1,17 +1,19 @@
-Please follow below commands before execute local_fabric.sh script in outside vagrant environment.
+# Peer network setup in local machine
+Please follow below commands before execute `local_fabric.sh` script in outside vagrant environment.
 
 (Below commands applicable only for non-vagrant environment: tested in Linux 14.04 LTS version)
 
 - sudo ufw status
 - sudo ufw disable
 
-Incase if peers are not launching please clear iptables rules and re-start docker daemon.
+Incase if peers are not launching please clear `iptables` rules (Delete Reject rule) and re-start docker daemon.
+
+`iptables -L` (to view)
+`iptables -D INPUT 4` (ex: to delete Reject rule from INPUT policy)
 
 ####Launching peers in local machine (Inside and Outside Vagrant environments)
 
-Copy or curl `local_fabric.sh` [**local_fabric.sh**](https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh) file into local machine and follow below instructions to run the script.
-
-To curl, click on Raw link and copy the link from address bar and curl it or copy and paste the below link in your local machine.
+Copy or curl [**local_fabric.sh**](https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh) file into local machine and follow below instructions to run the script.
 
 Example:
 
@@ -19,29 +21,51 @@ curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeerset
 
 *Follow below steps:*
 
-1. Make sure openblockchain/baseimage:latest Docker Image is available in your system. (Please see below section to generate baseImage)
-2. Make sure Docker Daemon is up and running. If not, please execute `sudo service docker start`
-3. Execute `chmod +x local_fabric.sh` `dos2unix ./local_fabric.sh` to make sure file is good to execute in unix environment.
-4. Execute `./local_fabric.sh -n 4 -s` (Enabled Security, Privacy with Consensus for 4 peers)
-5. To launch peers with security and without Consensus, please comment out `CONSENSUS=pbft` and `PBFT_MODE=batch` lines or change the value to noops in `local_fabric.sh`.
-
--n indicates number of peers you want 
--s indicates running peers with Security, Privacy and Consensus enabled. (If you don't pass any arguments, by default, script launches 5 peers without security, Privacy and Consensus) 
-
-**Pulling Docker Images:**
-
-Above script automatically pulls latest Docker Images of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub accounts).
+1. Make sure hyperledger/fabric-baseimage:latest Docker Image is available in your system. (Please see below section to generate baseImage)
 
 **Building hyperledger/fabric-baseimage:latest Image** (Outside vagrant)
 
-- Perform `git pull https://github.com/hyperledger/fabric.git master`
-- run `cd $GOPATH/src/gihub.com/hyperledger/fabric/scripts/provision`
-- run `./docker.sh x86_64-0.0.10` (this will generate hyperledger/fabric-baseimage:latest Image)
+- `git pull https://github.com/hyperledger/fabric.git master`
+- `cd $GOPATH/src/gihub.com/hyperledger/fabric/scripts/provision`
+- `./docker.sh x86_64-0.0.10` //this will generate hyperledger/fabric-baseimage:latest Image
 
 **Building hyperledger/fabric-baseimage:latest Image** (Inside vagrant)
 
-- Perform `vagrant halt/destroy`
-- run `vagrant up` command
+- `vagrant halt/destroy`
+- `vagrant up`
+
+2. Make sure Docker Daemon is up and running. If not, start docker service `sudo service docker start`
+3. `chmod +x local_fabric.sh` `dos2unix ./local_fabric.sh` to make sure file is good to execute in unix environment.
+4. `./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft`
+5. To launch peers with security and without Consensus, execute `./local_fabric.sh -n 4 -c 346f9fb -l debug -m noops`
+
+```
+
+./TransactionsCalci.sh -i http://IP:PORT -s <START_BLOCK_NUM> -e <END_BLOCK_NUM> -l
+
+OPTIONS:
+
+-h/? - Print a usage message
+-n   - Number of peers to launch
+-s   - Enable Security and Privacy
+-c   - Specific commit
+-l   - Enable logging method
+-m   - Enable consensus mode
+
+ Example: 
+
+./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft
+
+```
+-n number of peers 
+-s enable Security and Privacy
+-c commit number
+-l sets log level
+-m consensus mode
+```
+**Pulling Docker Images:**
+
+Above script automatically pulls latest Docker Images of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub).[Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
 
 ###Useful Docker Commands:
 
