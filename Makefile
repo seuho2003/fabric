@@ -1,4 +1,5 @@
 #!/bin/bash
+
 GO=$(firstword $(subst :, ,$(GOPATH)))
 GOCOV=$(GO)/bin/gocov
 GOCOVXML=$(GO)/bin/gocov-xml
