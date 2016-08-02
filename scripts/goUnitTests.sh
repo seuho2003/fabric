@@ -19,7 +19,8 @@ trap cleanup 0
 echo "DONE!"
 
 echo "Running tests..."
-go test -p 1 -timeout=20m $PKGS | go-junit-report > report.xml
+gocov test github.com/hyperledger/fabric/core | gocov-xml > report.xml
+#go test -p 1 -timeout=20m $PKGS | go-junit-report > report.xml
 #go test -p 1 -timeout=20m $PKGS | gocov-xml > coverage.xml
 #go test -coverprofile -p 1 -timeout=20m $PKGS | gocov-xml > report.xml
 #go test -cover -p 1 -timeout=20m $PKGS
