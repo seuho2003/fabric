@@ -19,7 +19,7 @@ trap cleanup 0
 echo "DONE!"
 
 echo "Running tests..."
-gocov test github.com/hyperledger/fabric/core | gocov-xml > report.xml
+gocov test -p 1 -timeout=20m github.com/hyperledger/fabric/... | grep -v /vendor/ | grep -v /examples/ | gocov-xml > report.xml
 #go test -p 1 -timeout=20m $PKGS | go-junit-report > report.xml
 #go test -p 1 -timeout=20m $PKGS | gocov-xml > coverage.xml
 #go test -coverprofile -p 1 -timeout=20m $PKGS | gocov-xml > report.xml
