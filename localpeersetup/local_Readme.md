@@ -8,21 +8,21 @@ Before execute local_fabric.sh script in your system, make sure your system sati
 
 2. If applicable, verify ufw firewall status in non-vagrant environment. Disable firewall if it is enabled.
 
-  - sudo ufw status
-  - sudo ufw disable
+  - `sudo ufw status`
+  - `sudo ufw disable`
 
 3. Clear `iptables` rules (if firewall rules are rejecting docker requests) and re-start docker daemon.
 
-  - iptables -L (to view iptable rules)
-  - iptables -D INPUT 4 (ex: to delete Reject rules from INPUT policy. 4 is the row number to delete)
+  - `iptables -L` //(to view iptable rules)
+  - `iptables -D INPUT 4` //ex: to delete Reject rules from INPUT policy. 4 is the row number to delete)
 
 4. If appicable, build peer and membersrvc images in your local machine using makefile and provide the image name and commit number to local_fabric script otherwise take the commit number from above mentioned docker hub account.
 
   Move to directory where the makefile is located (root of the fabric directory) 
 
-  - cd $GOPATH/src/github.com/hyperledger/fabric
-  - make images
-  - docker tag <imagename>:<tagname> <newimagename>:<newtagname> //usually newtagname will be a commit number
+  - `cd $GOPATH/src/github.com/hyperledger/fabric`
+  - `make images`
+  - `docker tag <imagename>:<tagname> <newimagename>:<newtagname>` //usually newtagname will be a commit number
 
 ###Pulling Docker Images:
 
