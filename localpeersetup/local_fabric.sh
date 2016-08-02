@@ -115,7 +115,6 @@ docker run -d  -it --name=PEER0 \
                 -e CORE_PEER_ID="vp0" \
                 -p $REST_PORT:5000 -p `expr $USE_PORT + 1`:30303 \
                 -e CORE_PEER_ADDRESS=$IP:`expr $USE_PORT + 1` \
-                -e CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=$CONSENSUS_MODE \
                 -e CORE_PEER_ADDRESSAUTODETECT=true \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
                 -e CORE_PEER_LOGGING_LEVEL=$PEER_LOG \
@@ -135,7 +134,6 @@ docker run -d -it --name=PEER$peer_id \
                 -e CORE_PEER_ID="vp"$peer_id \
                 -p $REST_PORT:5000 -p `expr $USE_PORT + 1`:30303 \
                 -e CORE_PEER_DISCOVERY_ROOTNODE=$IP:30001 \
-                -e CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=$CONSENSUS_MODE \
                 -e CORE_PEER_ADDRESSAUTODETECT=false \
                 -e CORE_PEER_ADDRESS=$IP:`expr $USE_PORT + 1` \
                 -e CORE_PEER_LISTENADDRESS=0.0.0.0:30303 \
