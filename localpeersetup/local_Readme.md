@@ -9,6 +9,7 @@ Please follow below commands before execute `local_fabric.sh` script in outside 
 Incase if peers are not launching please clear `iptables` rules (Delete Reject rule) and re-start docker daemon.
 
 `iptables -L` (to view)
+
 `iptables -D INPUT 4` (ex: to delete Reject rule from INPUT policy)
 
 ####Launching peers in local machine (Inside and Outside Vagrant environments)
@@ -19,7 +20,7 @@ Example:
 
 curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeersetup/local_fabric.sh -o local_fabric.sh
 
-*Follow below steps:*
+###Follow below steps:
 
 1. Make sure hyperledger/fabric-baseimage:latest Docker Image is available in your system. (Please see below section to generate baseImage)
 
@@ -40,26 +41,22 @@ curl -L https://raw.githubusercontent.com/rameshthoomu/fabric/tools/localpeerset
 5. To launch peers with security and without Consensus, execute `./local_fabric.sh -n 4 -c 346f9fb -l debug -m noops`
 
 ```
-
-./TransactionsCalci.sh -i http://IP:PORT -s <START_BLOCK_NUM> -e <END_BLOCK_NUM> -l
+./local_fabric.sh -n <number of peers> -s <enable security and Privacy> -c <Specific Commit> -l <Enable Logging method> -m <Consensus Mode>
 
 OPTIONS:
-
 -h/? - Print a usage message
 -n   - Number of peers to launch
 -s   - Enable Security and Privacy
 -c   - Specific commit
 -l   - Enable logging method
 -m   - Enable consensus mode
-
  Example: 
-
 ./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft
-
 ```
+
 **Pulling Docker Images:**
 
-Above script automatically pulls latest Docker Images of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub).[Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
+Above script automatically pulls latest Docker Images of hyperledger/fabric-peer and hyperledger/fabric-membersrvc from Docker Hub (Please check the commit number associated the latest tag in rameshthoomu/peer and rameshthoomu/membersrvc docker hub). [Docker Hub Account](https://hub.docker.com/u/rameshthoomu/)
 
 ###Useful Docker Commands:
 
