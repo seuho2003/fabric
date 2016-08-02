@@ -9,6 +9,7 @@
 # Peers launches on tested peer and membersrvc docker images and latest hyperledger/fabric
 # base image. Script pulls these images from rameshthoomu docker hub account. Take the
 # latest commit of peer and membersrvc from rameshthoomu docker hub account.
+
 # Pre-condition: Install docker in your local machine and start docker daemon
 
 ## USAGE:
@@ -20,6 +21,7 @@
 #       -c   - Specific commit
 #       -l   - Enable logging method
 #       -m   - Enable consensus mode
+#       -?/-h- Prints Usage  
 #
 # SAMPLE :
 #       ./local_fabric.sh -n 4 -s -c 346f9fb -l debug -m pbft
