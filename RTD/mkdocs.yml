@@ -1,5 +1,5 @@
 site_name: Hyperledger Fabric
-theme: readthedocs
+theme: bootstrap
 site_description: 'Welcome to the Hyperledger fabric documentation'
 
 pages:
