@@ -30,10 +30,6 @@ pages:
 - IdentityManagementFAQ: FAQ/identity_management_FAQ.md
 - UsageFAQ: FAQ/usage_FAQ.md
 
-- GerritChanges: Gerrit/changes.md
-- GerritLFAccount: Gerrit/lf-account.md
-- GerritReview: Gerrit/reviewing.md
-
 markdown_extensions:
   - extra
   - tables
