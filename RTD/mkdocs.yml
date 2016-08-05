@@ -1,10 +1,38 @@
 site_name: Hyperledger Fabric
-site_url: http://hyperledger-fabric.readthedocs.io
 theme: readthedocs
 site_description: 'Welcome to the Hyperledger fabric documentation'
 
 pages:
+
 - Home: index.md
+- Glossary: glossary.md
+- ProtocolSpec: protocol-spec.md
+- Usecases: biz/usecases.md
+
+- BuildingFabric: dev-setup/build.md
+- EnvironmentSetup: dev-setup/devenv.md
+
+- FabricDeveloperSetup: dev-setup/devenv.md
+- NetworkSetup: Setup/Network-setup.md
+- ChaincodeSetup: Setup/Chaincode-setup.md
+- LoggingControl: Setup/logging-control.md
+- CASetup: Setup/ca-setup.md
+
+- ApplicationACL: tech/application-ACL.md
+- Attributes: tech/attributes.md
+- BestPractices: tech/best-practices.md
+
+- SystemChaincodes: SystemChaincodes/noop.md
+
+- ChainCodeFAQ: FAQ/chaincode_FAQ.md
+- ConfidentialityFAQ: FAQ/confidentiality_FAQ.md
+- ConsensusFAQ: FAQ/consensus_FAQ.md
+- IdentityManagementFAQ: FAQ/identity_management_FAQ.md
+- UsageFAQ: FAQ/usage_FAQ.md
+
+- GerritChanges: Gerrit/changes.md
+- GerritLFAccount: Gerrit/lf-account.md
+- GerritReview: Gerrit/reviewing.md
 
 markdown_extensions:
   - extra

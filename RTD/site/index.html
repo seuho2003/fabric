@@ -1,136 +1,385 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Welcome to the Hyperledger fabric documentation">
+  
+  
+  <title>Hyperledger Fabric</title>
+  
+
+  <link rel="shortcut icon" href="./img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="./css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "None";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = "/";
+  </script>
+  
+  <script src="./js/jquery-2.1.1.min.js"></script>
+  <script src="./js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="./js/highlight.pack.js"></script>
+  <script src="./js/theme.js"></script> 
+  <script src="./API/Samples/Sample_1.js"></script>
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> Hyperledger Fabric</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 current">
+        <a class="current" href=".">Home</a>
         
-        
-        
-        <link rel="shortcut icon" href="./img/favicon.ico">
-
-	<title>My Docs</title>
-
-        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.5.0.css" rel="stylesheet">
-        <link href="./css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
-
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
-
-        
-    </head>
-
-    <body class="homepage">
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
+            <ul>
             
-
-            <!-- Main title -->
-            <a class="navbar-brand" href=".">My Docs</a>
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
+                <li class="toctree-l3"><a href="#hyperledger-fabric-documentation">Hyperledger Fabric Documentation</a></li>
+                
             
-
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                        <i class="fa fa-search"></i> Search
-                    </a>
-                </li>
+                <li class="toctree-l3"><a href="#getting-started">Getting started</a></li>
                 
+            
+                <li class="toctree-l3"><a href="#quickstart-documentation">Quickstart documentation</a></li>
                 
+            
+                <li class="toctree-l3"><a href="#fabric-developer-guide">Fabric developer guide</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#chaincode-developer-guide">Chaincode developer guide</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#api-developer-guide">API developer guide</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#operations-guide">Operations guide</a></li>
+                
+            
             </ul>
-        </div>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="glossary/">Glossary</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="protocol-spec/">ProtocolSpec</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="biz/usecases/">Usecases</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="dev-setup/build/">BuildingFabric</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="dev-setup/devenv/">EnvironmentSetup</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="dev-setup/devenv/">FabricDeveloperSetup</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="Setup/Network-setup/">NetworkSetup</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="Setup/Chaincode-setup/">ChaincodeSetup</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="Setup/logging-control/">LoggingControl</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="Setup/ca-setup/">CASetup</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="tech/application-ACL/">ApplicationACL</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="tech/attributes/">Attributes</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="tech/best-practices/">BestPractices</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="SystemChaincodes/noop/">SystemChaincodes</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="FAQ/chaincode_FAQ/">ChainCodeFAQ</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="FAQ/confidentiality_FAQ/">ConfidentialityFAQ</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="FAQ/consensus_FAQ/">ConsensusFAQ</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="FAQ/identity_management_FAQ/">IdentityManagementFAQ</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="FAQ/usage_FAQ/">UsageFAQ</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="Gerrit/changes/">GerritChanges</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="Gerrit/lf-account/">GerritLFAccount</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="Gerrit/reviewing/">GerritReview</a>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">Hyperledger Fabric</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h2 id="hyperledger-fabric-documentation">Hyperledger Fabric Documentation</h2>
+<p>The Hyperledger <a href="https://github.com/hyperledger/fabric">fabric</a> is an implementation of blockchain technology, that has been collaboratively developed under the Linux Foundation&rsquo;s <a href="http://hyperledger.org">Hyperledger Project</a>. It leverages familiar and proven technologies, and offers a modular architecture that allows pluggable implementations of various function including membership services, consensus, and smart contracts (Chaincode) execution. It features powerful container technology to host any mainstream language for smart contracts development.</p>
+<p>To contribute to this documentation, create an issue for any requests for clarification or to highlight any errors, or you may fork and update the <a href="https://github.com/hyperledger/fabric">source</a>, and submit a pull request.</p>
+<p>Below, you&rsquo;ll find the following sections:</p>
+<ul>
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#quickstart-documentation">Quickstart</a></li>
+<li>Developer guides</li>
+<li><a href="#fabric-developer-guide">Fabric developer guide</a></li>
+<li><a href="#chaincode-developer-guide">Chaincode developer guide</a></li>
+<li><a href="#api-developer-guide">API developer guide</a></li>
+<li><a href="#operations-guide">Operations guide</a></li>
+</ul>
+<h2 id="getting-started">Getting started</h2>
+<p>If you are new to the project, you can begin by reviewing the following links. If you&rsquo;d prefer to dive right in, see the <a href="#quickstart-documentation">Quickstart</a> section, below.</p>
+<ul>
+<li><a href="https://github.com/hyperledger/hyperledger/wiki/Whitepaper-WG">Whitepaper WG</a>: where the community is developing a whitepaper to explain the motivation and goals for the project.</li>
+<li><a href="https://github.com/hyperledger/hyperledger/wiki/Requirements-WG">Requirements WG</a>: where the community is developing use cases and requirements.</li>
+<li><a href="biz/usecases/">Canonical use cases</a></li>
+<li><a href="glossary/">Glossary</a>: to understand the terminology that we use throughout the Fabric project&rsquo;s documentation.</li>
+<li><a href="https://github.com/hyperledger/fabric/tree/master/docs/FAQ">Fabric FAQs</a></li>
+</ul>
+<h2 id="quickstart-documentation">Quickstart documentation</h2>
+<ul>
+<li><a href="dev-setup/devenv/">Development environment set-up</a>: if you are considering helping with development of the Hyperledger Fabric or Fabric-API projects themselves, this guide will help you install and configure all you&rsquo;ll need. The development environment is also useful (but, not necessary) for developing blockchain applications and/or Chaincode.</li>
+<li><a href="Setup/Network-setup/">Network setup</a>: This document covers setting up a network on your local machine for development.</li>
+<li><a href="Setup/Chaincode-setup/">Chaincode development environment</a>: Chaincode developers need a way to test and debug their Chaincode without having to set up a complete peer network. This document describes how to write, build, and test Chaincode in a local development environment.</li>
+<li><a href="API/CoreAPI.md">APIs</a>: This document covers the available APIs for interacting with a peer node.</li>
+</ul>
+<h2 id="fabric-developer-guide">Fabric developer guide</h2>
+<p>When you are ready to start contributing to the Hyperledger fabric project, we strongly recommend that you read the <a href="protocol-spec/">protocol specification</a> for the technical details so that you have a better understanding of how the code fits together.</p>
+<ul>
+<li><a href="https://github.com/hyperledger/fabric/blob/master/CONTRIBUTING.md">Making code contributions</a>: First, you&rsquo;ll want to familiarize yourself with the project&rsquo;s contribution guidelines.</li>
+<li><a href="dev-setup/devenv/">Setting up the development environment</a>: after that, you will want to set up your development environment.</li>
+<li><a href="dev-setup/build/">Building the fabric core</a>: next, try building the project in your local development environment to ensure that everything is set up correctly.</li>
+<li><a href="dev-setup/build/#building-outside-of-vagrant">Building outside of Vagrant</a>: for the adventurous, you might try to build outside of the standard Vagrant development environment.</li>
+<li><a href="Setup/logging-control/">Logging control</a>: describes how to tweak the logging levels of various components within the fabric.</li>
+<li><a href="./dev-setup/headers.txt">License header</a>: every source file must include this license header modified to include a copyright statement for the principle author(s).</li>
+</ul>
+<h2 id="chaincode-developer-guide">Chaincode developer guide</h2>
+<ul>
+<li><a href="dev-setup/devenv/">Setting up the development environment</a>: when developing and testing Chaincode, or an application that leverages the fabric API or SDK, you&rsquo;ll probably want to run the fabric locally on your laptop to test. You can use the same setup that Fabric developers use.</li>
+<li><a href="Setup/Network-setup/">Setting Up a Network For Development</a>: alternately, you can follow these instructions for setting up a local network for Chaincode development without the entire fabric development environment setup.</li>
+<li><a href="Setup/Chaincode-setup/">Writing, Building, and Running Chaincode in a Development Environment</a>: a step-by-step guide to writing and testing Chaincode.</li>
+<li><a href="FAQ/chaincode_FAQ/">Chaincode FAQ</a>: a FAQ for all of your burning questions relating to Chaincode.</li>
+</ul>
+<h2 id="api-developer-guide">API developer guide</h2>
+<ul>
+<li><a href="API/CoreAPI.md">APIs - CLI, REST, and Node.js</a><ul>
+<li><a href="API/CoreAPI.md#cli">CLI</a>: working with the command-line interface.</li>
+<li><a href="API/CoreAPI.md#rest-api">REST</a>: working with the REST API.</li>
+<li><a href="https://github.com/hyperledger/fabric/blob/master/sdk/node/README.md">Node.js SDK</a>: working with the Node.js SDK.</li>
+</ul>
+</li>
+</ul>
+<h2 id="operations-guide">Operations guide</h2>
+<ul>
+<li><a href="Setup/Network-setup/">Setting Up a Network</a>: instructions for setting up a network of fabric peers.</li>
+<li><a href="Setup/ca-setup/">Certificate Authority (CA) Setup</a>: setting up a CA to support identity, security (authentication/authorization), privacy and confidentiality.</li>
+<li><a href="tech/application-ACL/">Application ACL</a>: working with access control lists.</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="glossary/" class="btn btn-neutral float-right" title="Glossary">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
     </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2016 IBM Corp. <br></br>Contributed to the Hyperledger Project under the <a href="https://github.com/hyperledger/fabric/blob/master/LICENSE" target="_blank">Apache Software License 2.0</a></p>
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+        <span style="margin-left: 15px"><a href="glossary/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
 </div>
 
-        <div class="container">
-            
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-    
-        <li class="main active"><a href="#welcome-to-mkdocs">Welcome to MkDocs</a></li>
-        
-            <li><a href="#commands">Commands</a></li>
-        
-            <li><a href="#project-layout">Project layout</a></li>
-        
-    
-    </ul>
-</div></div>
-                <div class="col-md-9" role="main">
-
-<h1 id="welcome-to-mkdocs">Welcome to MkDocs</h1>
-<p>For full documentation visit <a href="http://mkdocs.org">mkdocs.org</a>.</p>
-<h2 id="commands">Commands</h2>
-<ul>
-<li><code>mkdocs new [dir-name]</code> - Create a new project.</li>
-<li><code>mkdocs serve</code> - Start the live-reloading docs server.</li>
-<li><code>mkdocs build</code> - Build the documentation site.</li>
-<li><code>mkdocs help</code> - Print this help message.</li>
-</ul>
-<h2 id="project-layout">Project layout</h2>
-<pre><code>mkdocs.yml    # The configuration file.
-docs/
-    index.md  # The documentation homepage.
-    ...       # Other markdown pages, images and other files.
-</code></pre></div>
-            
-        </div>
-
-        <footer class="col-md-12">
-            <hr>
-            
-            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
-        </footer>
-
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
-        <script>var base_url = '.';</script>
-        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
-        <script src="./js/base.js"></script>
-
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>
-                            From here you can search these documents. Enter
-                            your search terms below.
-                        </p>
-                        <form role="form">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
-                            </div>
-                        </form>
-                        <div id="mkdocs-search-results"></div>
-                    </div>
-                    <div class="modal-footer">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </body>
+</body>
 </html>
 
 <!--
 MkDocs version : 0.15.3
-Build Date UTC : 2016-08-05 09:53:57.250243
+Build Date UTC : 2016-08-05 21:32:46.768591
 -->

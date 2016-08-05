@@ -9,4 +9,180 @@
     </url>
     
 
+    
+    <url>
+     <loc>None/glossary/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/protocol-spec/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/biz/usecases/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/dev-setup/build/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/dev-setup/devenv/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/dev-setup/devenv/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/Setup/Network-setup/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/Setup/Chaincode-setup/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/Setup/logging-control/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/Setup/ca-setup/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/tech/application-ACL/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/tech/attributes/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/tech/best-practices/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/SystemChaincodes/noop/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/FAQ/chaincode_FAQ/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/FAQ/confidentiality_FAQ/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/FAQ/consensus_FAQ/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/FAQ/identity_management_FAQ/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/FAQ/usage_FAQ/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/Gerrit/changes/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/Gerrit/lf-account/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/Gerrit/reviewing/</loc>
+     <lastmod>2016-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
 </urlset>
