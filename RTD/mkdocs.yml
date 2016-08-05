@@ -1,1 +1,35 @@
-site_name: My Docs
+site_name: Hyperledger Fabric
+site_url: http://hyperledger-fabric.readthedocs.io
+theme: readthedocs
+site_description: 'Welcome to the Hyperledger fabric documentation'
+
+pages:
+- Home: index.md
+- Glossary: glossary.md
+- Protocol Spec: protocol-spec.md
+- Usecases: biz/usecases.md
+- Attributes Usage: API/AttributesUsage.md
+- Chaincode API: API/ChaincodeAPI.md
+- CoreAPI: API/CoreAPI.md
+- MemberService API: API/MemberServicesAPI.md
+- Building Fabric: dev-setup/build.md
+- Fabric Developer Setup: dev-setup/devenv.md
+- ChainCode_FAQ: FAQ/chaincode_FAQ.md
+- ConfidentialityFAQ: FAQ/confidentiality_FAQ.md
+- ConsensusFAQ: FAQ/consensus_FAQ.md
+- Identity ManagementFAQ: FAQ/identity_management_FAQ.md
+- UsageFAQ: FAQ/usage_FAQ.md
+- Gerrit: Gerrit/gerrit.md
+- Gerrit Changes: Gerrit/changes.md
+- Gerrit LF Account: Gerrit/lf-account.md
+- Gerrit Review: Gerrit/reviewing.md
+
+markdown_extensions:
+  - extra
+  - tables
+  - toc
+  - fenced_code
+  - smarty
+  - footnotes
+
+copyright: Copyright &copy; 2016 IBM Corp. <br></br>Contributed to the Hyperledger Project under the <a href="https://github.com/hyperledger/fabric/blob/master/LICENSE" target="_blank">Apache Software License 2.0</a>
