@@ -22,4 +22,3 @@ unit-tests:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - ${GOPATH}/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric
-  command: ./unit-test/run.sh

@@ -100,7 +100,7 @@ orderer-docker: build/image/orderer/$(DUMMY)
 testenv: build/image/testenv/$(DUMMY)
 
 unit-test: peer-docker testenv
-	cd unit-test && docker-compose up --abort-on-container-exit --force-recreate && docker-compose down
+	cd unit-test && bash parallel.sh
 
 unit-tests: unit-test
 
