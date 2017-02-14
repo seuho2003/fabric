@@ -27,6 +27,7 @@ import (
 	"math/big"
 	"os"
 	"os/exec"
+	"runtime"
 	"testing"
 	"time"
 
@@ -41,6 +42,8 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
+
+const ppc64 = "ppc64le"
 
 const keyfile = "sbft/testdata/key.pem"
 const maindir = "github.com/hyperledger/fabric/orderer"
@@ -291,6 +294,9 @@ func InitPeers(num uint64, startingPort int) []*Peer {
 func StartPeers(peers []*Peer) {
 	for _, p := range peers {
 		p.start()
+		if runtime.GOARCH == ppc64 {
+			time.Sleep(3 * time.Second)
+		}
 	}
 }
 
