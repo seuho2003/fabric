@@ -98,13 +98,12 @@ Welcome to fabric's documentation
    :maxdepth: 2
    :caption: FAQs
 
-   faq
-#   FAQ/architecture_FAQ
-#   FAQ/chaincode_FAQ
-#   FAQ/confidentiality_FAQ
-#   FAQ/consensus_FAQ
-#   FAQ/identity_management_FAQ
-#   FAQ/usage_FAQ
+   FAQ/architecture_FAQ
+   FAQ/chaincode_FAQ
+   FAQ/confidentiality_FAQ
+   FAQ/consensus_FAQ
+   FAQ/identity_management_FAQ
+   FAQ/usage_FAQ
 
 .. toctree::
    :maxdepth: 2
