@@ -76,7 +76,7 @@ func TestGetKAndValueForAttribute(t *testing.T) {
 	}
 
 	_, attribute, err := getKAndValueForAttribute("position", prek0, tcert)
-	if err != nil {
+	if err == nil {
 		t.Error(err)
 	}
 
