@@ -102,7 +102,7 @@ build/image/testenv/$(DUMMY): build/image/buildenv/$(DUMMY)
 testenv: build/image/testenv/$(DUMMY)
 
 unit-test: peer-docker testenv
-	cd unit-test && docker-compose up --abort-on-container-exit --force-recreate && docker-compose down
+	cd unit-test && docker-compose up -d --force-recreate && sleep 10 && docker logs -f unittest_unit-tests_1 && docker-compose down
 
 unit-tests: unit-test
 
