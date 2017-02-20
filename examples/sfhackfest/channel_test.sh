@@ -1,7 +1,17 @@
 #!/bin/sh
 
 # find address of peer0 in your network
+ORDERER_IP_ADDRESS=`perl -e 'use Socket; $a = inet_ntoa(inet_aton("orderer")); print "$a\n";'`
 PEER0_IP_ADDRESS=`perl -e 'use Socket; $a = inet_ntoa(inet_aton("peer0")); print "$a\n";'`
+PEER1_IP_ADDRESS=`perl -e 'use Socket; $a = inet_ntoa(inet_aton("peer1")); print "$a\n";'`
+PEER2_IP_ADDRESS=`perl -e 'use Socket; $a = inet_ntoa(inet_aton("peer2")); print "$a\n";'`
+
+echo "-----------------------------------------"
+echo "Orderer IP $ORDERER_IP_ADDRESS"
+echo "PEER0 IP $PEER0_IP_ADDRESS"
+echo "PEER1 IP $PEER1_IP_ADDRESS"
+echo "PEER2 IP $PEER2_IP_ADDRESS"
+echo "-----------------------------------------"
 
 # create an anchor file
 cat<<EOF>anchorPeer.txt
@@ -27,7 +37,7 @@ EOF
 
 #create
 echo "Creating channel on Orderer"
-CORE_PEER_GOSSIP_IGNORESECURITY=true CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp/sampleconfig CORE_PEER_COMMITTER_LEDGER_ORDERER=orderer:7050 peer channel create -c myc1 -a anchorPeer.txt >>log.txt 2>&1
+CORE_PEER_GOSSIP_IGNORESECURITY=true CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp/sampleconfig CORE_PEER_COMMITTER_LEDGER_ORDERER=$ORDERER_IP_ADDRESS:7050 peer channel create -c myc1 -a anchorPeer.txt >>log.txt 2>&1
 cat log.txt
    grep -q "Exiting" log.txt
    if [ $? -ne 0 ]; then
@@ -41,7 +51,7 @@ i=0
 while test $i -lt $TOTAL_PEERS  
 do
 echo "###################################### Joining peer$i"
-CORE_PEER_COMMITTER_LEDGER_ORDERER=orderer:7050 CORE_PEER_ADDRESS=peer$i:7051 peer channel join -b myc1.block >>log.txt 2>&1
+CORE_PEER_COMMITTER_LEDGER_ORDERER=$ORDERER_IP_ADDRESS:7050 CORE_PEER_ADDRESS=peer$i:7051 peer channel join -b myc1.block >>log.txt 2>&1
 cat log.txt
 echo '-------------------------------------------------'
 grep -q "Join Result: " log.txt
@@ -54,6 +64,27 @@ echo "SUCCESSFUL JOIN CHANNEL on PEER$i"
 i=$((i+1))
 sleep 10
 done
+
 echo "Peer0 , Peer1 and Peer2 are added to the channel myc1"
 cat log.txt
+
+CORE_PEER_COMMITTER_LEDGER_ORDERER=$ORDERER_IP_ADDRESS:7050 CORE_PEER_ADDRESS=$PEER0_IP_ADDRESS:7051 peer chaincode install -n mycc -v 1.0 -p github.com/hyperledger/fabric/examples >log.txt 2>&1
+cat log.txt
+echo "===================== Chaincode is installed on remote peer PEER0 ===================== "
+
+CORE_PEER_COMMITTER_LEDGER_ORDERER=$ORDERER_IP_ADDRESS:7050 CORE_PEER_ADDRESS=$PEER0_IP_ADDRESS:7051 peer chaincode instantiate -C myc1 -n mycc -v 1.0 -p github.com/hyperledger/fabric/examples -c '{"Args":[""]}' >log.txt 2>&1
+cat log.txt
+echo "===================== Instantiated chaincode on PEER0 ===================== "
+sleep 15
+
+CORE_PEER_COMMITTER_LEDGER_ORDERER=$ORDERER_IP_ADDRESS:7050 CORE_PEER_ADDRESS=$PEER0_IP_ADDRESS:7051 peer chaincode invoke -C myc1 -n mycc -c '{"function":"invoke","Args":["put","a","yugfoiuehyorye87y4yiushdofhjfjdsfjshdfsdkfsdifsdpiupisupoirusoiuou"]}' >log.txt 2>&1
+cat log.txt
+echo "===================== Invoke transaction on chaincode===================== "
+sleep 15
+
+CORE_PEER_COMMITTER_LEDGER_ORDERER=$ORDERER_IP_ADDRESS:7050 CORE_PEER_ADDRESS=$PEER0_IP_ADDRESS:7051 peer chaincode query -C myc1 -n mycc -c '{"function":"invoke","Args":["get","a"]}' >log.txt 2>&1
+cat log.txt
+echo "===================== Query on chaincode on PEER0 is successful ===================== "
+
+echo "===================== Single Channel Test execution completed ===================== "
 exit 0
