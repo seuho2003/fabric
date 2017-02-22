@@ -13,12 +13,9 @@
 # limitations under the License.
 #
 
-import os
 import endorser_util
 import bdd_grpc_util
-import bdd_test_util
 import bootstrap_util
-import devops_pb2
 
 @when(u'user "{userName}" creates a chaincode spec "{ccSpecAlias}" with name "{chaincodeName}" of type "{ccType}" for chaincode "{chaincodePath}" with args')
 def step_impl(context, userName, ccType, chaincodeName, chaincodePath, ccSpecAlias):
@@ -35,11 +32,8 @@ def step_impl(context, userName, ccDeploymentSpecAlias, ccSpecAlias, devopsCompo
     directory = bootstrap_util.getDirectory(context=context)
     user = directory.getUser(userName=userName)
     assert ccSpecAlias in user.tags, "ChaincodeSpec alias '{0}' not found for user '{1}'".format(ccSpecAlias, userName)
-
-    ipAddress = bdd_test_util.ipFromContainerNamePart(devopsComposeService, context.compose_containers)
-    channel = bdd_grpc_util.getGRPCChannel(ipAddress)
-    devopsStub = devops_pb2.beta_create_Devops_stub(channel)
-    deploymentSpec = devopsStub.Build(user.tags[ccSpecAlias],20)
+    deploymentSpec = None
+    raise Exception("Not Implemented")
     #user.setTagValue(ccDeploymentSpecAlias, deploymentSpec)
     user.setTagValue(ccDeploymentSpecAlias, deploymentSpec)
 

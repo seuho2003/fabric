@@ -6,7 +6,6 @@ import bdd_test_util
 import bdd_grpc_util
 import bootstrap_util
 from peer import chaincode_pb2
-from peer import chaincode_proposal_pb2
 from peer import proposal_pb2
 from peer import peer_pb2_grpc
 import identities_pb2
@@ -50,7 +49,7 @@ def createInvokeProposalForBDD(context, ccSpec, chainID, signersCert, Mspid, typ
     chainHdr = bootstrapHelper.makeChainHeader(type=common_dot_common_pb2.HeaderType.Value(type),
                                                txID=tx_id, extension=ccHdrExt.SerializeToString())
 
-    header = common_dot_common_pb2.Header(channel_header=chainHdr, signature_header=sigHdr)
+    header = common_dot_common_pb2.Header(channel_header=chainHdr.SerializeToString(), signature_header=sigHdr.SerializeToString())
 
     # make proposal
     proposal = proposal_pb2.Proposal(header=header.SerializeToString(), payload=ccProposalPayload.SerializeToString())

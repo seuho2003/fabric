@@ -162,12 +162,12 @@ def step_impl(context, userName, createChannelSignedConfigEnvelope):
     signedAnchorsConfigItems = user.tags[anchorSignedConfigItemsName]
 
     # Intermediate step until template tool is ready
-    signedConfigItems = bootstrap_util.createSignedConfigItems(configGroups=signedMspConfigItems + signedAnchorsConfigItems)
+    channgel_config_groups = bootstrap_util.createSignedConfigItems(configGroups=signedMspConfigItems + signedAnchorsConfigItems)
 
-
+    bootstrap_util.setMetaPolicy(channgel_config_groups)
 
     #NOTE: Conidered passing signing key for appDeveloper, but decided that the peer org signatures they need to collect subsequently should be proper way
-    config_update_envelope = bootstrap_util.createConfigUpdateEnvelope(channelConfigGroup=signedConfigItems, chainId=channelID, chainCreationPolicyName=chainCreationPolicyName)
+    config_update_envelope = bootstrap_util.createConfigUpdateEnvelope(channelConfigGroup=channgel_config_groups, chainId=channelID, chainCreationPolicyName=chainCreationPolicyName)
 
     user.setTagValue(createChannelSignedConfigEnvelope, ChannelCreationInfo(channelID, chainCreationPolicyName, config_update_envelope))
 

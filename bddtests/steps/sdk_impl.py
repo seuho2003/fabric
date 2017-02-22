@@ -1,19 +1,6 @@
-import os
-import re
-import time
-import copy
-import base64
-from datetime import datetime, timedelta
-
 import sys, requests, json
 
 import bdd_test_util
-
-from grpc.beta import implementations
-
-import fabric_pb2
-import chaincode_pb2
-import devops_pb2
 
 SDK_NODE_APP_REST_PORT = 8080
 

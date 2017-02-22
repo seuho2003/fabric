@@ -138,9 +138,6 @@ Feature: Bootstrap
       | funcName | arg1 |  arg2 | arg3 | arg4 |
       |   init   |  a   |  100  |  b   |  200 |
 
-      #And user "binhn" creates a deployment spec "cc_deploy_spec" using chaincode spec "cc_spec" and devops on peer "vp0"
-      #And user "binhn" creates a deployment proposal "proposal1" using chaincode deployment spec "cc_deploy_spec"
-
     # Under the covers, create a deployment spec, etc.
     And user "dev0Org0" using cert alias "dev0Org0App1" creates a deployment proposal "proposal1" for channel "com.acme.blockchain.jdoe.Channel1" using chaincode spec "cc_spec"
 

@@ -358,6 +358,13 @@ class BootstrapHelper:
     KEY_NEW_CONFIGURATION_ITEM_POLICY = "NewConfigurationItemPolicy"
     DEFAULT_CHAIN_CREATORS = [KEY_ACCEPT_ALL_POLICY]
 
+    # ReadersPolicyKey is the key used for the read policy
+    KEY_POLICY_READERS = "Readers"
+
+    # WritersPolicyKey is the key used for the writer policy
+    KEY_POLICY_WRITERS = "Writers"
+
+
     DEFAULT_NONCE_SIZE = 24
 
     @classmethod
@@ -617,6 +624,19 @@ def createSignedConfigItems(configGroups=[]):
         mergeConfigGroups(channelConfig, configGroup)
     return channelConfig
 
+def setMetaPolicy(channgel_config_groups):
+    #New meta policy info
+    typeImplicitMeta = common_dot_policies_pb2.Policy.PolicyType.Value("IMPLICIT_META")
+    P = common_dot_policies_pb2.Policy
+    IMP=common_dot_policies_pb2.ImplicitMetaPolicy
+    ruleAny = common_dot_policies_pb2.ImplicitMetaPolicy.Rule.Value("ANY")
+    channgel_config_groups.groups[ApplicationGroup].policies[BootstrapHelper.KEY_POLICY_READERS].policy.CopyFrom(
+        P(type=typeImplicitMeta, policy=IMP(
+            rule=ruleAny).SerializeToString()))
+    channgel_config_groups.groups[ApplicationGroup].policies[BootstrapHelper.KEY_POLICY_WRITERS].policy.CopyFrom(
+        P(type=typeImplicitMeta, policy=IMP(
+            rule=ruleAny).SerializeToString()))
+
 
 def createChannelConfigGroup(hashingAlgoName="SHA256", consensusType="solo", batchTimeout="10s", batchSizeMaxMessageCount=10, batchSizeAbsoluteMaxBytes=100000000, batchSizePreferredMaxBytes=512 * 1024):
 
@@ -645,6 +665,16 @@ def createChannelConfigGroup(hashingAlgoName="SHA256", consensusType="solo", bat
         BootstrapHelper.KEY_EGRESS_POLICY].value = toValue(
         orderer_dot_configuration_pb2.EgressPolicyNames(
             names=[BootstrapHelper.KEY_ACCEPT_ALL_POLICY]))
+    #New meta policy info
+    typeImplicitMeta = common_dot_policies_pb2.Policy.PolicyType.Value("IMPLICIT_META")
+    P = common_dot_policies_pb2.Policy
+    IMP=common_dot_policies_pb2.ImplicitMetaPolicy
+    ruleAny = common_dot_policies_pb2.ImplicitMetaPolicy.Rule.Value("ANY")
+    channel.policies[BootstrapHelper.KEY_POLICY_READERS].policy.CopyFrom(P(type=typeImplicitMeta, policy=IMP(
+        rule=ruleAny, sub_policy=BootstrapHelper.KEY_POLICY_READERS).SerializeToString()))
+    channel.policies[BootstrapHelper.KEY_POLICY_WRITERS].policy.CopyFrom(P(type=typeImplicitMeta, policy=IMP(
+        rule=ruleAny, sub_policy=BootstrapHelper.KEY_POLICY_WRITERS).SerializeToString()))
+
     return channel
 
 def createConfigUpdateTxEnvelope(chainId, configUpdateEnvelope):
@@ -662,8 +692,8 @@ def createConfigUpdateTxEnvelope(chainId, configUpdateEnvelope):
     )
 
     payloadHeader = common_dot_common_pb2.Header(
-        channel_header=payloadChainHeader,
-        signature_header=payloadSignatureHeader,
+        channel_header=payloadChainHeader.SerializeToString(),
+        signature_header=payloadSignatureHeader.SerializeToString(),
     )
     payload = common_dot_common_pb2.Payload(header=payloadHeader, data=configUpdateEnvelope.SerializeToString())
     envelope = common_dot_common_pb2.Envelope(payload=payload.SerializeToString(), signature=None)
@@ -684,8 +714,8 @@ def createConfigTxEnvelope(chainId, config_envelope):
     )
 
     payloadHeader = common_dot_common_pb2.Header(
-        channel_header=payloadChainHeader,
-        signature_header=payloadSignatureHeader,
+        channel_header=payloadChainHeader.SerializeToString(),
+        signature_header=payloadSignatureHeader.SerializeToString(),
     )
     payload = common_dot_common_pb2.Payload(header=payloadHeader, data=config_envelope.SerializeToString())
     envelope = common_dot_common_pb2.Envelope(payload=payload.SerializeToString(), signature=None)
@@ -958,8 +988,8 @@ def createChainCreatorsPolicy(context, chainCreatePolicyName, chaindId, orgNames
     mspPrincipalList = []
     for org in [directory.getOrganization(orgName) for orgName in orgNames]:
         mspPrincipalList.append(msp_principal_pb2.MSPPrincipal(
-            PrincipalClassification=msp_principal_pb2.MSPPrincipal.Classification.Value("ByIdentity"),
-            Principal=crypto.dump_certificate(crypto.FILETYPE_ASN1, org.getSelfSignedCert())))
+            principal_classification=msp_principal_pb2.MSPPrincipal.Classification.Value("IDENTITY"),
+            principal=crypto.dump_certificate(crypto.FILETYPE_ASN1, org.getSelfSignedCert())))
     policy = common_dot_policies_pb2.Policy(
         type=common_dot_policies_pb2.Policy.PolicyType.Value("SIGNATURE"),
         policy=AuthDSLHelper.Envelope(
