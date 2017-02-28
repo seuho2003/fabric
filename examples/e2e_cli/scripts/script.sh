@@ -21,7 +21,7 @@ CHANNEL_NAME=$1
 COUNTER=0
 MAX_RETRY=5
 
-if [ -z "CHANNEL_NAME" ]; then
+if [ -z "$CHANNEL_NAME" ]; then
 	echo "---- Using default channel 'mychannel'"
 	CHANNEL_NAME="mychannel"
 fi
