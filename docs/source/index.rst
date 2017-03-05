@@ -8,6 +8,7 @@ Welcome to Hyperledger fabric's documentation
    :caption: Key Concepts
    
    overview
+   ca_setup
    whyfabric
    biz/usecases
    glossary
