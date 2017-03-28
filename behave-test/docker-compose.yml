@@ -1,0 +1,12 @@
+--- # Compose file to run behave tests in testenv container
+
+testenv:
+  container_name: testenv
+  image: hyperledger/fabric-testenv
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /var/lib/docker:/var/lib/docker
+    - ${GOPATH}/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric
+
+  command: ./behave-test/behave-tests.sh
+

@@ -2,6 +2,8 @@ FROM hyperledger/fabric-baseos:_BASE_TAG_
 ENV PEER_CFG_PATH /etc/hyperledger/fabric
 ENV CORE_PEER_MSPCONFIGPATH $PEER_CFG_PATH/msp/sampleconfig
 RUN mkdir -p /var/hyperledger/production $PEER_CFG_PATH
+RUN apt-get update -qq
+RUN apt-get install -y libltdl-dev
 COPY payload/peer /usr/local/bin
 COPY payload/core.yaml $PEER_CFG_PATH
 ADD  payload/msp-sampleconfig.tar.bz2 $PEER_CFG_PATH
