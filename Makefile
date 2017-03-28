@@ -24,6 +24,7 @@
 #   - test-cmd - generates a "go test" string suitable for manual customization
 #   - behave - runs the behave test
 #   - behave-deps - ensures pre-requisites are available for running behave manually
+#   - behave-tests runs the behave tests in testenv container
 #   - gotools - installs go tools like golint
 #   - linter - runs all code checks
 #   - native - ensures all native binaries are available
@@ -142,6 +143,10 @@ behave: behave-deps
 behave-peer-chaincode: build/bin/peer peer-docker orderer-docker
 	@cd peer/chaincode && behave
 
+behave-tests: testenv peer-docker orderer-docker peer
+	@echo "Running behave tests.."
+	cd behave-test && docker-compose up --abort-on-container-exit --force-recreate && docker-compose down
+
 linter: buildenv
 	@echo "LINT: Running code checks.."
 	@$(DRUN) hyperledger/fabric-buildenv:$(DOCKER_TAG) ./scripts/golinter.sh
@@ -212,7 +217,8 @@ build/image/testenv/payload:    build/docker/bin/orderer \
 				build/docker/bin/peer \
 				peer/core.yaml \
 				build/msp-sampleconfig.tar.bz2 \
-				images/testenv/install-softhsm2.sh
+				images/testenv/install-softhsm2.sh \
+                                images/testenv/behavesetup.sh
 build/image/zookeeper/payload:  images/zookeeper/docker-entrypoint.sh
 build/image/kafka/payload:      images/kafka/docker-entrypoint.sh \
 				images/kafka/kafka-run-class.sh
