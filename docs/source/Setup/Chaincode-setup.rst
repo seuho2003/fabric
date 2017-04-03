@@ -1,5 +1,9 @@
 Writing, Building, and Running Chaincode in a Development Environment
+<<<<<<< HEAD
 ---------------------------------------------------------------------
+=======
+=====================================================================
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Chaincode developers need a way to test and debug their chaincode
 without having to set up a complete peer network. By default, when you
@@ -15,12 +19,21 @@ chaincode as a Docker container.
 
 The following instructions apply to *developing* chaincode in Go or
 Java. They do not apply to running in a production environment. However,
+<<<<<<< HEAD
 if *developing* chaincode in Java, please see the `Java chaincode
 setup <https://github.com/hyperledger/fabric/blob/master/docs/Setup/JAVAChaincode.md>`__
 instructions first, to be sure your environment is properly configured.
 
 **Note:** We have added support for `System
 chaincode <https://github.com/hyperledger/fabric/blob/master/docs/SystemChaincode-noop.md>`__.
+=======
+if *developing* chaincode in Java, please see the :doc:`Java chaincode
+setup <https://github.com/hyperledger/fabric/blob/master/docs/Setup/JAVAChaincode>`
+instructions first, to be sure your environment is properly configured.
+
+**Note:** We have added support for :doc:`System
+chaincode <https://github.com/hyperledger/fabric/blob/master/docs/SystemChaincode-noop>`
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Choices
 -------
@@ -28,6 +41,7 @@ Choices
 Once again, you have the choice of using one of the following
 approaches:
 
+<<<<<<< HEAD
 -  `Option 1 <#option-1-vagrant-development-environment>`__ using the
    **Vagrant** `development
    environment <https://github.com/hyperledger/fabric/blob/master/docs/dev-setup/devenv.md>`__
@@ -41,6 +55,288 @@ from scratch, and there's no need to keep a clone of the fabric GitHub
 repos current/up-to-date. Instead, you can simply pull and run the
 ``fabric-peer`` and ``fabric-membersrvc`` images directly from
 DockerHub.
+=======
+-  `Option 1 <#option-1-docker-for-mac-or-windows>`__ using Docker for
+   Mac or Windows
+-  `Option 2 <#option-2-docker-toolbox>`__ using Docker toolbox
+-  `Option 3 <#option-3-vagrant-development-environment>`__ using the
+   **Vagrant** :doc:`development
+   environment <https://github.com/hyperledger/fabric/blob/master/docs/dev-setup/devenv>`
+   that is used for developing the fabric itself
+
+| A Docker approach provides several advantages, highlighted through its
+  simplicity.
+| By using options *1* or *2*, from above, you avoid having to build
+  everything from scratch, and there's no need to keep a synchronized
+  clone of the Hyperledger fabric codebase. Instead, you can simply pull
+  and run the ``fabric-peer`` and ``fabric-membersrvc`` images directly
+  from DockerHub. There is no need to manually start the peer and member
+  service nodes, rather a single ``docker-compose up`` command will spin
+  up a live network on your machine. Additionally, you are able to
+  operate from a single terminal, and you avoid the extra layer of
+  abstraction and virtualization which arises when using the Vagrant
+  environment.
+
+For more information on using Docker Compose, and customizing your
+Docker environment, see the :doc:`Docker Setup
+Guide <Setup/Docker-setup>` If you are not familiar with Docker
+and/or chaincode development, it's recommended to go through this
+section first.
+
+Option 1 Docker for Mac or Windows
+----------------------------------
+
+The Docker images for ``fabric-peer`` and ``fabric-membersrvc`` are
+continuously built and tested through the Hyperledger fabric CI
+(continuous integration). To run these fabric components on your Mac or
+Windows laptop/server using the Docker for
+`Mac <https://docs.docker.com/engine/installation/mac/>`__ or
+`Windows <https://docs.docker.com/engine/installation/windows/>`__
+platform, follow these steps. If using `Docker
+Toolbox <https://docs.docker.com/toolbox/overview/>`__, please skip to
+`Option 2 <#option-2-docker-toolbox>`__, below.
+
+Pull images from DockerHub
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You DO NOT need to manually pull the ``fabric-peer``,
+``fabric-membersrvc`` or ``fabric-baseimage`` images published by the
+Hyperledger Fabric project from DockerHub. These images are specified in
+the docker-compose.yaml and will be automatically downloaded and
+extracted when you run ``docker-compose up``. However, you do need to
+ensure that the image tags correspond correctly to your platform.
+
+Identify your platform and check the image tags. Use the **Tags** tab in
+the ``hyperledger/fabric-baseimage`` repository on
+`DockerHub <https://hub.docker.com/r/hyperledger/fabric-baseimage/tags/>`__
+to browse the available images. For example, if you are running Docker
+natively on Linux or OSX then you will want:
+
+::
+
+    hyperledger/fabric-baseimage:x86_64-0.2.0
+
+Retrieve the docker-compose file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now you need to retrieve a Docker Compose file to spin up your network.
+There are two standard Docker Compose files available. One is for a
+single node + CA network, and the second is for a four node + CA
+network. Identify or create a working directory where you want the
+Docker Compose file(s) to reside; this can be anywhere on your machine
+(the below directory is simply an example). Then execute a ``cURL`` to
+retrieve the .yaml file. For example, to retrieve the .yaml file for a
+single node + CA network:
+
+::
+
+    mkdir -p $HOME/hyperledger/docker-compose
+    cd $HOME/hyperledger/docker-compose
+    curl https://raw.githubusercontent.com/hyperledger/fabric/v0.6/examples/docker-compose/single-peer-ca.yaml -o single-peer-ca.yaml 2>/dev/null
+
+OR to retrieve the .yaml file for a four node + CA network:
+
+::
+
+    mkdir -p $HOME/hyperledger/docker-compose
+    cd $HOME/hyperledger/docker-compose
+    curl https://raw.githubusercontent.com/hyperledger/fabric/v0.6/examples/docker-compose/four-peer-ca.yaml -o four-peer-ca.yaml 2>/dev/null
+
+If you want to configure your network to use specific ``fabric-peer`` or
+``fabric-membersrvc`` images from `Hyperledger Docker
+Hub <https://hub.docker.com/u/hyperledger/>`__, use the **Tags** tab in
+the corresponding image repository to browse the available versions.
+Then add the tag in your Docker Compose .yaml file. For example, in the
+``single-peer-ca.yaml`` you might alter the ``hyperledger/fabric-peer``
+image from:
+
+::
+
+    vp0:
+        image: hyperledger/fabric-peer
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+
+to
+
+::
+
+    vp0:
+        image: hyperledger/fabric-peer:x86_64-0.6.1-preview
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+
+Running the Peer and CA
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To run the ``fabric-peer``\ and ``fabric-membersrvc`` images, you will
+use `Docker Compose <https://docs.docker.com/compose/>`__ against one of
+your .yaml files. You specify the file after the ``-f`` argument on the
+command line. Therefore, to spin up the single node + CA network you
+first navigate to the working directory where your compose file(s)
+reside, and then execute ``docker-compose up`` from the command line:
+
+::
+
+    cd $HOME/hyperledger/docker-compose
+    docker-compose -f single-peer-ca.yaml up
+
+OR for a four node + CA network:
+
+::
+
+    cd $HOME/hyperledger/docker-compose
+    docker-compose -f four-node-ca.yaml up
+
+Now, you are ready to start `running the
+chaincode <#running-the-chaincode>`__.
+
+Option 2 Docker Toolbox
+-----------------------
+
+If you are using `Docker
+Toolbox <https://docs.docker.com/toolbox/overview/>`__, please follow
+these instructions.
+
+**Note**: Docker will not run natively on older versions of macOS or any
+Windows versions prior to Windows 10. If either scenario describes your
+OS, you must use Docker Toolbox.
+
+Docker Toolbox bundles Docker Engine, Docker Machine and Docker Compose,
+and by means of a VirtualBox, provides you with an environment to run
+Docker processes. You initialize the Docker host simply by launching the
+Docker Quick Start Terminal. Once the host is initialized, you can run
+all of the Docker commands and Docker Compose commands from the toolbox
+as if you were running them on the command line. Once you are in the
+toolbox, it is the same experience as if you were running on a Linux
+machine with Docker & Docker Compose installed.
+
+Start up the default Docker host by clicking on the Docker Quick Start
+Terminal. It will open a new terminal window and initialize the Docker
+host. Once the startup process is complete, you will see the Docker
+whale together with the IP address of the Docker host, as shown below.
+In this example the IP address of the Docker host is 192.168.99.100.
+Take note of this IP address as you will need it later to connect to
+your Docker containers.
+
+If you need to retrieve an IP address for one of your peers, use the
+``docker inspect`` command. For more information on useful Docker
+commands, refer to the `Docker
+documentation <https://docs.docker.com>`__.
+
+::
+
+                            ##         .
+                      ## ## ##        ==
+                   ## ## ## ## ##    ===
+            /"""""""""""""""""\___/ ===
+       ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+            \______ o           __/
+             \    \         __/
+              \____\_______/
+
+    docker is configured to use the default machine with IP 192.168.99.100
+    For help getting started, check out the docs at https://docs.docker.com
+
+Pull images from DockerHub
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+| You DO NOT need to manually pull the ``fabric-peer``,
+  ``fabric-membersrvc`` or ``fabric-baseimage`` images published by the
+  Hyperledger Fabric project from DockerHub.
+| These images are specified in the docker-compose.yaml and will be
+  automatically downloaded and extracted when you run
+  ``docker-compose up``. However, you do need to ensure that the image
+  tags correspond correctly to your platform.
+
+Identify your platform and check the image tags. Use the **Tags** tab in
+the ``hyperledger/fabric-baseimage`` repository on
+`DockerHub <https://hub.docker.com/r/hyperledger/fabric-baseimage/tags/>`__
+to browse the available images. If you are using Docker toolbox, then
+you will want:
+
+::
+
+    hyperledger/fabric-baseimage:x86_64-0.2.0
+
+Retrieve the docker-compose file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now you need to retrieve a Docker Compose file to spin up your network.
+There are two standard Docker Compose files available. One is for a
+single node + CA network, and the second is for a four node + CA
+network. Identify or create a working directory where you want the
+Docker Compose file(s) to reside. Then execute a ``cURL`` to retrieve
+the .yaml file. For example, to retrieve the .yaml file for a single
+node + CA network:
+
+::
+
+    mkdir -p $HOME/hyperledger/docker-compose
+    cd $HOME/hyperledger/docker-compose
+    curl https://raw.githubusercontent.com/hyperledger/fabric/master/examples/docker-compose/single-peer-ca.yaml -o single-peer-ca.yaml 2>/dev/null
+
+OR to retrieve the .yaml file for a four node + CA network:
+
+::
+
+    mkdir -p $HOME/hyperledger/docker-compose
+    cd $HOME/hyperledger/docker-compose
+    curl https://raw.githubusercontent.com/hyperledger/fabric/master/examples/docker-compose/four-peer-ca.yaml
+    -o four-peer-ca.yaml 2>dev/null
+
+If you want to configure your network to use specific ``fabric-peer`` or
+``fabric-membersrvc`` images from `Hyperledger Docker
+Hub <https://hub.docker.com/u/hyperledger/>`__, use the **Tags** tab in
+the corresponding image repository to browse the available versions.
+Then add the tag in your Docker Compose .yaml file. For example, in the
+``single-peer-ca.yaml`` you might alter the ``hyperledger/fabric-peer``
+image from:
+
+::
+
+    vp0:
+        image: hyperledger/fabric-peer
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+
+to
+
+::
+
+    vp0:
+        image: hyperledger/fabric-peer:x86_64-0.6.1-preview
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+
+Running the Peer and CA
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To run the ``fabric-peer``\ and ``fabric-membersrvc`` images, you will
+use `Docker Compose <https://docs.docker.com/compose/>`__ against one of
+your .yaml files. You specify the file through the ``-f`` argument on
+the command line. Therefore, to spin up the single node + CA network you
+first navigate to the working directory where your compose file(s)
+reside, and then execute ``docker-compose up`` from the command line:
+
+::
+
+    cd $HOME/hyperledger/docker-compose
+    docker-compose -f single-peer-ca.yaml up
+
+OR for a four node + CA network:
+
+::
+
+    cd $HOME/hyperledger/docker-compose
+    docker-compose -f four-node-ca.yaml up
+
+Now, you are ready to start `running the
+chaincode <#running-the-chaincode>`__.
+
+Option 3 Vagrant development environment
+----------------------------------------
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 You will need multiple terminal windows - essentially one for each
 component. One runs the validating peer; another runs the chaincode; the
@@ -49,8 +345,16 @@ Finally, when running with security enabled, an additional fourth window
 is required to run the **Certificate Authority (CA)** server. Detailed
 instructions are provided in the sections below.
 
+<<<<<<< HEAD
 Option 1 Vagrant development environment
 ----------------------------------------
+=======
+| **Note**: Using the Vagrant environment results in a more complicated
+  scenario due to an extra layer of virtualization and the need for
+  multiple terminals.
+| Running Docker natively or using Docker Toolbox are the recommended
+  approaches.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Security Setup (optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,6 +391,25 @@ peer, 4 = validating peer, and 8 = auditor.
 Running the validating peer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<<<<<<< HEAD
+=======
+**Note:** To run with security enabled, first modify the
+`core.yaml <https://github.com/hyperledger/fabric/blob/master/peer/core.yaml>`__
+configuration file to set the ``security.enabled`` value to ``true``
+before building the peer executable. Alternatively, you can enable
+security by running the peer with the following environment variable:
+``CORE_SECURITY_ENABLED=true``. To enable privacy and confidentiality of
+transactions (which requires security to also be enabled), modify the
+`core.yaml <https://github.com/hyperledger/fabric/blob/master/peer/core.yaml>`__
+configuration file to set the ``security.privacy`` value to ``true`` as
+well. Alternatively, you can enable privacy by running the peer with the
+following environment variable: ``CORE_SECURITY_PRIVACY=true``. If you
+are enabling security and privacy on the peer process with environment
+variables, it is important to include these environment variables in the
+command when executing all subsequent peer operations (e.g. deploy,
+invoke, or query).
+
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 In a **new** terminal window, from the ``devenv`` subdirectory of your
 fabric workspace environment, ``ssh`` into Vagrant:
 
@@ -95,7 +418,13 @@ fabric workspace environment, ``ssh`` into Vagrant:
     cd $GOPATH/src/github.com/hyperledger/fabric/devenv
     vagrant ssh
 
+<<<<<<< HEAD
 Build and run the peer process.
+=======
+Build and run the peer process to enable security and privacy after
+setting ``security.enabled`` and ``security.privacy`` settings to
+``true``.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 ::
 
@@ -114,6 +443,7 @@ variables:
 Now, you are ready to start `running the
 chaincode <#running-the-chaincode>`__.
 
+<<<<<<< HEAD
 Option 2 Docker for Mac or Windows
 ----------------------------------
 
@@ -265,6 +595,21 @@ Not Vagrant
 If you are using either `Option
 2 <#option-2-docker-for-mac-or-windows>`__ or `Option
 3 <#option-3-docker-toolbox>`__, you'll need to download the sample
+=======
+Running the chaincode
+---------------------
+
+Docker or Docker Toolbox
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Start a **new** terminal window. If you ran spun up your Docker
+containers in detached mode - ``docker-compose up -d`` - you can remain
+in the same terminal.
+
+If you are using either `Option
+1 <#option-1-docker-for-mac-or-windows>`__ or `Option
+2 <#option-2-docker-toolbox>`__, you'll need to download the sample
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 chaincode. The chaincode project must be placed somewhere under the
 ``src`` directory in your local ``$GOPATH`` as shown below.
 
@@ -272,7 +617,11 @@ chaincode. The chaincode project must be placed somewhere under the
 
     mkdir -p $GOPATH/src/github.com/chaincode_example02/
     cd $GOPATH/src/github.com/chaincode_example02
+<<<<<<< HEAD
     curl --request GET https://raw.githubusercontent.com/hyperledger/fabric/master/examples/chaincode/go/chaincode_example02/chaincode_example02.go > chaincode_example02.go
+=======
+    curl GET https://raw.githubusercontent.com/hyperledger/fabric/master/examples/chaincode/go/chaincode_example02/chaincode_example02.go > chaincode_example02.go
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Next, you'll need to clone the Hyperledger fabric to your local $GOPATH,
 so that you can build your chaincode. **Note:** this is a temporary
@@ -296,6 +645,33 @@ When you are ready to start creating your own Go chaincode, create a new
 subdirectory under $GOPATH/src. You can copy the
 **chaincode\_example02** file to the new directory and modify it.
 
+<<<<<<< HEAD
+=======
+Vagrant
+~~~~~~~
+
+Start a **new** terminal window.
+
+If you are using `Option
+3 <#option-3-vagrant-development-environment>`__, you'll need to ``ssh``
+to Vagrant.
+
+::
+
+    cd $GOPATH/src/github.com/hyperledger/fabric/devenv
+    vagrant ssh
+
+Next, we'll build the **chaincode\_example02** code, which is provided
+in the Hyperledger fabric source code repository. If you are using
+`Option 3 <#option-3-vagrant-development-environment>`__, then you can
+do this from your clone of the fabric repository.
+
+::
+
+    cd $GOPATH/src/github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+    go build
+
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 Starting and registering the chaincode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -313,6 +689,16 @@ invoke or query transaction. If the "Received REGISTERED" message is not
 displayed, then an error has occurred during the deployment; revisit the
 previous steps to resolve the issue.
 
+<<<<<<< HEAD
+=======
+| **Note**: These instructions relate to writing, building, and running
+  chaincode in "development" mode. This means that if you are using
+  Docker, you will not see additional Docker containers after you have
+  deployed your chaincode. Rather, the chaincode is directly registered
+  with the peer as outlined in the above command.
+| See the :doc:`Docker Setup Guide <Setup/Docker-setup>`
+
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 Running the CLI or REST API
 ---------------------------
 
@@ -330,8 +716,13 @@ how to clean up the temporary files.
 
 See the `logging
 control <https://github.com/hyperledger/fabric/blob/master/docs/Setup/logging-control.md>`__
+<<<<<<< HEAD
 reference for information on controlling logging output from the
 ``peer`` and chaincodes.
+=======
+reference for information on controllinglogging output from the ``peer``
+and chaincodes.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Terminal 3 (CLI or REST API)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -438,7 +829,11 @@ parameter is used instead.
 
 ::
 
+<<<<<<< HEAD
     peer chaincode deploy -n mycc -c '{"Args": ["init", "a","100", "b", "200"]}'
+=======
+    peer chaincode deploy -n mycc -c '{Args": ["init", "a","100", "b", "200"]}'
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Alternatively, you can run the chaincode deploy transaction through the
 REST API.
@@ -457,7 +852,11 @@ REST API.
         "chaincodeID":{
             "name": "mycc"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "args":["init", "a", "100", "b", "200"]
         }
       },
@@ -491,7 +890,12 @@ variables in the command when executing all subsequent peer operations
 
 ::
 
+<<<<<<< HEAD
       CORE_SECURITY_ENABLED=true CORE_SECURITY_PRIVACY=true peer chaincode deploy -u jim -n mycc -c '{"Args": ["init", "a","100", "b", "200"]}'
+=======
+      CORE_SECURITY_ENABLED=true CORE_SECURITY_PRIVACY=true peer chaincode deploy -u
+      jim -n mycc -c '{"Args": ["init", "a","100", "b", "200"]}'
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 **REST Request:**
 
@@ -507,7 +911,11 @@ variables in the command when executing all subsequent peer operations
         "chaincodeID":{
             "name": "mycc"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "args":["init", "a", "100", "b", "200"]
         },
         "secureContext": "jim"
@@ -522,8 +930,13 @@ following output in the chaincode window:
 
 ::
 
+<<<<<<< HEAD
         <TIMESTAMP_SIGNATURE> Received INIT(uuid:005dea42-d57f-4983-803e-3232e551bf61), initializing chaincode
         Aval = 100, Bval = 200
+=======
+        <TIMESTAMP_SIGNATURE> Received INIT(uuid:005dea42-d57f-4983-803e-3232e551bf61),
+      initializing chaincode Aval = 100, Bval = 200
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Chaincode invoke via CLI and REST
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -534,7 +947,11 @@ chaincode window (started in Vagrant terminal 2):
 
 ::
 
+<<<<<<< HEAD
         peer chaincode invoke -l golang -n mycc -c '{"Args": ["invoke", "a", "b", "10"]}'
+=======
+        peer chaincode invoke -l golang -n mycc -c '{Args": ["invoke", "a", "b", "10"]}'
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Alternatively, run the chaincode invoking transaction through the REST
 API.
@@ -553,7 +970,11 @@ API.
           "chaincodeID":{
               "name":"mycc"
           },
+<<<<<<< HEAD
           "input": {
+=======
+          "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
              "args":["invoke", "a", "b", "10"]
           }
       },
@@ -587,7 +1008,12 @@ variables in the command when executing all subsequent peer operations
 
 ::
 
+<<<<<<< HEAD
       CORE_SECURITY_ENABLED=true CORE_SECURITY_PRIVACY=true peer chaincode invoke -u jim -l golang -n mycc -c '{"Args": ["invoke", "a", "b", "10"]}'
+=======
+          CORE_SECURITY_ENABLED=true CORE_SECURITY_PRIVACY=true peer chaincode invoke
+        -u jim -l golang -n mycc -c '{"Function": "invoke", "Args": ["a", "b", "10"]}'
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 **REST Request:**
 
@@ -603,7 +1029,11 @@ variables in the command when executing all subsequent peer operations
           "chaincodeID":{
               "name":"mycc"
           },
+<<<<<<< HEAD
           "input": {
+=======
+          "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
              "args":["invoke", "a", "b", "10"]
           },
           "secureContext": "jim"
@@ -617,8 +1047,13 @@ to B. You should see the following output in the chaincode window:
 
 ::
 
+<<<<<<< HEAD
         <TIMESTAMP_SIGNATURE> Received RESPONSE. Payload 200, Uuid 075d72a4-4d1f-4a1d-a735-4f6f60d597a9
         Aval = 90, Bval = 210
+=======
+        <TIMESTAMP_SIGNATURE> Received RESPONSE. Payload 200,
+      Uuid 075d72a4-4d1f-4a1d-a735-4f6f60d597a9 Aval = 90, Bval = 210
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Chaincode query via CLI and REST
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -661,7 +1096,11 @@ Alternatively, run the chaincode query transaction through the REST API.
           "chaincodeID":{
               "name":"mycc"
           },
+<<<<<<< HEAD
           "input": {
+=======
+          "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
              "args":["query", "a"]
           }
       },
@@ -695,7 +1134,12 @@ variables in the command when executing all subsequent peer operations
 
 ::
 
+<<<<<<< HEAD
           CORE_SECURITY_ENABLED=true CORE_SECURITY_PRIVACY=true peer chaincode query -u jim -l golang -n mycc -c '{"Args": ["query", "b"]}'
+=======
+          CORE_SECURITY_ENABLED=true CORE_SECURITY_PRIVACY=true peer chaincode query
+        -u jim -l golang -n mycc -c '{Args": ["query", "b"]}'
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 **REST Request:**
 
@@ -711,7 +1155,11 @@ variables in the command when executing all subsequent peer operations
           "chaincodeID":{
               "name":"mycc"
           },
+<<<<<<< HEAD
           "input": {
+=======
+          "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
              "args":["query", "a"]
           },
           "secureContext": "jim"

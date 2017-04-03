@@ -1,8 +1,15 @@
 Coding guidelines
+<<<<<<< HEAD
 -----------------
 
 Coding Golang 
 ~~~~~~~~~~~~~~
+=======
+================
+
+Coding Golang
+-------------
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 We code in Go™ and strictly follow the `best
 practices <http://golang.org/doc/effective_go.html>`__ and will not
@@ -12,7 +19,11 @@ code and fix all errors and warnings: -
 vet <https://golang.org/cmd/vet/>`__ -
 `goimports <https://godoc.org/golang.org/x/tools/cmd/goimports>`__
 
+<<<<<<< HEAD
 Generating gRPC code 
+=======
+Generating gRPC code
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 ---------------------
 
 If you modify any ``.proto`` files, run the following command to

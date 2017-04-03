@@ -3,7 +3,11 @@ Java chaincode
 
 Note: This guide generally assumes you have followed the Chaincode
 development environment setup tutorial
+<<<<<<< HEAD
 `here <https://github.com/hyperledger/fabric/blob/master/docs/Setup/Chaincode-setup.md>`__.
+=======
+`here <https://github.com/hyperledger/fabric/blob/v0.6/docs/Setup/Chaincode-setup.md>`__.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 To get started developing Java chaincode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

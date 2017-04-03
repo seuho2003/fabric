@@ -32,8 +32,12 @@ go-carpet-coverage*
 # make node-sdk copied files
 sdk/node/lib/protos/*
 report.xml
+<<<<<<< HEAD
 .settings
 .project
 .gradle
 build/
 bin/
+=======
+build/
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst

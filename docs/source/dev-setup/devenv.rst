@@ -4,6 +4,7 @@ Setting up the development environment
 Overview
 ~~~~~~~~
 
+<<<<<<< HEAD
 Prior to the v1.0.0 release, the development environment utilized Vagrant
 running an Ubuntu image, which in turn launched Docker containers as a
 means of ensuring a consistent experience for developers who might be
@@ -44,11 +45,35 @@ Prerequisites
    1.7.4 or later
 -  (only if using Vagrant) -
    `VirtualBox <https://www.virtualbox.org/>`__ - 5.0 or later
+=======
+The current development environment utilizes Vagrant running an Ubuntu
+image, which in turn launches Docker containers. Conceptually, the Host
+launches a VM, which in turn launches Docker containers.
+
+**Host -> VM -> Docker**
+
+This model allows developers to leverage their favorite OS/editors and
+execute the system in a controlled environment that is consistent
+amongst the development team.
+
+-  Note that your Host should not run within a VM. If you attempt this,
+   the VM within your Host may fail to boot with a message indicating
+   that VT-x is not available.
+
+Prerequisites
+~~~~~~~~~~~~~
+
+-  `Git client <https://git-scm.com/downloads>`__
+-  `Go <https://golang.org/>`__ - 1.6 or later
+-  `Vagrant <https://www.vagrantup.com/>`__ - 1.7.4 or later
+-  `VirtualBox <https://www.virtualbox.org/>`__ - 5.0 or later
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 -  BIOS Enabled Virtualization - Varies based on hardware
 
 -  Note: The BIOS Enabled Virtualization may be within the CPU or
    Security settings of the BIOS
 
+<<<<<<< HEAD
 ``pip``, ``behave`` and ``docker-compose``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -61,6 +86,8 @@ Prerequisites
     #PIP packages required for some behave tests
     pip install urllib3 ndg-httpsclient pyasn1 ecdsa python-slugify grpcio-tools jinja2 b3j0f.aop six
 
+=======
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 Steps
 ~~~~~
 
@@ -89,8 +116,12 @@ running
     git config --global core.autocrlf false
 
 If you continue with ``core.autocrlf`` set to ``true``, the
+<<<<<<< HEAD
 ``vagrant up`` command will fail with the error:
 
+=======
+``vagrant up`` command will fail with the error
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 ``./setup.sh: /bin/bash^M: bad interpreter: No such file or directory``
 
 Cloning the Fabric project
@@ -108,24 +139,38 @@ little bit of setup needed:
     cd github.com/hyperledger
 
 Recall that we are using ``Gerrit`` for source control, which has its
+<<<<<<< HEAD
 own internal git repositories. Hence, we will need to clone from
 `Gerrit <../Gerrit/gerrit.md#Working-with-a-local-clone-of-the-repository>`__.
+=======
+own internal git repositories. Hence, we will need to :doc:`clone from
+Gerrit <../Gerrit/gerrit>`
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 For brevity, the command is as follows:
 
 ::
 
     git clone ssh://LFID@gerrit.hyperledger.org:29418/fabric && scp -p -P 29418 LFID@gerrit.hyperledger.org:hooks/commit-msg fabric/.git/hooks/
 
+<<<<<<< HEAD
 **Note:** Of course, you would want to replace ``LFID`` with your own
 `Linux Foundation ID <../Gerrit/lf-account.md>`__.
+=======
+**Note:** of course, you would want to replace ``LFID`` with your :doc:`Linux
+Foundation ID <../Gerrit/lf-account>`
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Boostrapping the VM using Vagrant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+<<<<<<< HEAD
 If you are planning on using the Vagrant developer environment, the
 following steps apply. **Again, we recommend against its use except for
 developers that are limited to older versions of macOS and Windows that
 are not supported by Docker for Mac or Windows.**
+=======
+Now you're ready to launch Vagrant.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 ::
 
@@ -139,6 +184,7 @@ be able to ``ssh`` into the Vagrant VM just created.
 
     vagrant ssh
 
+<<<<<<< HEAD
 Once inside the VM, you can find the peer project under
 ``$GOPATH/src/github.com/hyperledger/fabric``. It is also mounted as
 ``/hyperledger``.
@@ -148,11 +194,25 @@ Building the fabric
 
 Once you have all the dependencies installed, and have cloned the
 repository, you can proceed to `build and test <build.md>`__ the fabric.
+=======
+Building the fabric
+~~~~~~~~~~~~~~~~~~~
+
+Once you have your vagrant development environment established, you can
+proceed to :doc:`build and test <build>` the fabric. Once inside the VM,
+you can find the peer project under
+``$GOPATH/src/github.com/hyperledger/fabric``. It is also mounted as
+``/hyperledger``.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Notes
 ~~~~~
 
+<<<<<<< HEAD
 **NOTE:** Any time you change any of the files in your local fabric
+=======
+**NOTE:** any time you change any of the files in your local fabric
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 directory (under ``$GOPATH/src/github.com/hyperledger/fabric``), the
 update will be instantly available within the VM fabric directory.
 
@@ -174,6 +234,11 @@ good, it's just cranking.
 Windows 10 (see
 `mitchellh/vagrant#6754 <https://github.com/mitchellh/vagrant/issues/6754>`__).
 If the ``vagrant up`` command fails it may be because you do not have
+<<<<<<< HEAD
 the Microsoft Visual C++ Redistributable package installed. You can
 download the missing package at the following address:
+=======
+Microsoft Visual C++ Redistributable installed. You can download the
+missing package at the following address:
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 http://www.microsoft.com/en-us/download/details.aspx?id=8328

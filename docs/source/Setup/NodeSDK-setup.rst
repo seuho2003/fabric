@@ -1,5 +1,9 @@
 Hyperledger Fabric Client (HFC) SDK for Node.js
+<<<<<<< HEAD
 -----------------------------------------------
+=======
+===============================================
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 The Hyperledger Fabric Client (HFC) SDK provides a powerful and easy to
 use API to interact with a Hyperledger Fabric blockchain.
@@ -12,7 +16,11 @@ and install Node.js for your OS. You'll also want the latest version of
 the latest version.
 
 Installing the hfc module
+<<<<<<< HEAD
 ~~~~~~~~~~~~~~~~~~~~~~~~~
+=======
+-------------------------
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 We publish the ``hfc`` node module to ``npm``. To install ``hfc`` from
 npm simply execute the following command:
@@ -21,6 +29,7 @@ npm simply execute the following command:
 
     npm install -g hfc
 
+<<<<<<< HEAD
 See `Hyperledger fabric Node.js client
 SDK <http://fabric-sdk-node.readthedocs.io/en/latest/node-sdk-guide>`__
 for more information.
@@ -32,4 +41,16 @@ First, you'll want to have a running peer node and member services. The
 instructions for setting up a network are `here <Network-setup.md>`__.
 You may also use the
 `Fabric-starter-kit <../starter/fabric-starter-kit.md>`__ that provides
+=======
+See :doc:`Hyperledger fabric Node.js client
+SDK <../nodeSDK/node-sdk-guide>` for more information.
+
+Hyperledger Fabric network
+--------------------------
+
+First, you'll want to have a running peer node and member services. The
+instructions for setting up a network are :doc:`here <Network-setup>`
+You may also use the
+:doc:`Fabric-starter-kit <../starter/fabric-starter-kit>` that provides
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 the network.

@@ -1,9 +1,17 @@
 Identity Management (Membership Service)
+<<<<<<< HEAD
 ----------------------------------------
 
 * What is unique about the fabric's Membership Service module? 
 
 One of the things that makes the Membership Service module stand out from
+=======
+========================================
+
+Q. What is unique about the fabric's Membership Service module?
+
+A. One of the things that makes the Membership Service module stand out from
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 the pack is our implementation of the latest advances in cryptography.
 
 In addition to ensuring private, auditable transactions, our Membership
@@ -18,6 +26,7 @@ Issuers also have the ability revoke transaction certificates or
 designate them to expire within a certain timeframe, allowing greater
 control over the asset tokens they have issued.
 
+<<<<<<< HEAD
 Like most other modules on Fabric, you can always replace the
 default module with another membership service option should the need
 arise.
@@ -26,6 +35,16 @@ arise.
 solution?
 
 No. The only role of the Membership Service module is to issue digital
+=======
+Like most other modules on the fabric, you can always replace the
+default module with another membership service option should the need
+arise.
+
+Q. Does its Membership Service make the fabric a centralized
+solution?
+
+A. No. The only role of the Membership Service module is to issue digital
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 certificates to validated entities that want to participate in the
 network. It does not execute transactions nor is it aware of how or when
 these certificates are used in any particular network.

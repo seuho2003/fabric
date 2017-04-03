@@ -1,9 +1,15 @@
 Confidentiality
 ===============
 
+<<<<<<< HEAD
  * How is the confidentiality of transactions and business logic achieved?
 
 The security module works in conjunction with the membership service
+=======
+Q. How is the confidentiality of transactions and business logic achieved?
+
+A. The security module works in conjunction with the membership service
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 module to provide access control service to any data recorded and
 business logic deployed on a chain network.
 
@@ -18,10 +24,17 @@ the contents of confidential transactions are encrypted with secret keys
 known only to their originators, validators, and authorized auditors.
 Only holders of the secret keys can interpret transaction contents.
 
+<<<<<<< HEAD
 * What if none of the stakeholders of a business contract are
 validators? 
 
 In some business scenarios, full confidentiality of contract
+=======
+Q. What if none of the stakeholders of a business contract are
+validators?
+
+A. In some business scenarios, full confidentiality of contract
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 logic may be required – such that only contract counterparties and
 auditors can access and interpret their chaincode. Under these
 scenarios, counter parties would need to spin off a new child chain with

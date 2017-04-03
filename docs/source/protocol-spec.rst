@@ -37,6 +37,7 @@ Table of Contents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  `2.1 Architecture <#21-architecture>`__
+<<<<<<< HEAD
 -  `2.1.1 Membership Services <#211-membership-services>`__
 -  `2.1.2 Blockchain Services <#212-blockchain-services>`__
 -  `2.1.3 Chaincode Services <#213-chaincode-services>`__
@@ -49,11 +50,30 @@ Table of Contents
 -  `2.2.1 Single Validating Peer <#221-single-validating-peer>`__
 -  `2.2.2 Multiple Validating Peers <#222-multiple-validating-peers>`__
 -  `2.2.3 Multichain <#223-multichain>`__
+=======
+
+   -  `2.1.1 Membership Services <#211-membership-services>`__
+   -  `2.1.2 Blockchain Services <#212-blockchain-services>`__
+   -  `2.1.3 Chaincode Services <#213-chaincode-services>`__
+   -  `2.1.4 Events <#214-events>`__
+   -  `2.1.5 Application Programming Interface
+      (API) <#215-application-programming-interface-api>`__
+   -  `2.1.6 Command Line Interface
+      (CLI) <#216-command-line-interface-cli>`__
+
+-  `2.2 Topology <#22-topology>`__
+
+   -  `2.2.1 Single Validating Peer <#221-single-validating-peer>`__
+   -  `2.2.2 Multiple Validating
+      Peers <#222-multiple-validating-peers>`__
+   -  `2.2.3 Multichain <#223-multichain>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 `3. Protocol <#3-protocol_1>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  `3.1 Message <#31-message>`__
+<<<<<<< HEAD
 -  `3.1.1 Discovery Messages <#311-discovery-messages>`__
 -  `3.1.2 Transaction Messages <#312-transaction-messages>`__
 -  `3.1.2.1 Transaction Data
@@ -117,6 +137,101 @@ Table of Contents
 -  `3.5.1.2 Event Consumer <#3512-event-consumer>`__
 -  `3.5.2 Event Adapters <#352-event-adapters>`__
 -  `3.5.3 Event Structure <#353-event-structure>`__
+=======
+
+   -  `3.1.1 Discovery Messages <#311-discovery-messages>`__
+   -  `3.1.2 Transaction Messages <#312-transaction-messages>`__
+
+      -  `3.1.2.1 Transaction Data
+         Structure <#3121-transaction-data-structure>`__
+      -  `3.1.2.2 Transaction
+         Specification <#3122-transaction-specification>`__
+      -  `3.1.2.3 Deploy Transaction <#3123-deploy-transaction>`__
+      -  `3.1.2.4 Invoke Transaction <#3124-invoke-transaction>`__
+      -  `3.1.2.5 Query Transaction <#3125-query-transaction>`__
+
+   -  `3.1.3 Synchronization Messages <#313-synchronization-messages>`__
+   -  `3.1.4 Consensus Messages <#314-consensus-messages>`__
+
+-  `3.2 Ledger <#32-ledger>`__
+
+   -  `3.2.1 Blockchain <#321-blockchain>`__
+
+      -  `3.2.1.1 Block <#3211-block>`__
+      -  `3.2.1.2 Block Hashing <#3212-block-hashing>`__
+      -  `3.2.1.3 NonHashData <#3213-nonhashdata>`__
+      -  `3.2.1.4 Transaction Execution <#3214-transaction-execution>`__
+
+   -  `3.2.2 World State <#322-world-state>`__
+
+      -  `3.2.2.1 Hashing the world
+         state <#3221-hashing-the-world-state>`__
+      -  `3.2.2.1.1 Bucket-tree <#32211-buckettree>`__
+
+-  `3.3 Chaincode <#33-chaincode>`__
+
+   -  `3.3.1 Virtual Machine
+      Instantiation <#331-virtual-machine-instantiation>`__
+   -  `3.3.2 Chaincode Protocol <#332-chaincode-protocol>`__
+
+      -  `3.3.2.1 Chaincode Deploy <#3321-chaincode-deploy>`__
+      -  `3.3.2.2 Chaincode Invoke <#3322-chaincode-invoke>`__
+      -  `3.3.2.3 Chaincode Query <#3323-chaincode-query>`__
+      -  `3.3.2.4 Chaincode State <#3324-chaincode-state>`__
+
+-  `3.4 Pluggable Consensus
+   Framework <#34-pluggable-consensus-framework>`__
+
+   -  `3.4.1 Consenter interface <#341-consenter-interface>`__
+   -  `3.4.2 CPI interface <#342-cpi-interface>`__
+   -  `3.4.3 Inquirer interface <#343-inquirer-interface>`__
+   -  `3.4.4 Communicator interface <#344-communicator-interface>`__
+   -  `3.4.5 SecurityUtils interface <#345-securityutils-interface>`__
+   -  `3.4.6 LedgerStack interface <#346-ledgerstack-interface>`__
+   -  `3.4.7 Executor interface <#347-executor-interface>`__
+
+      -  `3.4.7.1 Beginning a transaction
+         batch <#3471-beginning-a-transaction-batch>`__
+      -  `3.4.7.2 Executing
+         transactions <#3472-executing-transactions>`__
+      -  `3.4.7.3 Committing and rolling-back
+         transactions <#3473-committing-and-rollingback-transactions>`__
+
+   -  `3.4.8 Ledger interface <#348-ledger-interface>`__
+
+      -  `3.4.8.1 ReadOnlyLedger
+         interface <#3481-readonlyledger-interface>`__
+      -  `3.4.8.2 UtilLedger interface <#3482-utilledger-interface>`__
+      -  `3.4.8.3 WritableLedger
+         interface <#3483-writableledger-interface>`__
+
+   -  `3.4.9 RemoteLedgers interface <#349-remoteledgers-interface>`__
+   -  `3.4.10 controller package <#3410-controller-package>`__
+
+      -  `3.4.10.1
+         controller.NewConsenter <#34101-controllernewconsenter>`__
+
+   -  `3.4.11 helper package <#3411-helper-package>`__
+
+      -  `3.4.11.1 High-level overview <#34111-highlevel-overview>`__
+      -  `3.4.11.2
+         helper.ConsensusHandler <#34112-helperconsensushandler>`__
+      -  `3.4.11.3
+         helper.NewConsensusHandler <#34113-helpernewconsensushandler>`__
+      -  `3.4.11.4 helper.Helper <#34114-helperhelper>`__
+      -  `3.4.11.5 helper.NewHelper <#34115-helpernewhelper>`__
+      -  `3.4.11.6 helper.HandleMessage <#34116-helperhandlemessage>`__
+
+-  `3.5 Events <#35-events>`__
+
+   -  `3.5.1 Event Stream <#351-event-stream>`__
+
+      -  `3.5.1.1 Event Producer <#3511-event-producer>`__
+      -  `3.5.1.2 Event Consumer <#3512-event-consumer>`__
+
+   -  `3.5.2 Event Adapters <#352-event-adapters>`__
+   -  `3.5.3 Event Structure <#353-event-structure>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 `4. Security <#4-security_1>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -125,6 +240,7 @@ Table of Contents
    requirements <#41-business-security-requirements>`__
 -  `4.2 User Privacy through Membership
    Services <#42-user-privacy-through-membership-services>`__
+<<<<<<< HEAD
 -  `4.2.1 User/Client Enrollment
    Process <#421-userclient-enrollment-process>`__
 -  `4.2.2 Expiration and revocation of
@@ -144,13 +260,50 @@ Table of Contents
    application <#44-access-control-features-on-the-application>`__
 -  `4.4.1 Invocation access control <#441-invocation-access-control>`__
 -  `4.4.2 Read access control <#442-read-access-control>`__
+=======
+
+   -  `4.2.1 User/Client Enrollment
+      Process <#421-userclient-enrollment-process>`__
+   -  `4.2.2 Expiration and revocation of
+      certificates <#422-expiration-and-revocation-of-certificates>`__
+
+-  `4.3 Transaction security offerings at the infrastructure
+   level <#43-transaction-security-offerings-at-the-infrastructure-level>`__
+
+   -  `4.3.1 Security Lifecycle of
+      Transactions <#431-security-lifecycle-of-transactions>`__
+   -  `4.3.2 Transaction
+      confidentiality <#432-transaction-confidentiality>`__
+
+      -  `4.3.2.1 Confidentiality against
+         users <#4321-confidentiality-against-users>`__
+      -  `4.3.2.2 Confidentiality against
+         validators <#4322-confidentiality-against-validators>`__
+
+   -  `4.3.3 Replay attack resistance <#433-replay-attack-resistance>`__
+
+-  `4.4 Access control features on the
+   application <#44-access-control-features-on-the-application>`__
+
+   -  `4.4.1 Invocation access
+      control <#441-invocation-access-control>`__
+   -  `4.4.2 Read access control <#442-read-access-control>`__
+
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 -  `4.5 Online wallet service <#45-online-wallet-service>`__
 -  `4.6 Network security (TLS) <#46-network-security-tls>`__
 -  `4.7 Restrictions in the current
    release <#47-restrictions-in-the-current-release>`__
+<<<<<<< HEAD
 -  `4.7.1 Simplified client <#471-simplified-client>`__
 -  `4.7.2 Simplified transaction
    confidentiality <#472-simplified-transaction-confidentiality>`__
+=======
+
+   -  `4.7.1 Simplified client <#471-simplified-client>`__
+   -  `4.7.2 Simplified transaction
+      confidentiality <#472-simplified-transaction-confidentiality>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 `5. Byzantine Consensus <#5-byzantine-consensus_1>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -164,6 +317,7 @@ Table of Contents
 
 -  `6.1 REST Service <#61-rest-service>`__
 -  `6.2 REST API <#62-rest-api>`__
+<<<<<<< HEAD
 -  `6.2.1 REST Endpoints <#621-rest-endpoints>`__
 -  `6.2.1.1 Block API <#6211-block-api>`__
 -  `6.2.1.2 Blockchain API <#6212-blockchain-api>`__
@@ -179,6 +333,28 @@ Table of Contents
 -  `6.3.1.3 chaincode deploy <#6313-chaincode-deploy>`__
 -  `6.3.1.4 chaincode invoke <#6314-chaincode-invoke>`__
 -  `6.3.1.5 chaincode query <#6315-chaincode-query>`__
+=======
+
+   -  `6.2.1 REST Endpoints <#621-rest-endpoints>`__
+
+      -  `6.2.1.1 Block API <#6211-block-api>`__
+      -  `6.2.1.2 Blockchain API <#6212-blockchain-api>`__
+      -  `6.2.1.3 Chaincode API <#6213-chaincode-api>`__
+      -  `6.2.1.4 Network API <#6214-network-api>`__
+      -  `6.2.1.5 Registrar API (member
+         services) <#6215-registrar-api-member-services>`__
+      -  `6.2.1.6 Transactions API <#6216-transactions-api>`__
+
+-  `6.3 CLI <#63-cli>`__
+
+   -  `6.3.1 CLI Commands <#631-cli-commands>`__
+
+      -  `6.3.1.1 node start <#6311-node-start>`__
+      -  `6.3.1.2 network login <#6312-network-login>`__
+      -  `6.3.1.3 chaincode deploy <#6313-chaincode-deploy>`__
+      -  `6.3.1.4 chaincode invoke <#6314-chaincode-invoke>`__
+      -  `6.3.1.5 chaincode query <#6315-chaincode-query>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 `7. Application Model <#7-application-model_1>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -652,7 +828,11 @@ for writing chaincode. Other languages may be added in the future.
         }
         Type type = 1;
         ChaincodeID chaincodeID = 2;
+<<<<<<< HEAD
         ChaincodeInput input = 3;
+=======
+        ChaincodeInput ctorMsg = 3;
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
         int32 timeout = 4;
         string secureContext = 5;
         ConfidentialityLevel confidentialityLevel = 6;
@@ -670,7 +850,11 @@ for writing chaincode. Other languages may be added in the future.
     }
 
 **Definition of fields:** - ``chaincodeID`` - The chaincode source code
+<<<<<<< HEAD
 path and name. - ``input`` - Function name and argument parameters to
+=======
+path and name. - ``ctorMsg`` - Function name and argument parameters to
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 call. - ``timeout`` - Time in milliseconds to execute the transaction. -
 ``confidentialityLevel`` - Confidentiality level of this transaction. -
 ``secureContext`` - Security context of the transactor. - ``metadata`` -
@@ -1152,7 +1336,11 @@ validating peer using protobuf message.
             QUERY = 14;
             QUERY_COMPLETED = 15;
             QUERY_ERROR = 16;
+<<<<<<< HEAD
             GET_STATE_BY_RANGE = 17;
+=======
+            RANGE_QUERY_STATE = 17;
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
         }
 
         Type type = 1;
@@ -1262,22 +1450,35 @@ DEL\_STATE
 Chaincode sends a ``DEL_STATE`` message to delete the value whose key is
 specified in the ``payload``.
 
+<<<<<<< HEAD
 GET\_STATE\_BY\_RANGE
                      
 
 Chaincode sends a ``GET_STATE_BY_RANGE`` message to get a range of
 values. The message ``payload`` contains a ``GetStateByRangeInfo``
+=======
+RANGE\_QUERY\_STATE
+                   
+
+Chaincode sends a ``RANGE_QUERY_STATE`` message to get a range of
+values. The message ``payload`` contains a ``RangeQueryStateInfo``
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 object.
 
 ::
 
+<<<<<<< HEAD
     message GetStateByRange {
+=======
+    message RangeQueryState {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
         string startKey = 1;
         string endKey = 2;
     }
 
 The ``startKey`` and ``endKey`` are inclusive and assumed to be in
 lexical order. The validating peer responds with ``RESPONSE`` message
+<<<<<<< HEAD
 whose ``payload`` is a ``GetStateByRangeResponse`` object.
 
 ::
@@ -1288,27 +1489,55 @@ whose ``payload`` is a ``GetStateByRangeResponse`` object.
         string ID = 3;
     }
     message GetStateByRangeKeyValue {
+=======
+whose ``payload`` is a ``RangeQueryStateResponse`` object.
+
+::
+
+    message RangeQueryStateResponse {
+        repeated RangeQueryStateKeyValue keysAndValues = 1;
+        bool hasMore = 2;
+        string ID = 3;
+    }
+    message RangeQueryStateKeyValue {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
         string key = 1;
         bytes value = 2;
     }
 
 If ``hasMore=true`` in the response, this indicates that additional keys
 are available in the requested range. The chaincode can request the next
+<<<<<<< HEAD
 set of keys and values by sending a ``GetStateByRangeNext`` message with
+=======
+set of keys and values by sending a ``RangeQueryStateNext`` message with
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 an ID that matches the ID returned in the response.
 
 ::
 
+<<<<<<< HEAD
     message GetStateByRangeNext {
+=======
+    message RangeQueryStateNext {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
         string ID = 1;
     }
 
 When the chaincode is finished reading from the range, it should send a
+<<<<<<< HEAD
 ``GetStateByRangeClose`` message with the ID it wishes to close.
 
 ::
 
     message GetStateByRangeClose {
+=======
+``RangeQueryStateClose`` message with the ID it wishes to close.
+
+::
+
+    message RangeQueryStateClose {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
       string ID = 1;
     }
 
@@ -1862,7 +2091,11 @@ and implements the ``consensus.CPI`` interface.
 
 A validating peer establishes a message handler
 (``helper.ConsensusHandler``) for every connected peer, via the
+<<<<<<< HEAD
 ``helper.NewConsensusHandler`` function (a handler factory). Every
+=======
+``helper.NewConsesusHandler`` function (a handler factory). Every
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 incoming message is inspected on its type (``helper.HandleMessage``); if
 it's a message for which consensus needs to be reached, it's passed on
 to the peer's consenter object (``consensus.Consenter``). Otherwise it's
@@ -1938,7 +2171,11 @@ the stack.
 3.4.11.6 helper.HandleMessage
 '''''''''''''''''''''''''''''
 
+<<<<<<< HEAD
 Recall that the ``helper.ConsensusHandler`` object returned by
+=======
+Recall that the ``helper.ConsesusHandler`` object returned by
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 ``helper.NewConsensusHandler`` implements the ``peer.MessageHandler``
 interface:
 
@@ -4002,7 +4239,11 @@ Deploy Request:
         "chaincodeID":{
             "path":"github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "function":"init",
             "args":["a", "1000", "b", "2000"]
         }
@@ -4041,7 +4282,11 @@ Deploy Request with security enabled:
         "chaincodeID":{
             "path":"github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "function":"init",
             "args":["a", "1000", "b", "2000"]
         },
@@ -4074,7 +4319,11 @@ Invoke Request:
         "chaincodeID":{
           "name":"52b0d803fc395b5e34d8d4a7cd69fb6aa00099b8fabed83504ac1c5d61a425aca5b3ad3bf96643ea4fdaac132c417c37b00f88fa800de7ece387d008a76d3586"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "function":"invoke",
             "args":["a", "b", "100"]
         }
@@ -4111,7 +4360,11 @@ Invoke Request with security enabled:
         "chaincodeID":{
           "name":"52b0d803fc395b5e34d8d4a7cd69fb6aa00099b8fabed83504ac1c5d61a425aca5b3ad3bf96643ea4fdaac132c417c37b00f88fa800de7ece387d008a76d3586"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "function":"invoke",
             "args":["a", "b", "100"]
         },
@@ -4146,7 +4399,11 @@ Query Request:
         "chaincodeID":{
           "name":"52b0d803fc395b5e34d8d4a7cd69fb6aa00099b8fabed83504ac1c5d61a425aca5b3ad3bf96643ea4fdaac132c417c37b00f88fa800de7ece387d008a76d3586"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "function":"query",
             "args":["a"]
         }
@@ -4183,7 +4440,11 @@ Query Request with security enabled:
         "chaincodeID":{
           "name":"52b0d803fc395b5e34d8d4a7cd69fb6aa00099b8fabed83504ac1c5d61a425aca5b3ad3bf96643ea4fdaac132c417c37b00f88fa800de7ece387d008a76d3586"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "function":"query",
             "args":["a"]
         },

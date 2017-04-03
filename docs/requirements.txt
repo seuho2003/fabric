@@ -1,5 +1,8 @@
 python-markdown-math==0.2
+<<<<<<< HEAD
 
+=======
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 alabaster==0.7.8
 Babel==2.3.4
 docutils==0.12

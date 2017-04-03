@@ -1,8 +1,18 @@
+<<<<<<< HEAD
 Use Cases
 =========
 
 B2B Contract
 ------------
+=======
+Canonical Use Cases
+===================
+
+ 
+
+B2B Contract
+~~~~~~~~~~~~
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Business contracts can be codified to allow two or more parties to
 automate contractual agreements in a trusted way. Although information
@@ -74,7 +84,11 @@ Key Components
  
 
 Manufacturing Supply Chain
+<<<<<<< HEAD
 --------------------------
+=======
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Final assemblers, such as automobile manufacturers, can create a supply
 chain network managed by its peers and suppliers so that a final
@@ -131,7 +145,11 @@ Key Components
  
 
 Asset Depository
+<<<<<<< HEAD
 ----------------
+=======
+~~~~~~~~~~~~~~~~
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Assets such as financial securities must be able to be dematerialized on
 a blockchain network so that all stakeholders of an asset type will have
@@ -188,10 +206,24 @@ Key Components
    interrogate the chaincode that defines an asset type. If an asset
    represents shares of publicly traded companies, then the view access
    right must be granted to every entity on the network.
+<<<<<<< HEAD
    
 
 One Trade, One Contract
 -----------------------
+=======
+
+ 
+
+Extended Use Cases
+==================
+
+The following extended use cases examine additional requirements and
+scenarios.
+
+One Trade, One Contract
+~~~~~~~~~~~~~~~~~~~~~~~
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 From the time that a trade is captured by the front office until the
 trade is finally settled, only one contract that specifies the trade
@@ -206,7 +238,11 @@ sub-contracts that are always linked to the original parent contract.
  
 
 Direct Communication
+<<<<<<< HEAD
 --------------------
+=======
+~~~~~~~~~~~~~~~~~~~~
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Company A announces its intention to raise 2 Billion USD by way of
 rights issue. Because this is a voluntary action, Company A needs to
@@ -222,7 +258,11 @@ to record the new shares under the name of their new rightful owner.
  
 
 Separation of Asset Ownership and Custodian’s Duties
+<<<<<<< HEAD
 ----------------------------------------------------
+=======
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Assets should always be owned by their actual owners, and asset owners
 must be able to allow third-party professionals to manage their assets
@@ -239,7 +279,11 @@ to shareowners.
  
 
 Interoperability of Assets
+<<<<<<< HEAD
 --------------------------
+=======
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 If an organization requires 20,000 units of asset B, but instead owns
 10,000 units of asset A, it needs a way to exchange asset A for asset B.

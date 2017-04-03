@@ -4,7 +4,11 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+<<<<<<< HEAD
 SPHINXPROJ    = hyperledger-fabricdocs
+=======
+SPHINXPROJ    = hyperledger
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 SOURCEDIR     = source
 BUILDDIR      = build
 

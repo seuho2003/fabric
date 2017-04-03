@@ -2,14 +2,83 @@ Building the fabric
 -------------------
 
 The following instructions assume that you have already set up your
+<<<<<<< HEAD
 `development environment <devenv.md>`__.
 
 To build the Fabric:
+=======
+:doc:`development environment <devenv>`
+
+To access your VM, run ``vagrant ssh`` from within the devenv directory
+of your locally cloned fabric repository.
+
+::
+
+    cd $GOPATH/src/github.com/hyperledger/fabric/devenv
+    vagrant ssh
+
+From within the VM, you can build, run, and test your environment.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 ::
 
     cd $GOPATH/src/github.com/hyperledger/fabric
+<<<<<<< HEAD
     make dist-clean all
+=======
+    make peer
+
+To see what commands are available, simply execute the following
+commands:
+
+::
+
+    peer help
+
+You should see the following output:
+
+::
+
+        Usage:
+          peer [command]
+
+        Available Commands:
+          node        node specific commands.
+          network     network specific commands.
+          chaincode   chaincode specific commands.
+          help        Help about any command
+
+        Flags:
+          -h, --help[=false]: help for peer
+              --logging-level="": Default logging level and overrides, see core.yaml for full syntax
+
+
+        Use "peer [command] --help" for more information about a command.
+
+The ``peer node start`` command will initiate a peer process, with which
+one can interact by executing other commands. For example, the
+``peer node status`` command will return the status of the running peer.
+The full list of commands is the following:
+
+::
+
+          node
+            start       Starts the node.
+            status      Returns status of the node.
+            stop        Stops the running node.
+          network
+            login       Logs in user to CLI.
+            list        Lists all network peers.
+          chaincode
+            deploy      Deploy the specified chaincode to the network.
+            invoke      Invoke the specified chaincode.
+            query       Query using the specified chaincode.
+          help        Help about any command
+
+**Note:** If your GOPATH environment variable contains more than one
+element, the chaincode must be found in the first one or deployment will
+fail.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Running the unit tests
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -37,16 +106,23 @@ Running Node.js Unit Tests
 You must also run the Node.js unit tests to insure that the Node.js
 client SDK is not broken by your changes. To run the Node.js unit tests,
 follow the instructions
+<<<<<<< HEAD
 `here <https://github.com/hyperledger/fabric-sdk-node/README.md>`__.
+=======
+`here <https://github.com/hyperledger/fabric/tree/v0.6/sdk/node#unit-tests>`__.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Running Behave BDD Tests
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+<<<<<<< HEAD
 **Note:** currently, the behave tests must be run from within in the
 Vagrant environment. See the devenv setup instructions if you have not
 already set up your `Vagrant
 environment <devenv.md#Boostrapping-the-VM-using-Vagrant>`__.
 
+=======
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 `Behave <http://pythonhosted.org/behave/>`__ tests will setup networks
 of peers with different security and consensus configurations and verify
 that transactions run properly. To run these tests
@@ -58,6 +134,7 @@ that transactions run properly. To run these tests
 
 Some of the Behave tests run inside Docker containers. If a test fails
 and you want to have the logs from the Docker containers, run the tests
+<<<<<<< HEAD
 with this option:
 
 ::
@@ -65,6 +142,24 @@ with this option:
     cd $GOPATH/src/github.com/hyperledger/fabric/bddtests
     behave -D logs=Y
 
+=======
+with this option
+
+::
+
+    behave -D logs=Y
+
+Note, in order to run behave directly, you must run 'make images' first
+to build the necessary ``peer`` and ``member services`` docker images.
+These images can also be individually built when ``go test`` is called
+with the following parameters:
+
+::
+
+    go test github.com/hyperledger/fabric/core/container -run=BuildImage_Peer
+    go test github.com/hyperledger/fabric/core/container -run=BuildImage_Obcca
+
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 Building outside of Vagrant
 ---------------------------
 
@@ -73,13 +168,72 @@ Generally speaking, one has to 'translate' the vagrant `setup
 file <https://github.com/hyperledger/fabric/blob/master/devenv/setup.sh>`__
 to the platform of your choice.
 
+<<<<<<< HEAD
+=======
+Prerequisites
+~~~~~~~~~~~~~
+
+-  `Git client <https://git-scm.com/downloads>`__
+-  `Go <https://golang.org/>`__ - 1.6 or later
+-  `RocksDB <https://github.com/facebook/rocksdb/blob/master/INSTALL.md>`__
+   version 4.1 and its dependencies
+-  `Docker <https://docs.docker.com/engine/installation/>`__
+-  `Pip <https://pip.pypa.io/en/stable/installing/>`__
+-  Set the maximum number of open files to 10000 or greater for your OS
+
+Docker
+~~~~~~
+
+Make sure that the Docker daemon initialization includes the options
+
+::
+
+    -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+
+Typically, docker runs as a ``service`` task, with configuration file at
+``/etc/default/docker``.
+
+Be aware that the Docker bridge (the ``CORE_VM_ENDPOINT``) may not come
+up at the IP address currently assumed by the test environment
+(``172.17.0.1``). Use ``ifconfig`` or ``ip addr`` to find the docker
+bridge.
+
+Building RocksDB
+~~~~~~~~~~~~~~~~
+
+::
+
+    apt-get install -y libsnappy-dev zlib1g-dev libbz2-dev
+    cd /tmp
+    git clone https://github.com/facebook/rocksdb.git
+    cd rocksdb
+    git checkout v4.1
+    PORTABLE=1 make shared_lib
+    INSTALL_PATH=/usr/local make install-shared
+
+``pip``, ``behave`` and ``docker-compose``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    pip install --upgrade pip
+    pip install behave nose docker-compose
+    pip install -I flask==0.10.1 python-dateutil==2.2 pytz==2014.3 pyyaml==3.10 couchdb==1.0 flask-cors==2.0.1 requests==2.4.3
+
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 Building on Z
 ~~~~~~~~~~~~~
 
 To make building on Z easier and faster, `this
+<<<<<<< HEAD
 script <https://github.com/hyperledger/fabric/tree/master/devenv/setupRHELonZ.sh>`__
 is provided (which is similar to the `setup
 file <https://github.com/hyperledger/fabric/blob/master/devenv/setup.sh>`__
+=======
+script <https://github.com/hyperledger/fabric/tree/v0.6/devenv/setupRHELonZ.sh>`__
+is provided (which is similar to the `setup
+file <https://github.com/hyperledger/fabric/blob/v0.6/devenv/setup.sh>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 provided for vagrant). This script has been tested only on RHEL 7.2 and
 has some assumptions one might want to re-visit (firewall settings,
 development as root user, etc.). It is however sufficient for
@@ -110,7 +264,11 @@ Building on Power Platform
 Development and build on Power (ppc64le) systems is done outside of
 vagrant as outlined `here <#building-outside-of-vagrant->`__. For ease
 of setting up the dev environment on Ubuntu, invoke `this
+<<<<<<< HEAD
 script <https://github.com/hyperledger/fabric/tree/master/devenv/setupUbuntuOnPPC64le.sh>`__
+=======
+script <https://github.com/hyperledger/fabric/tree/v0.6/devenv/setupUbuntuOnPPC64le.sh>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 as root. This script has been validated on Ubuntu 16.04 and assumes
 certain things (like, development system has OS repositories in place,
 firewall setting etc) and in general can be improvised further.
@@ -129,6 +287,28 @@ the following commands to build the fabric code:
     cd $GOPATH/src/github.com/hyperledger/fabric
     make dist-clean all
 
+<<<<<<< HEAD
+=======
+Building natively on OSX
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+First, install Docker, as described
+`here <https://docs.docker.com/engine/installation/mac/>`__. The
+database by default writes to /var/hyperledger. You can override this in
+the ``core.yaml`` configuration file, under ``peer.fileSystemPath``.
+
+::
+
+    brew install go rocksdb snappy gnu-tar     # For RocksDB version 4.1, you can compile your own, as described earlier
+
+    # You will need the following two for every shell you want to use
+    eval $(docker-machine env)
+    export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
+
+    cd $GOPATH/src/github.com/hyperledger/fabric
+    make peer
+
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 Configuration
 -------------
 
@@ -155,5 +335,9 @@ The available log levels in order of increasing verbosity are: *CRITICAL
 \| ERROR \| WARNING \| NOTICE \| INFO \| DEBUG*
 
 See `specific logging
+<<<<<<< HEAD
 control <https://github.com/hyperledger/fabric/blob/master/docs/Setup/logging-control.md>`__
+=======
+control <https://github.com/hyperledger/fabric/blob/v0.6/docs/Setup/logging-control.md>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 instructions when running the peer process.

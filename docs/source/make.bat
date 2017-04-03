@@ -9,7 +9,11 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
+<<<<<<< HEAD
 set SPHINXPROJ=hyperledger-fabricdocs
+=======
+set SPHINXPROJ=hyperledger
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 if "%1" == "" goto help
 

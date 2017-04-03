@@ -10,7 +10,11 @@ Attributes Certificate Authority (ACA) so the chaincode can trust in the
 authenticity of the attributes' values.
 
 To view complete documentation about attributes design please read
+<<<<<<< HEAD
 `'Attributes support' <../tech/attributes.md>`__.
+=======
+:doc:`'Attributes support' <../tech/attributes>`
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Use case: Authorizable counter
 ------------------------------
@@ -21,7 +25,11 @@ chaincode invoker based on attribute values carried in the invoker's
 certificate.
 
 `'Authorizable
+<<<<<<< HEAD
 counter' <../../examples/chaincode/go/authorizable_counter/authorizable_counter.go>`__
+=======
+counter' <https://github.com/hyperledger/fabric/blob/v0.6/examples/chaincode/go/authorizable_counter/authorizable_counter.go>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 is a simple example of ABAC, in this case only invokers whose "position"
 attribute has the value 'Software Engineer' will be able to increment
 the counter. On the other hand any invoker will be able to read the
@@ -39,7 +47,11 @@ function to check the attribute value from the chaincode code.
     }
 
 The same behavior can be achieved by making use of `'Attribute
+<<<<<<< HEAD
 support' <https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim/crypto/attr>`__
+=======
+support' <https://github.com/hyperledger/fabric/tree/v0.6/core/chaincode/shim/crypto/attr>`__
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 API, in this case an attribute handler must be instantiated.
 
 ::
@@ -123,12 +135,15 @@ be written in the following way:
 
     ./peer chaincode deploy -u userName -n mycc -c '{"Function":"init", "Args": []}' -a '["position", "company"]'
 
+<<<<<<< HEAD
 Or:
 
 ::
 
     ./peer chaincode deploy -u userName -n mycc -c '{"Args": ["init"]}' -a '["position", "company"]'
 
+=======
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 REST
 ^^^^
 
@@ -144,7 +159,11 @@ REST
         "chaincodeID":{
             "name": "mycc"
         },
+<<<<<<< HEAD
         "input": {
+=======
+        "ctorMsg": {
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
             "function":"init",
             "args":[]
         }
@@ -186,12 +205,15 @@ it should be written as follows:
 
     ./peer chaincode invoke -u userName -n mycc -c '{"Function":"increment", "Args": []}' -a '["position", "company"]'
 
+<<<<<<< HEAD
 Or:
 
 ::
 
     ./peer chaincode invoke -u userName -n mycc -c '{"Args": ["increment"]}' -a '["position", "company"]'
 
+=======
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 REST
 ^^^^
 
@@ -254,12 +276,15 @@ it should be written in this way:
 
     ./peer chaincode query -u userName -n mycc -c '{"Function":"read", "Args": []}' -a '["position", "company"]'
 
+<<<<<<< HEAD
 Or:
 
 ::
 
     ./peer chaincode query -u userName -n mycc -c '{"Args": ["read"]}' -a '["position", "company"]'
 
+=======
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 REST
 ^^^^
 

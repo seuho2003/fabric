@@ -29,8 +29,13 @@ multiple processes binding to the same port. For most application and
 chaincode development/testing running with a single fabric peer should
 not be an issue unless you are interested in performance and resilience
 testing the fabric's capabilities, such as consensus. For more advanced
+<<<<<<< HEAD
 testing, we strongly recommend using the fabric's Vagrant `development
 environment <../dev-setup/devenv.md>`__.
+=======
+testing, we strongly recommend using the fabric's Vagrant :doc:`development
+environment <../dev-setup/devenv>`
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 With this approach, there are multiple choices as to how to run Docker:
 using `Docker Toolbox <https://docs.docker.com/toolbox/overview/>`__ or
@@ -62,8 +67,13 @@ If you have pulled images from DockerHub as described in the previous
 section, you may proceed to the `next
 step <#starting-up-validating-peers>`__.
 
+<<<<<<< HEAD
 The second approach would be to leverage the `development
 environment <../dev-setup/devenv.md>`__ setup (which we will assume you
+=======
+The second approach would be to leverage the :doc:`development
+environment <../dev-setup/devenv>` setup (which we will assume you
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 have already established) to build and deploy your own binaries and/or
 Docker images from a clone of the
 `hyperledger/fabric <https://github.com/hyperledger/fabric>`__ GitHub
@@ -72,8 +82,13 @@ contribute directly to the Hyperledger Fabric project, or that wish to
 deploy from a fork of the Hyperledger code base.
 
 The following commands should be run from *within* the Vagrant
+<<<<<<< HEAD
 environment described in `Setting Up Development
 Environment <../dev-setup/devenv.md>`__.
+=======
+environment described in :doc:`Setting Up Development
+Environment <../dev-setup/devenv>`
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 To create the Docker image for the ``hyperledger/fabric-peer``:
 
@@ -172,7 +187,11 @@ Start up a validating peer:
 Let's launch the first validating peer (the root node). We'll set
 CORE\_PEER\_ID to vp0 and CORE\_VM\_ENDPOINT as above. Here's the
 docker-compose.yml for launching a single container within the
+<<<<<<< HEAD
 **Vagrant** `development environment <../dev-setup/devenv.md>`__:
+=======
+**Vagrant** :doc:`development environment <../dev-setup/devenv>`
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 ::
 
@@ -231,8 +250,13 @@ Running with the CA
 
 If you want to take advantage of security (authentication and
 authorization), privacy and confidentiality, then you'll need to run the
+<<<<<<< HEAD
 Fabric's certificate authority (CA). Please refer to the `CA
 Setup <ca-setup.md>`__ instructions.
+=======
+Fabric's certificate authority (CA). Please refer to the :doc:`CA
+Setup <ca-setup>` instructions.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 Start up additional validating peers:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -240,7 +264,11 @@ Start up additional validating peers:
 Following the pattern we established
 `above <#assigning-a-value-for-core_peer_id>`__ we'll use ``vp1`` as the
 ID for the second validating peer. If using Docker Compose, we can
+<<<<<<< HEAD
 simply link the two peer nodes. Here's the docker-compose.yml for a
+=======
+simply link the two peer nodes. Here's the docker-compse.yml for a
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 **Vagrant** environment with two peer nodes - vp0 and vp1:
 
 ::
@@ -379,7 +407,11 @@ variables, e.g. ``CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=pbft`` or
 Logging control
 ~~~~~~~~~~~~~~~
 
+<<<<<<< HEAD
 See `Logging Control <logging-control.md>`__ for information on
+=======
+See :doc:`Logging Control <logging-control>` for information on
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 controlling logging output from the ``peer`` and deployed chaincodes.
 
 .. raw:: html

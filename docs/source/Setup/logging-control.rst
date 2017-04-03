@@ -42,7 +42,11 @@ code, but the logging system only sees a flat string. It doesn't
 understand that "foo/bar" is related to "foo" in any way, or that
 "foo/\*" might indicate all "submodules" of foo.
 
+<<<<<<< HEAD
 peer
+=======
+Peer
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 ----
 
 The logging level of the ``peer`` command can be controlled from the
@@ -95,6 +99,7 @@ settings):
 Go chaincodes
 -------------
 
+<<<<<<< HEAD
 The standard mechanism to log within a chaincode application is to
 integrate with the logging transport exposed to each chaincode instance
 via the peer. The chaincode ``shim`` package provides APIs that allow a
@@ -116,6 +121,14 @@ recommended to enable this for production.
 
 API
 ~~~
+=======
+As independently executed programs, user-provided chaincodes can use any
+appropriate technique to create their private logs - from simple print
+statements to fully-annotated and level-controlled logs. The chaincode
+``shim`` package provides APIs that allow a chaincode to create and
+manage logging objects whose logs will be formatted and interleaved
+consistently with the ``shim`` logs.
+>>>>>>> efef932... [FAB-2977] convert v0.6 .md to .rst
 
 ``NewLogger(name string) *ChaincodeLogger`` - Create a logging object
 for use by a chaincode
