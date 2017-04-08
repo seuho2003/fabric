@@ -309,7 +309,7 @@ chaincode:
         name:
 
     # Generic builder environment, suitable for most chaincode types
-    builder: hyperledger/fabric-ccenv:$(ARCH)-$(PROJECT_VERSION)
+    builder: dgbd1devrhap061.dev.local/clsnet/fabric-ccenv:$(ARCH)-$(PROJECT_VERSION)
 
     golang:
         # golang will never need more than baseos
