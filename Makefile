@@ -202,8 +202,11 @@ build/image/javaenv/payload:    build/javashim.tar.bz2 \
 				build/protos.tar.bz2 \
 				settings.gradle
 build/image/peer/payload:       build/docker/bin/peer \
+				build/bin/configtxgen \
+                                common/tools/cryptogen \
 				peer/core.yaml \
 				build/msp-sampleconfig.tar.bz2 \
+                                examples/e2e_cli/crypto \
 				common/configtx/tool/configtx.yaml
 build/image/orderer/payload:    build/docker/bin/orderer \
 				build/msp-sampleconfig.tar.bz2 \
@@ -228,7 +231,7 @@ build/image/couchdb/payload:	images/couchdb/docker-entrypoint.sh \
 
 build/image/%/payload:
 	mkdir -p $@
-	cp $^ $@
+	cp -R $^ $@
 
 .PRECIOUS: build/image/%/Dockerfile
 
