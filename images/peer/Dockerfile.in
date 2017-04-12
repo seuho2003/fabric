@@ -5,10 +5,10 @@ RUN mkdir -p /var/hyperledger/production $PEER_CFG_PATH
 RUN apt-get update -qq
 RUN apt-get install -y libltdl-dev
 COPY payload/peer /usr/local/bin
-ADD  payload/crypto $PEER_CFG_PATH/crypto
-#COPY payload/configtxgen /usr/local/bin
-COPY payload/configtxgen $PEER_CFG_PATH
-COPY payload/cryptogen $PEER_CFG_PATH
+#ADD  payload/crypto $PEER_CFG_PATH/crypto
+COPY payload/configtxgen /usr/local/bin
+#COPY payload/configtxgen $PEER_CFG_PATH
+COPY payload/cryptogen /usr/local/bin
 COPY payload/core.yaml $PEER_CFG_PATH
 ADD  payload/msp-sampleconfig.tar.bz2 $PEER_CFG_PATH
 ADD  payload/configtx.yaml $PEER_CFG_PATH

@@ -19,6 +19,7 @@
 #   - all (default) - builds all targets and runs all tests/checks
 #   - checks - runs all tests/checks
 #   - peer - builds a native fabric peer binary
+#   - cryptogen - build a native cryptogen binary
 #   - orderer - builds a native fabric orderer binary
 #   - unit-test - runs the go-test based unit tests
 #   - test-cmd - generates a "go test" string suitable for manual customization
@@ -75,6 +76,7 @@ MSP_SAMPLECONFIG = $(shell git ls-files msp/sampleconfig/*)
 PROJECT_FILES = $(shell git ls-files)
 IMAGES = peer orderer ccenv javaenv buildenv testenv zookeeper kafka couchdb
 
+pkgmap.cryptogen      := $(PKGNAME)/common/tools/cryptogen
 pkgmap.configtxgen    := $(PKGNAME)/common/configtx/tool/configtxgen
 pkgmap.peer           := $(PKGNAME)/peer
 pkgmap.orderer        := $(PKGNAME)/orderer
@@ -109,6 +111,9 @@ orderer-docker: build/image/orderer/$(DUMMY)
 .PHONY: configtxgen
 configtxgen: build/bin/configtxgen
 
+.PHONY: cryptogen
+cryptogen: build/bin/cryptogen
+
 buildenv: build/image/buildenv/$(DUMMY)
 
 build/image/testenv/$(DUMMY): build/image/buildenv/$(DUMMY)
@@ -126,7 +131,7 @@ test-cmd:
 	@echo "go test -ldflags \"$(GO_LDFLAGS)\""
 
 docker: $(patsubst %,build/image/%/$(DUMMY), $(IMAGES))
-native: peer orderer
+native: peer orderer configtxgen cryptogen
 
 BEHAVE_ENVIRONMENTS = kafka orderer orderer-1-kafka-1 orderer-1-kafka-3
 BEHAVE_ENVIRONMENT_TARGETS = $(patsubst %,bddtests/environments/%, $(BEHAVE_ENVIRONMENTS))
@@ -203,10 +208,9 @@ build/image/javaenv/payload:    build/javashim.tar.bz2 \
 				settings.gradle
 build/image/peer/payload:       build/docker/bin/peer \
 				build/bin/configtxgen \
-                                common/tools/cryptogen \
+                                build/bin/cryptogen \
 				peer/core.yaml \
 				build/msp-sampleconfig.tar.bz2 \
-                                examples/e2e_cli/crypto \
 				common/configtx/tool/configtx.yaml
 build/image/orderer/payload:    build/docker/bin/orderer \
 				build/msp-sampleconfig.tar.bz2 \
@@ -231,7 +235,7 @@ build/image/couchdb/payload:	images/couchdb/docker-entrypoint.sh \
 
 build/image/%/payload:
 	mkdir -p $@
-	cp -R $^ $@
+	cp $^ $@
 
 .PRECIOUS: build/image/%/Dockerfile
 
