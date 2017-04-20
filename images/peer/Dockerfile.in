@@ -1,8 +1,11 @@
 FROM _BASE_NS_/fabric-baseos:_BASE_TAG_
 ENV PEER_CFG_PATH /etc/hyperledger/fabric
+ENV RELEASE_CFG_PATH /usr/local/release
 ENV CORE_PEER_MSPCONFIGPATH $PEER_CFG_PATH/msp/sampleconfig
 RUN mkdir -p /var/hyperledger/production $PEER_CFG_PATH
+RUN mkdir -p /usr/local/release $RELEASE_CFG_PATH
 COPY payload/peer /usr/local/bin
+COPY payload/release $RELEASE_CFG_PATH
 COPY payload/core.yaml $PEER_CFG_PATH
 ADD  payload/msp-sampleconfig.tar.bz2 $PEER_CFG_PATH
 ADD  payload/configtx.yaml $PEER_CFG_PATH

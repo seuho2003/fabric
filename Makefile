@@ -208,6 +208,7 @@ build/image/javaenv/payload:    build/javashim.tar.bz2 \
 				build/protos.tar.bz2 \
 				settings.gradle
 build/image/peer/payload:       build/docker/bin/peer \
+                                release \
 				peer/core.yaml \
 				build/msp-sampleconfig.tar.bz2 \
 				common/configtx/tool/configtx.yaml
@@ -233,7 +234,7 @@ build/image/couchdb/payload:	images/couchdb/docker-entrypoint.sh \
 
 build/image/%/payload:
 	mkdir -p $@
-	cp $^ $@
+	cp -R $^ $@
 
 .PRECIOUS: build/image/%/Dockerfile
 

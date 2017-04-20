@@ -37,3 +37,4 @@ report.xml
 .gradle
 build/
 bin/
+release/
