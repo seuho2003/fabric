@@ -6,6 +6,9 @@
 # hyperledger/fabric-<image> latest tag
 ##################################################
 
+ARCH=$(uname -m)
+echo "===========> $ARCH"
+
 dockerFabricPull() {
   local FABRIC_TAG=$1
   local ORG_NAME=$2
@@ -81,12 +84,9 @@ while getopts "\?hc:f:o:" opt; do
   esac
 done
 
-: ${CA_TAG:="x86_64-1.0.0-alpha"}
-: ${FABRIC_TAG:="x86_64-1.0.0-alpha"}
+: ${CA_TAG:="$ARCH-1.0.0-alpha"}
+: ${FABRIC_TAG:="$ARCH-1.0.0-alpha"}
 : ${ORG_NAME:="hyperledger"}
-
-ARCH=$(uname -m)
-echo "===========> $ARCH"
 
 echo "===> Pulling fabric Images"
 dockerFabricPull ${FABRIC_TAG} ${ORG_NAME}
