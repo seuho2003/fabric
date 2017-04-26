@@ -15,6 +15,7 @@ PKGS=`go list ${TEST_PKGS} 2> /dev/null | \
                                                   grep -v /orderer/mocks | \
                                                   grep -v /common/mocks | \
                                                   grep -v /core/deliverservice/mocks | \
+                                                  grep -v /core/mocks | \
                                                   grep -v /examples/chaincode/chaintool/ | \
                                                   grep -v /examples/chaincode/go/asset_management | \
                                                   grep -v /examples/chaincode/go/utxo | \
