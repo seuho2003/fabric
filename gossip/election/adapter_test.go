@@ -27,8 +27,13 @@ import (
 	"github.com/hyperledger/fabric/gossip/api"
 	"github.com/hyperledger/fabric/gossip/common"
 	"github.com/hyperledger/fabric/gossip/discovery"
+	"github.com/hyperledger/fabric/gossip/util"
 	proto "github.com/hyperledger/fabric/protos/gossip"
 )
+
+func init() {
+	util.SetupTestLogging()
+}
 
 func TestNewAdapter(t *testing.T) {
 	selfNetworkMember := &discovery.NetworkMember{
@@ -102,10 +107,9 @@ func TestAdapterImpl_Peers(t *testing.T) {
 
 func TestAdapterImpl_Stop(t *testing.T) {
 	_, adapters := createCluster(0, 1, 2, 3, 4, 5)
-	var ch []<-chan Msg
 
 	for _, adapter := range adapters {
-		ch = append(ch, adapter.Accept())
+		adapter.Accept()
 	}
 
 	for _, adapter := range adapters {

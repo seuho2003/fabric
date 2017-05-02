@@ -4,15 +4,15 @@ Setting up the development environment
 Overview
 ~~~~~~~~
 
-Through the v0.6 release, the development environment utilized Vagrant
+Prior to the v1.0.0 release, the development environment utilized Vagrant
 running an Ubuntu image, which in turn launched Docker containers as a
 means of ensuring a consistent experience for developers who might be
-working with varying platforms, such as MacOSX, Windows, Linux, or
+working with varying platforms, such as macOS, Windows, Linux, or
 whatever. Advances in Docker have enabled native support on the most
-popular development platforms: MacOSX and Windows. Hence, we have
+popular development platforms: macOS and Windows. Hence, we have
 reworked our build to take full advantage of these advances. While we
 still maintain a Vagrant based approach that can be used for older
-versions of MacOSX and Windows that Docker does not support, we strongly
+versions of macOS and Windows that Docker does not support, we strongly
 encourage that the non-Vagrant development setup be used.
 
 Note that while the Vagrant-based development setup could not be used in
@@ -26,12 +26,13 @@ Prerequisites
 -  `Git client <https://git-scm.com/downloads>`__
 -  `Go <https://golang.org/>`__ - 1.7 or later (for releases before
    v1.0, 1.6 or later)
--  For MacOSX,
+-  For macOS,
    `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?mt=12>`__
    must be installed
 -  `Docker <https://www.docker.com/products/overview>`__ - 1.12 or later
+-  `Docker Compose <https://docs.docker.com/compose/>`__ - 1.8.1 or later
 -  `Pip <https://pip.pypa.io/en/stable/installing/>`__
--  (MacOSX) you may need to install gnutar, as MacOSX comes with bsdtar
+-  (macOS) you may need to install gnutar, as macOS comes with bsdtar
    as the default, but the build uses some gnutar flags. You can use
    Homebrew to install it as follows:
 
@@ -108,7 +109,7 @@ little bit of setup needed:
 
 Recall that we are using ``Gerrit`` for source control, which has its
 own internal git repositories. Hence, we will need to clone from
-`Gerrit <../Gerrit/gerrit.md#Working-with-a-local-clone-of-the-repository>`__.
+:doc:`Gerrit <../Gerrit/gerrit>`.
 For brevity, the command is as follows:
 
 ::
@@ -116,14 +117,14 @@ For brevity, the command is as follows:
     git clone ssh://LFID@gerrit.hyperledger.org:29418/fabric && scp -p -P 29418 LFID@gerrit.hyperledger.org:hooks/commit-msg fabric/.git/hooks/
 
 **Note:** Of course, you would want to replace ``LFID`` with your own
-`Linux Foundation ID <../Gerrit/lf-account.md>`__.
+:doc:`Linux Foundation ID <../Gerrit/lf-account>`.
 
-Boostrapping the VM using Vagrant
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bootstrapping the VM using Vagrant
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are planning on using the Vagrant developer environment, the
 following steps apply. **Again, we recommend against its use except for
-developers that are limited to older versions of MacOSX and Windows that
+developers that are limited to older versions of macOS and Windows that
 are not supported by Docker for Mac or Windows.**
 
 ::
@@ -146,7 +147,7 @@ Building the fabric
 ~~~~~~~~~~~~~~~~~~~
 
 Once you have all the dependencies installed, and have cloned the
-repository, you can proceed to `build and test <build.md>`__ the fabric.
+repository, you can proceed to :doc:`build and test <build>` the fabric.
 
 Notes
 ~~~~~

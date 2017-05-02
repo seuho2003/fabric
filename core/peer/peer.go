@@ -27,6 +27,8 @@ import (
 	"github.com/hyperledger/fabric/common/config"
 	"github.com/hyperledger/fabric/common/configtx"
 	configtxapi "github.com/hyperledger/fabric/common/configtx/api"
+	configtxtest "github.com/hyperledger/fabric/common/configtx/test"
+	"github.com/hyperledger/fabric/common/flogging"
 	mockconfigtx "github.com/hyperledger/fabric/common/mocks/configtx"
 	mockpolicies "github.com/hyperledger/fabric/common/mocks/policies"
 	"github.com/hyperledger/fabric/common/policies"
@@ -35,18 +37,19 @@ import (
 	"github.com/hyperledger/fabric/core/committer/txvalidator"
 	"github.com/hyperledger/fabric/core/ledger"
 	"github.com/hyperledger/fabric/core/ledger/ledgermgmt"
+	"github.com/hyperledger/fabric/gossip/api"
 	"github.com/hyperledger/fabric/gossip/service"
 	"github.com/hyperledger/fabric/msp"
 	mspmgmt "github.com/hyperledger/fabric/msp/mgmt"
 	"github.com/hyperledger/fabric/protos/common"
+	mspprotos "github.com/hyperledger/fabric/protos/msp"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
-	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
 
-var peerLogger = logging.MustGetLogger("peer")
+var peerLogger = flogging.MustGetLogger("peer")
 
 var peerServer comm.GRPCServer
 
@@ -61,6 +64,10 @@ type chainSupport struct {
 
 func (cs *chainSupport) Ledger() ledger.PeerLedger {
 	return cs.ledger
+}
+
+func (cs *chainSupport) GetMSPIDs(cid string) []string {
+	return GetMSPIDs(cid)
 }
 
 // chain is a local struct to manage objects in a chain
@@ -186,6 +193,13 @@ func createChain(cid string, ledger ledger.PeerLedger, cb *common.Block) error {
 			Manager:     cm,
 			Application: configtxInitializer.ApplicationConfig(),
 		})
+		service.GetGossipService().SuspectPeers(func(identity api.PeerIdentityType) bool {
+			// TODO: this is a place-holder that would somehow make the MSP layer suspect
+			// that a given certificate is revoked, or its intermediate CA is revoked.
+			// In the meantime, before we have such an ability, we return true in order
+			// to suspect ALL identities in order to validate all of them.
+			return true
+		})
 	}
 
 	trustedRootsCallbackWrapper := func(cm configtxapi.Manager) {
@@ -233,17 +247,13 @@ func CreateChainFromBlock(cb *common.Block) error {
 	if err != nil {
 		return err
 	}
-	var ledger ledger.PeerLedger
-	if ledger, err = createLedger(cid); err != nil {
-		return err
+
+	var l ledger.PeerLedger
+	if l, err = ledgermgmt.CreateLedger(cb); err != nil {
+		return fmt.Errorf("Cannot create ledger from genesis block, due to %s", err)
 	}
 
-	if err := ledger.Commit(cb); err != nil {
-		peerLogger.Errorf("Unable to get genesis block committed into the ledger, chainID %v", cid)
-		return err
-	}
-
-	return createChain(cid, ledger, cb)
+	return createChain(cid, l, cb)
 }
 
 // MockCreateChain used for creating a ledger for a chain for tests
@@ -255,21 +265,32 @@ func MockCreateChain(cid string) error {
 		return err
 	}
 
-	i := mockconfigtx.Initializer{
+	// Here we need to mock also the policy manager
+	// in order for the ACL to be checked
+	initializer := mockconfigtx.Initializer{
 		Resources: mockconfigtx.Resources{
 			PolicyManagerVal: &mockpolicies.Manager{
 				Policy: &mockpolicies.Policy{},
 			},
 		},
+		PolicyProposerVal: &mockconfigtx.PolicyProposer{
+			Transactional: mockconfigtx.Transactional{},
+		},
+		ValueProposerVal: &mockconfigtx.ValueProposer{
+			Transactional: mockconfigtx.Transactional{},
+		},
+	}
+	manager := &mockconfigtx.Manager{
+		Initializer: initializer,
 	}
 
 	chains.Lock()
 	defer chains.Unlock()
+
 	chains.list[cid] = &chain{
 		cs: &chainSupport{
-			ledger:  ledger,
-			Manager: &mockconfigtx.Manager{Initializer: i},
-		},
+			Manager: manager,
+			ledger:  ledger},
 	}
 
 	return nil
@@ -368,7 +389,7 @@ func buildTrustedRootsForChain(cm configtxapi.Manager) {
 				for _, root := range v.GetRootCerts() {
 					sid, err := root.Serialize()
 					if err == nil {
-						id := &msp.SerializedIdentity{}
+						id := &mspprotos.SerializedIdentity{}
 						err = proto.Unmarshal(sid, id)
 						if err == nil {
 							appRootCAs = append(appRootCAs, id.IdBytes)
@@ -378,7 +399,7 @@ func buildTrustedRootsForChain(cm configtxapi.Manager) {
 				for _, intermediate := range v.GetIntermediateCerts() {
 					sid, err := intermediate.Serialize()
 					if err == nil {
-						id := &msp.SerializedIdentity{}
+						id := &mspprotos.SerializedIdentity{}
 						err = proto.Unmarshal(sid, id)
 						if err == nil {
 							appRootCAs = append(appRootCAs, id.IdBytes)
@@ -433,13 +454,15 @@ func SetCurrConfigBlock(block *common.Block, cid string) error {
 	return fmt.Errorf("Chain %s doesn't exist on the peer", cid)
 }
 
-// All ledgers are located under `peer.fileSystemPath`
+// createLedger function is used only for the testing (see function 'MockCreateChain').
+// TODO - this function should not be in this file which contains production code
 func createLedger(cid string) (ledger.PeerLedger, error) {
 	var ledger ledger.PeerLedger
 	if ledger = GetLedger(cid); ledger != nil {
 		return ledger, nil
 	}
-	return ledgermgmt.CreateLedger(cid)
+	gb, _ := configtxtest.MakeGenesisBlock(cid)
+	return ledgermgmt.CreateLedger(gb)
 }
 
 // NewPeerClientConnection Returns a new grpc.ClientConn to the configured local PEER.

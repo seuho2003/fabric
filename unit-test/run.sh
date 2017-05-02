@@ -11,11 +11,15 @@ echo -n "Obtaining list of tests to run for the following packages: ${TEST_PKGS}
 PKGS=`go list ${TEST_PKGS} 2> /dev/null | \
                                                   grep -v /vendor/ | \
                                                   grep -v /build/ | \
-                                                  grep -v /bddtests/ | \
-	                                          grep -v /examples/chaincode/chaintool/ | \
-						  grep -v /examples/chaincode/go/asset_management | \
-						  grep -v /examples/chaincode/go/utxo | \
-						  grep -v /examples/chaincode/go/rbac_tcerts_no_attrs`
+                                                  grep -v /bddtests | \
+                                                  grep -v /orderer/mocks | \
+                                                  grep -v /common/mocks | \
+                                                  grep -v /core/mocks | \
+                                                  grep -v /test | \
+                                                  grep -v /examples/chaincode/chaintool/ | \
+                                                  grep -v /examples/chaincode/go/asset_management | \
+                                                  grep -v /examples/chaincode/go/utxo | \
+                                                  grep -v /examples/chaincode/go/rbac_tcerts_no_attrs`
 
 if [ x$ARCH == xppc64le -o x$ARCH == xs390x ]
 then

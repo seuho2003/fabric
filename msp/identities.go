@@ -17,6 +17,7 @@ limitations under the License.
 package msp
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/hex"
@@ -26,8 +27,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/bccsp"
-	"github.com/hyperledger/fabric/bccsp/signer"
-	"github.com/hyperledger/fabric/protos/common"
+	"github.com/hyperledger/fabric/protos/msp"
 	"github.com/op/go-logging"
 )
 
@@ -51,7 +51,7 @@ func newIdentity(id *IdentityIdentifier, cert *x509.Certificate, pk bccsp.Key, m
 }
 
 // SatisfiesPrincipal returns null if this instance matches the supplied principal or an error otherwise
-func (id *identity) SatisfiesPrincipal(principal *common.MSPPrincipal) error {
+func (id *identity) SatisfiesPrincipal(principal *msp.MSPPrincipal) error {
 	return id.msp.SatisfiesPrincipal(id, principal)
 }
 
@@ -71,12 +71,27 @@ func (id *identity) Validate() error {
 }
 
 // GetOrganizationalUnits returns the OU for this instance
-func (id *identity) GetOrganizationalUnits() []string {
+func (id *identity) GetOrganizationalUnits() []*OUIdentifier {
 	if id.cert == nil {
 		return nil
 	}
 
-	return id.cert.Subject.OrganizationalUnit
+	cid, err := id.msp.getCertificationChainIdentifier(id)
+	if err != nil {
+		mspLogger.Errorf("Failed getting certification chain identifier for [%v]: [%s]", id, err)
+
+		return nil
+	}
+
+	res := []*OUIdentifier{}
+	for _, unit := range id.cert.Subject.OrganizationalUnit {
+		res = append(res, &OUIdentifier{
+			OrganizationalUnitIdentifier: unit,
+			CertifiersIdentifier:         cid,
+		})
+	}
+
+	return res
 }
 
 // NewSerializedIdentity returns a serialized identity
@@ -86,7 +101,7 @@ func (id *identity) GetOrganizationalUnits() []string {
 func NewSerializedIdentity(mspID string, certPEM []byte) ([]byte, error) {
 	// We serialize identities by prepending the MSPID
 	// and appending the x509 cert in PEM format
-	sId := &SerializedIdentity{Mspid: mspID, IdBytes: certPEM}
+	sId := &msp.SerializedIdentity{Mspid: mspID, IdBytes: certPEM}
 	raw, err := proto.Marshal(sId)
 	if err != nil {
 		return nil, fmt.Errorf("Failed serializing identity [%s][% X]: [%s]", mspID, certPEM, err)
@@ -101,7 +116,12 @@ func (id *identity) Verify(msg []byte, sig []byte) error {
 	// mspLogger.Infof("Verifying signature")
 
 	// Compute Hash
-	digest, err := id.msp.bccsp.Hash(msg, &bccsp.SHAOpts{})
+	hashOpt, err := id.getHashOpt(id.msp.cryptoConfig.SignatureHashFamily)
+	if err != nil {
+		return fmt.Errorf("Failed getting hash function options [%s]", err)
+	}
+
+	digest, err := id.msp.bccsp.Hash(msg, hashOpt)
 	if err != nil {
 		return fmt.Errorf("Failed computing digest [%s]", err)
 	}
@@ -124,12 +144,12 @@ func (id *identity) Verify(msg []byte, sig []byte) error {
 
 func (id *identity) VerifyOpts(msg []byte, sig []byte, opts SignatureOpts) error {
 	// TODO
-	return nil
+	return errors.New("This method is unimplemented")
 }
 
 func (id *identity) VerifyAttributes(proof []byte, spec *AttributeProofSpec) error {
 	// TODO
-	return nil
+	return errors.New("This method is unimplemented")
 }
 
 // Serialize returns a byte array representation of this identity
@@ -143,7 +163,7 @@ func (id *identity) Serialize() ([]byte, error) {
 	}
 
 	// We serialize identities by prepending the MSPID and appending the ASN.1 DER content of the cert
-	sId := &SerializedIdentity{Mspid: id.id.Mspid, IdBytes: pemBytes}
+	sId := &msp.SerializedIdentity{Mspid: id.id.Mspid, IdBytes: pemBytes}
 	idBytes, err := proto.Marshal(sId)
 	if err != nil {
 		return nil, fmt.Errorf("Could not marshal a SerializedIdentity structure for identity %s, err %s", id.id, err)
@@ -152,15 +172,25 @@ func (id *identity) Serialize() ([]byte, error) {
 	return idBytes, nil
 }
 
+func (id *identity) getHashOpt(hashFamily string) (bccsp.HashOpts, error) {
+	switch hashFamily {
+	case bccsp.SHA2:
+		return bccsp.GetHashOpt(bccsp.SHA256)
+	case bccsp.SHA3:
+		return bccsp.GetHashOpt(bccsp.SHA3_256)
+	}
+	return nil, fmt.Errorf("hash famility not recognized [%s]", hashFamily)
+}
+
 type signingidentity struct {
 	// we embed everything from a base identity
 	identity
 
 	// signer corresponds to the object that can produce signatures from this identity
-	signer *signer.CryptoSigner
+	signer crypto.Signer
 }
 
-func newSigningIdentity(id *IdentityIdentifier, cert *x509.Certificate, pk bccsp.Key, signer *signer.CryptoSigner, msp *bccspmsp) SigningIdentity {
+func newSigningIdentity(id *IdentityIdentifier, cert *x509.Certificate, pk bccsp.Key, signer crypto.Signer, msp *bccspmsp) SigningIdentity {
 	//mspLogger.Infof("Creating signing identity instance for ID %s", id)
 	return &signingidentity{identity{id: id, cert: cert, pk: pk, msp: msp}, signer}
 }
@@ -170,7 +200,12 @@ func (id *signingidentity) Sign(msg []byte) ([]byte, error) {
 	//mspLogger.Infof("Signing message")
 
 	// Compute Hash
-	digest, err := id.msp.bccsp.Hash(msg, &bccsp.SHAOpts{})
+	hashOpt, err := id.getHashOpt(id.msp.cryptoConfig.SignatureHashFamily)
+	if err != nil {
+		return nil, fmt.Errorf("Failed getting hash function options [%s]", err)
+	}
+
+	digest, err := id.msp.bccsp.Hash(msg, hashOpt)
 	if err != nil {
 		return nil, fmt.Errorf("Failed computing digest [%s]", err)
 	}
@@ -190,12 +225,12 @@ func (id *signingidentity) Sign(msg []byte) ([]byte, error) {
 
 func (id *signingidentity) SignOpts(msg []byte, opts SignatureOpts) ([]byte, error) {
 	// TODO
-	return nil, nil
+	return nil, errors.New("This method is unimplemented")
 }
 
 func (id *signingidentity) GetAttributeProof(spec *AttributeProofSpec) (proof []byte, err error) {
 	// TODO
-	return nil, nil
+	return nil, errors.New("This method is unimplemented")
 }
 
 func (id *signingidentity) GetPublicVersion() Identity {
@@ -204,5 +239,5 @@ func (id *signingidentity) GetPublicVersion() Identity {
 
 func (id *signingidentity) Renew() error {
 	// TODO
-	return nil
+	return errors.New("This method is unimplemented")
 }

@@ -19,9 +19,9 @@ package chaincode
 import (
 	"fmt"
 
+	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/common/util"
 	"github.com/hyperledger/fabric/peer/common"
-	"github.com/op/go-logging"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ const (
 	chainFuncName = "chaincode"
 )
 
-var logger = logging.MustGetLogger("chaincodeCmd")
+var logger = flogging.MustGetLogger("chaincodeCmd")
 
 func AddFlags(cmd *cobra.Command) {
 	flags := cmd.PersistentFlags()
@@ -69,8 +69,9 @@ func Cmd(cf *ChaincodeCmdFactory) *cobra.Command {
 	chaincodeCmd.AddCommand(invokeCmd(cf))
 	chaincodeCmd.AddCommand(queryCmd(cf))
 	chaincodeCmd.AddCommand(upgradeCmd(cf))
-	chaincodeCmd.AddCommand(packageCmd(cf))
+	chaincodeCmd.AddCommand(packageCmd(cf, nil))
 	chaincodeCmd.AddCommand(installCmd(cf))
+	chaincodeCmd.AddCommand(signpackageCmd(cf))
 
 	return chaincodeCmd
 }

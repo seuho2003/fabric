@@ -18,9 +18,8 @@ package gossip
 
 import (
 	"bytes"
-	"fmt"
-
 	"errors"
+	"fmt"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/gossip/api"
@@ -86,10 +85,7 @@ func (mc *msgComparator) identityInvalidationPolicy(thisIdentityMsg *PeerIdentit
 
 func (mc *msgComparator) dataInvalidationPolicy(thisDataMsg *DataMessage, thatDataMsg *DataMessage) common.InvalidationResult {
 	if thisDataMsg.Payload.SeqNum == thatDataMsg.Payload.SeqNum {
-		if thisDataMsg.Payload.Hash == thatDataMsg.Payload.Hash {
-			return common.MessageInvalidated
-		}
-		return common.MessageNoAction
+		return common.MessageInvalidated
 	}
 
 	diff := abs(thisDataMsg.Payload.SeqNum, thatDataMsg.Payload.SeqNum)

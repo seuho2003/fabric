@@ -23,7 +23,7 @@ from peer import chaincode_pb2
 from peer import transaction_pb2
 from peer import proposal_pb2
 from peer import peer_pb2_grpc
-import identities_pb2
+from msp import identities_pb2
 
 from common import common_pb2 as common_dot_common_pb2
 
@@ -62,12 +62,12 @@ def createInvokeProposalForBDD(context, ccSpec, chainID, signersCert, Mspid, typ
 
     bootstrapHelper = ContextHelper.GetHelper(context=context).getBootrapHelper(chainId=chainID)
 
-    serializedIdentity = identities_pb2.SerializedIdentity(Mspid=Mspid, IdBytes=crypto.dump_certificate(crypto.FILETYPE_PEM, signersCert))
+    serializedIdentity = identities_pb2.SerializedIdentity(mspid=Mspid, id_bytes=crypto.dump_certificate(crypto.FILETYPE_PEM, signersCert))
 
     nonce = bootstrap_util.BootstrapHelper.getNonce()
 
     sigHdr = bootstrapHelper.makeSignatureHeader(serializedIdentity.SerializeToString(), nonce)
-    
+
     # Calculate the transaction ID
     tx_id = binascii.hexlify(bootstrap_util.computeCryptoHash(nonce + serializedIdentity.SerializeToString()))
 
@@ -124,12 +124,12 @@ def signProposal(proposal, entity, signersCert):
 
 
 def createDeploymentChaincodeSpecForBDD(ccDeploymentSpec, chainID):
-    lc_chaincode_spec = getChaincodeSpec(ccType="GOLANG", path="", name="lccc",
+    lc_chaincode_spec = getChaincodeSpec(ccType="GOLANG", path="", name="lscc",
                                          args=['deploy', chainID, ccDeploymentSpec.SerializeToString()])
     return lc_chaincode_spec
 
 def createInstallChaincodeSpecForBDD(ccDeploymentSpec, chainID):
-    lc_chaincode_spec = getChaincodeSpec(ccType="GOLANG", path="", name="lccc",
+    lc_chaincode_spec = getChaincodeSpec(ccType="GOLANG", path="", name="lscc",
                                          args=['install', ccDeploymentSpec.SerializeToString()])
     return lc_chaincode_spec
 
@@ -139,11 +139,11 @@ def getEndorserStubs(context, composeServices, directory, nodeAdminTuple):
     signingOrg = directory.getOrganization(nodeAdminTuple.organization)
 
     for composeService in composeServices:
-        ipAddress = bdd_test_util.ipFromContainerNamePart(composeService, context.compose_containers)
+        ipAddress, port = bdd_test_util.getPortHostMapping(context.compose_containers, composeService, 7051)
         # natForPeerSigner = directory.findNodeAdminTuple(userName="{0}Signer".format(composeService), contextName=composeService, orgName="peerOrg0")
         # signerCert = directory.getCertAsPEM(natForPeerSigner)
         root_certificates = directory.getTrustedRootsForPeerNetworkAsPEM()
-        channel = bdd_grpc_util.getGRPCChannel(ipAddress=ipAddress, port=7051, root_certificates=root_certificates,
+        channel = bdd_grpc_util.getGRPCChannel(ipAddress=ipAddress, port=port, root_certificates=root_certificates,
                                                ssl_target_name_override=composeService)
         newEndorserStub = peer_pb2_grpc.EndorserStub(channel)
         stubs.append(newEndorserStub)
@@ -157,7 +157,7 @@ def getExample02ChaincodeSpec():
 def _createDeploymentSpecAsFile(ccSpec, outputPath):
     '''peer chaincode package -n myCC -c '{"Args":["init","a","100","b","200"]}' -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 --logging-level=DEBUG test.file'''
     myEnv = os.environ.copy()
-    myEnv['CORE_PEER_MSPCONFIGPATH'] = "./../msp/sampleconfig"
+    myEnv['CORE_PEER_MSPCONFIGPATH'] = "./../sampleconfig/msp"
     nameArgs = ["-n", ccSpec.chaincode_id.name]
     ctorArgs = ["-c", json.dumps({'Args' : [item for item in ccSpec.input.args]})]
     pathArgs = ["-p", ccSpec.chaincode_id.path]

@@ -18,16 +18,17 @@ package common
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/hyperledger/fabric/bccsp/factory"
+	"github.com/hyperledger/fabric/common/errors"
 	"github.com/hyperledger/fabric/common/flogging"
-	"github.com/hyperledger/fabric/core/errors"
+	"github.com/hyperledger/fabric/common/viperutil"
+	"github.com/hyperledger/fabric/core/config"
 	"github.com/hyperledger/fabric/core/peer"
 	"github.com/hyperledger/fabric/msp"
 	mspmgmt "github.com/hyperledger/fabric/msp/mgmt"
 	pb "github.com/hyperledger/fabric/protos/peer"
+	logging "github.com/op/go-logging"
 	"github.com/spf13/viper"
 )
 
@@ -36,21 +37,7 @@ const UndefinedParamValue = ""
 
 //InitConfig initializes viper config
 func InitConfig(cmdRoot string) error {
-	var alternativeCfgPath = os.Getenv("PEER_CFG_PATH")
-	if alternativeCfgPath != "" {
-		viper.AddConfigPath(alternativeCfgPath) // Path to look for the config file in
-	} else {
-		viper.AddConfigPath("./") // Path to look for the config file in
-		// Path to look for the config file in based on GOPATH
-		gopath := os.Getenv("GOPATH")
-		for _, p := range filepath.SplitList(gopath) {
-			peerpath := filepath.Join(p, "src/github.com/hyperledger/fabric/peer")
-			viper.AddConfigPath(peerpath)
-		}
-	}
-
-	// Now set the configuration file.
-	viper.SetConfigName(cmdRoot) // Name of config file (without extension)
+	config.InitViper(nil, cmdRoot)
 
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
@@ -64,7 +51,7 @@ func InitConfig(cmdRoot string) error {
 func InitCrypto(mspMgrConfigDir string, localMSPID string) error {
 	// Init the BCCSP
 	var bccspConfig *factory.FactoryOpts
-	err := viper.UnmarshalKey("peer.BCCSP", &bccspConfig)
+	err := viperutil.EnhancedExactUnmarshalKey("peer.BCCSP", &bccspConfig)
 	if err != nil {
 		return fmt.Errorf("Could not parse YAML config [%s]", err)
 	}
@@ -81,7 +68,7 @@ func InitCrypto(mspMgrConfigDir string, localMSPID string) error {
 func GetEndorserClient() (pb.EndorserClient, error) {
 	clientConn, err := peer.NewPeerClientConnection()
 	if err != nil {
-		err = errors.ErrorWithCallstack("Peer", "ConnectionError", "Error trying to connect to local peer: %s", err.Error())
+		err = errors.ErrorWithCallstack("PER", "404", "Error trying to connect to local peer").WrapError(err)
 		return nil, err
 	}
 	endorserClient := pb.NewEndorserClient(clientConn)
@@ -92,7 +79,7 @@ func GetEndorserClient() (pb.EndorserClient, error) {
 func GetAdminClient() (pb.AdminClient, error) {
 	clientConn, err := peer.NewPeerClientConnection()
 	if err != nil {
-		err = errors.ErrorWithCallstack("Peer", "ConnectionError", "Error trying to connect to local peer: %s", err.Error())
+		err = errors.ErrorWithCallstack("PER", "404", "Error trying to connect to local peer").WrapError(err)
 		return nil, err
 	}
 	adminClient := pb.NewAdminClient(clientConn)
@@ -105,7 +92,20 @@ func SetLogLevelFromViper(module string) error {
 	var err error
 	if module != "" {
 		logLevelFromViper := viper.GetString("logging." + module)
+		err = CheckLogLevel(logLevelFromViper)
+		if err != nil {
+			return err
+		}
 		_, err = flogging.SetModuleLevel(module, logLevelFromViper)
+	}
+	return err
+}
+
+// CheckLogLevel checks that a given log level string is valid
+func CheckLogLevel(level string) error {
+	_, err := logging.LogLevel(level)
+	if err != nil {
+		err = errors.ErrorWithCallstack("LOG", "400", "Invalid log level provided - %s", level)
 	}
 	return err
 }

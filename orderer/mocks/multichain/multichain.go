@@ -18,7 +18,7 @@ package multichain
 
 import (
 	"github.com/hyperledger/fabric/common/config"
-	mockconfigtxorderer "github.com/hyperledger/fabric/common/mocks/configvalues/channel/orderer"
+	mockconfig "github.com/hyperledger/fabric/common/mocks/config"
 	"github.com/hyperledger/fabric/orderer/common/blockcutter"
 	"github.com/hyperledger/fabric/orderer/common/filter"
 	mockblockcutter "github.com/hyperledger/fabric/orderer/mocks/blockcutter"
@@ -34,7 +34,7 @@ var logger = logging.MustGetLogger("orderer/mocks/multichain")
 // Whenever a block is written, it writes to the Batches channel to allow for synchronization
 type ConsenterSupport struct {
 	// SharedConfigVal is the value returned by SharedConfig()
-	SharedConfigVal *mockconfigtxorderer.SharedConfig
+	SharedConfigVal *mockconfig.Orderer
 
 	// BlockCutterVal is the value returned by BlockCutter()
 	BlockCutterVal *mockblockcutter.Receiver
@@ -44,6 +44,9 @@ type ConsenterSupport struct {
 
 	// ChainIDVal is the value returned by ChainID()
 	ChainIDVal string
+
+	// HeightVal is the value returned by Height()
+	HeightVal uint64
 
 	// NextBlockVal stores the block created by the most recent CreateNextBlock() call
 	NextBlockVal *cb.Block
@@ -83,6 +86,7 @@ func (mcs *ConsenterSupport) WriteBlock(block *cb.Block, _committers []filter.Co
 		umtxs[i] = utils.UnmarshalEnvelopeOrPanic(block.Data.Data[i])
 	}
 	mcs.Batches <- umtxs
+	mcs.HeightVal++
 	if encodedMetadataValue != nil {
 		block.Metadata.Metadata[cb.BlockMetadataIndex_ORDERER] = utils.MarshalOrPanic(&cb.Metadata{Value: encodedMetadataValue})
 	}
@@ -93,6 +97,11 @@ func (mcs *ConsenterSupport) WriteBlock(block *cb.Block, _committers []filter.Co
 // ChainID returns the chain ID this specific consenter instance is associated with
 func (mcs *ConsenterSupport) ChainID() string {
 	return mcs.ChainIDVal
+}
+
+// Height returns the number of blocks of the chain this specific consenter instance is associated with
+func (mcs *ConsenterSupport) Height() uint64 {
+	return mcs.HeightVal
 }
 
 // Sign returns the bytes passed in

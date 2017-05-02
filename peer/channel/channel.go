@@ -24,7 +24,6 @@ import (
 	"github.com/hyperledger/fabric/peer/common"
 	ab "github.com/hyperledger/fabric/protos/orderer"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	"github.com/op/go-logging"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -32,8 +31,6 @@ import (
 )
 
 const channelFuncName = "channel"
-
-var logger = logging.MustGetLogger("channelCmd")
 
 var (
 	// join related variables.
@@ -54,6 +51,7 @@ func Cmd(cf *ChannelCmdFactory) *cobra.Command {
 	channelCmd.AddCommand(joinCmd(cf))
 	channelCmd.AddCommand(createCmd(cf))
 	channelCmd.AddCommand(fetchCmd(cf))
+	channelCmd.AddCommand(listCmd(cf))
 
 	return channelCmd
 }

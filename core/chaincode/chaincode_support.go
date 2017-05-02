@@ -35,6 +35,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/platforms"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/core/common/ccprovider"
+	"github.com/hyperledger/fabric/core/config"
 	"github.com/hyperledger/fabric/core/container"
 	"github.com/hyperledger/fabric/core/container/api"
 	"github.com/hyperledger/fabric/core/container/ccintf"
@@ -120,7 +121,7 @@ func (chaincodeSupport *ChaincodeSupport) chaincodeHasBeenLaunched(chaincode str
 
 // NewChaincodeSupport creates a new ChaincodeSupport instance
 func NewChaincodeSupport(getPeerEndpoint func() (*pb.PeerEndpoint, error), userrunsCC bool, ccstartuptimeout time.Duration) *ChaincodeSupport {
-	ccprovider.SetChaincodesPath(viper.GetString("peer.fileSystemPath") + string(filepath.Separator) + "chaincodes")
+	ccprovider.SetChaincodesPath(config.GetPath("peer.fileSystemPath") + string(filepath.Separator) + "chaincodes")
 
 	pnid := viper.GetString("peer.networkId")
 	pid := viper.GetString("peer.id")
@@ -148,8 +149,8 @@ func NewChaincodeSupport(getPeerEndpoint func() (*pb.PeerEndpoint, error), userr
 
 	theChaincodeSupport.peerTLS = viper.GetBool("peer.tls.enabled")
 	if theChaincodeSupport.peerTLS {
-		theChaincodeSupport.peerTLSCertFile = viper.GetString("peer.tls.cert.file")
-		theChaincodeSupport.peerTLSKeyFile = viper.GetString("peer.tls.key.file")
+		theChaincodeSupport.peerTLSCertFile = config.GetPath("peer.tls.cert.file")
+		theChaincodeSupport.peerTLSKeyFile = config.GetPath("peer.tls.key.file")
 		theChaincodeSupport.peerTLSSvrHostOrd = viper.GetString("peer.tls.serverhostoverride")
 	}
 
@@ -190,8 +191,8 @@ func NewChaincodeSupport(getPeerEndpoint func() (*pb.PeerEndpoint, error), userr
 	if err == nil {
 		theChaincodeSupport.chaincodeLogLevel = chaincodeLogLevel.String()
 	} else {
-		chaincodeLogger.Warningf("Chaincode logging level %s is invalid; defaulting to %s", chaincodeLogLevelString, flogging.DefaultLevel().String())
-		theChaincodeSupport.chaincodeLogLevel = flogging.DefaultLevel().String()
+		chaincodeLogger.Warningf("Chaincode logging level %s is invalid; defaulting to %s", chaincodeLogLevelString, flogging.DefaultLevel())
+		theChaincodeSupport.chaincodeLogLevel = flogging.DefaultLevel()
 	}
 	theChaincodeSupport.logFormat = viper.GetString("chaincode.logFormat")
 
@@ -537,9 +538,10 @@ func (chaincodeSupport *ChaincodeSupport) Launch(context context.Context, cccid 
 		var depPayload []byte
 
 		//hopefully we are restarting from existing image and the deployed transaction exists
-		depPayload, err = GetCDSFromLCCC(context, cccid.TxID, cccid.SignedProposal, cccid.Proposal, cccid.ChainID, cID.Name)
+		//this will also validate the ID from the LSCC
+		depPayload, err = GetCDSFromLSCC(context, cccid.TxID, cccid.SignedProposal, cccid.Proposal, cccid.ChainID, cID.Name)
 		if err != nil {
-			return cID, cMsg, fmt.Errorf("Could not get deployment transaction from LCCC for %s - %s", canName, err)
+			return cID, cMsg, fmt.Errorf("Could not get deployment transaction from LSCC for %s - %s", canName, err)
 		}
 		if depPayload == nil {
 			return cID, cMsg, fmt.Errorf("failed to get deployment payload %s - %s", canName, err)
@@ -558,21 +560,24 @@ func (chaincodeSupport *ChaincodeSupport) Launch(context context.Context, cccid 
 
 	//launch container if it is a System container or not in dev mode
 	if (!chaincodeSupport.userRunsCC || cds.ExecEnv == pb.ChaincodeDeploymentSpec_SYSTEM) && (chrte == nil || chrte.handler == nil) {
-		//whether we deploying, upgrading or launching a chaincode we now have a
-		//deployment package. If lauching, we got it from LCCC and has gone through
-		//ccprovider.GetChaincodeFromFS
+		//NOTE-We need to streamline code a bit so the data from LSCC gets passed to this thus
+		//avoiding the need to go to the FS. In particular, we should use cdsfs completely. It is
+		//just a vestige of old protocol that we continue to use ChaincodeDeploymentSpec for
+		//anything other than Install. In particular, instantiate, invoke, upgrade should be using
+		//just some form of ChaincodeInvocationSpec.
+		//
+		//But for now, if we are invoking we have gone through the LSCC path above. If  instantiating
+		//or upgrading currently we send a CDS with nil CodePackage. In this case the codepath
+		//in the endorser has gone through LSCC validation. Just get the code from the FS.
 		if cds.CodePackage == nil {
 			//no code bytes for these situations
 			if !(chaincodeSupport.userRunsCC || cds.ExecEnv == pb.ChaincodeDeploymentSpec_SYSTEM) {
-				_, cdsfs, err := ccprovider.GetChaincodeFromFS(cID.Name, cID.Version)
+				ccpack, err := ccprovider.GetChaincodeFromFS(cID.Name, cID.Version)
 				if err != nil {
 					return cID, cMsg, err
 				}
-				//we should use cdsfs completely. It is just a vestige of old protocol that we
-				//continue to use ChaincodeDeploymentSpec for anything other than Install. In
-				//particular, instantiate, invoke, upgrade should be using just some form of
-				//ChaincodeInvocationSpec.
-				cds = cdsfs
+
+				cds = ccpack.GetDepSpec()
 				chaincodeLogger.Debugf("launchAndWaitForRegister fetched %d from file system", len(cds.CodePackage), err)
 			}
 		}

@@ -34,6 +34,7 @@ import (
 	"github.com/hyperledger/fabric/common/util"
 	"github.com/hyperledger/fabric/core/chaincode"
 	"github.com/hyperledger/fabric/core/common/ccprovider"
+	"github.com/hyperledger/fabric/core/config"
 	"github.com/hyperledger/fabric/core/container"
 	"github.com/hyperledger/fabric/core/peer"
 	syscc "github.com/hyperledger/fabric/core/scc"
@@ -50,7 +51,6 @@ import (
 )
 
 var endorserServer pb.EndorserServer
-var mspInstance msp.MSP
 var signer msp.SigningIdentity
 
 type testEnvironment struct {
@@ -64,7 +64,7 @@ func initPeer(chainID string) (*testEnvironment, error) {
 	// finitPeer(nil)
 	var opts []grpc.ServerOption
 	if viper.GetBool("peer.tls.enabled") {
-		creds, err := credentials.NewServerTLSFromFile(viper.GetString("peer.tls.cert.file"), viper.GetString("peer.tls.key.file"))
+		creds, err := credentials.NewServerTLSFromFile(config.GetPath("peer.tls.cert.file"), config.GetPath("peer.tls.key.file"))
 		if err != nil {
 			return nil, fmt.Errorf("Failed to generate credentials %v", err)
 		}
@@ -165,12 +165,12 @@ func getDeployOrUpgradeProposal(cds *pb.ChaincodeDeploymentSpec, chainID string,
 		propType = "deploy"
 	}
 	sccver := util.GetSysCCVersion()
-	//wrap the deployment in an invocation spec to lccc...
-	lcccSpec := &pb.ChaincodeInvocationSpec{ChaincodeSpec: &pb.ChaincodeSpec{Type: pb.ChaincodeSpec_GOLANG, ChaincodeId: &pb.ChaincodeID{Name: "lccc", Version: sccver}, Input: &pb.ChaincodeInput{Args: [][]byte{[]byte(propType), []byte(chainID), b}}}}
+	//wrap the deployment in an invocation spec to lscc...
+	lsccSpec := &pb.ChaincodeInvocationSpec{ChaincodeSpec: &pb.ChaincodeSpec{Type: pb.ChaincodeSpec_GOLANG, ChaincodeId: &pb.ChaincodeID{Name: "lscc", Version: sccver}, Input: &pb.ChaincodeInput{Args: [][]byte{[]byte(propType), []byte(chainID), b}}}}
 
 	//...and get the proposal for it
 	var prop *pb.Proposal
-	if prop, _, err = getInvokeProposal(lcccSpec, chainID, creator); err != nil {
+	if prop, _, err = getInvokeProposal(lsccSpec, chainID, creator); err != nil {
 		return nil, err
 	}
 
@@ -311,7 +311,7 @@ func invokeWithOverride(txid string, chainID string, spec *pb.ChaincodeSpec, non
 }
 
 func deleteChaincodeOnDisk(chaincodeID string) {
-	os.RemoveAll(filepath.Join(viper.GetString("peer.fileSystemPath"), "chaincodes", chaincodeID))
+	os.RemoveAll(filepath.Join(config.GetPath("peer.fileSystemPath"), "chaincodes", chaincodeID))
 }
 
 //begin tests. Note that we rely upon the system chaincode and peer to be created
@@ -395,7 +395,7 @@ func TestDeployAndInvoke(t *testing.T) {
 		chaincode.GetChain().Stop(ctxt, cccid, &pb.ChaincodeDeploymentSpec{ChaincodeSpec: &pb.ChaincodeSpec{ChaincodeId: chaincodeID}})
 		return
 	}
-	var nextBlockNumber uint64 // first block
+	var nextBlockNumber uint64 = 1 // first block needs to be block number = 1. Genesis block is block 0
 	err = endorserServer.(*Endorser).commitTxSimulation(prop, chainID, signer, resp, nextBlockNumber)
 	if err != nil {
 		t.Fail()
@@ -485,7 +485,7 @@ func TestDeployAndUpgrade(t *testing.T) {
 		return
 	}
 
-	var nextBlockNumber uint64 = 2 // something above created block 0
+	var nextBlockNumber uint64 = 3 // something above created block 0
 	err = endorserServer.(*Endorser).commitTxSimulation(prop, chainID, signer, resp, nextBlockNumber)
 	if err != nil {
 		t.Fail()
@@ -560,7 +560,7 @@ func TestWritersACLFail(t *testing.T) {
 		Err: errors.New("The creator of this proposal does not fulfil the writers policy of this chain"),
 	}
 	pm := peer.GetPolicyManager(chainID)
-	pm.(*mockpolicies.Manager).PolicyMap = map[string]*mockpolicies.Policy{policies.ChannelApplicationWriters: rejectpolicy}
+	pm.(*mockpolicies.Manager).PolicyMap = map[string]policies.Policy{policies.ChannelApplicationWriters: rejectpolicy}
 
 	f = "invoke"
 	invokeArgs := append([]string{f}, args...)
@@ -595,7 +595,7 @@ func TestAdminACLFail(t *testing.T) {
 		Err: errors.New("The creator of this proposal does not fulfil the writers policy of this chain"),
 	}
 	pm := peer.GetPolicyManager(chainID)
-	pm.(*mockpolicies.Manager).PolicyMap = map[string]*mockpolicies.Policy{policies.ChannelApplicationAdmins: rejectpolicy}
+	pm.(*mockpolicies.Manager).PolicyMap = map[string]policies.Policy{policies.ChannelApplicationAdmins: rejectpolicy}
 
 	var ctxt = context.Background()
 
@@ -624,6 +624,21 @@ func TestAdminACLFail(t *testing.T) {
 	chaincode.GetChain().Stop(ctxt, cccid, &pb.ChaincodeDeploymentSpec{ChaincodeSpec: &pb.ChaincodeSpec{ChaincodeId: chaincodeID}})
 }
 
+// TestInvokeSccFail makes sure that invoking a system chaincode fails
+func TestInvokeSccFail(t *testing.T) {
+	chainID := util.GetTestChainID()
+
+	chaincodeID := &pb.ChaincodeID{Name: "escc"}
+	args := util.ToChaincodeArgs("someFunc", "someArg")
+	spec := &pb.ChaincodeSpec{Type: 1, ChaincodeId: chaincodeID, Input: &pb.ChaincodeInput{Args: args}}
+	_, _, _, _, err := invoke(chainID, spec)
+	if err == nil {
+		t.Logf("Invoking escc should have failed!")
+		t.Fail()
+		return
+	}
+}
+
 func newTempDir() string {
 	tempDir, err := ioutil.TempDir("", "fabric-")
 	if err != nil {
@@ -647,8 +662,7 @@ func TestMain(m *testing.M) {
 	endorserServer = NewEndorserServer()
 
 	// setup the MSP manager so that we can sign/verify
-	mspMgrConfigDir := "../../msp/sampleconfig/"
-	err = msptesttools.LoadMSPSetupForTesting(mspMgrConfigDir)
+	err = msptesttools.LoadMSPSetupForTesting()
 	if err != nil {
 		fmt.Printf("Could not initialize msp/signer, err %s", err)
 		finitPeer(tev)

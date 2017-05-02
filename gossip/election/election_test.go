@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hyperledger/fabric/core/config"
+	"github.com/hyperledger/fabric/gossip/util"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -35,7 +37,7 @@ const (
 )
 
 func init() {
-
+	util.SetupTestLogging()
 	SetStartupGracePeriod(time.Millisecond * 500)
 	SetMembershipSampleInterval(time.Millisecond * 100)
 	SetLeaderAliveThreshold(time.Millisecond * 500)
@@ -62,12 +64,13 @@ func (m *msg) IsDeclaration() bool {
 type peer struct {
 	mockedMethods map[string]struct{}
 	mock.Mock
-	id                   string
-	peers                map[string]*peer
-	sharedLock           *sync.RWMutex
-	msgChan              chan Msg
-	isLeaderFromCallback bool
-	callbackInvoked      bool
+	id                 string
+	peers              map[string]*peer
+	sharedLock         *sync.RWMutex
+	msgChan            chan Msg
+	leaderFromCallback bool
+	callbackInvoked    bool
+	lock               sync.RWMutex
 	LeaderElectionService
 }
 
@@ -131,8 +134,22 @@ func (p *peer) Peers() []Peer {
 }
 
 func (p *peer) leaderCallback(isLeader bool) {
-	p.isLeaderFromCallback = isLeader
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	p.leaderFromCallback = isLeader
 	p.callbackInvoked = true
+}
+
+func (p *peer) isLeaderFromCallback() bool {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+	return p.leaderFromCallback
+}
+
+func (p *peer) isCallbackInvoked() bool {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+	return p.callbackInvoked
 }
 
 func createPeers(spawnInterval time.Duration, ids ...int) []*peer {
@@ -152,7 +169,7 @@ func createPeers(spawnInterval time.Duration, ids ...int) []*peer {
 func createPeer(id int, peerMap map[string]*peer, l *sync.RWMutex) *peer {
 	idStr := fmt.Sprintf("p%d", id)
 	c := make(chan Msg, 100)
-	p := &peer{id: idStr, peers: peerMap, sharedLock: l, msgChan: c, mockedMethods: make(map[string]struct{}), isLeaderFromCallback: false, callbackInvoked: false}
+	p := &peer{id: idStr, peers: peerMap, sharedLock: l, msgChan: c, mockedMethods: make(map[string]struct{}), leaderFromCallback: false, callbackInvoked: false}
 	p.LeaderElectionService = NewLeaderElectionService(p, idStr, p.leaderCallback)
 	l.Lock()
 	peerMap[idStr] = p
@@ -192,8 +209,8 @@ func TestInitPeersAtSameTime(t *testing.T) {
 	leaders := waitForLeaderElection(t, peers)
 	isP0leader := peers[len(peers)-1].IsLeader()
 	assert.True(t, isP0leader, "p0 isn't a leader. Leaders are: %v", leaders)
-	assert.True(t, peers[len(peers)-1].isLeaderFromCallback, "p0 didn't got leaderhip change callback invoked")
 	assert.Len(t, leaders, 1, "More than 1 leader elected")
+	waitForBoolFunc(t, peers[len(peers)-1].isLeaderFromCallback, true, "Leadership callback result is wrong for ", peers[len(peers)-1].id)
 }
 
 func TestInitPeersStartAtIntervals(t *testing.T) {
@@ -274,12 +291,12 @@ func TestConvergence(t *testing.T) {
 
 	for _, p := range combinedPeers {
 		if p.id == finalLeaders[0] {
-			assert.True(t, p.isLeaderFromCallback, "Leadership callback result is wrong for ", p.id)
-			assert.True(t, p.callbackInvoked, "Leadership callback wasn't invoked for ", p.id)
+			waitForBoolFunc(t, p.isLeaderFromCallback, true, "Leadership callback result is wrong for ", p.id)
+			waitForBoolFunc(t, p.isCallbackInvoked, true, "Leadership callback wasn't invoked for ", p.id)
 		} else {
-			assert.False(t, p.isLeaderFromCallback, "Leadership callback result is wrong for ", p.id)
+			waitForBoolFunc(t, p.isLeaderFromCallback, false, "Leadership callback result is wrong for ", p.id)
 			if p.id == leaders2[0] {
-				assert.True(t, p.callbackInvoked, "Leadership callback wasn't invoked for ", p.id)
+				waitForBoolFunc(t, p.isCallbackInvoked, true, "Leadership callback wasn't invoked for ", p.id)
 			}
 		}
 	}
@@ -312,7 +329,7 @@ func TestPartition(t *testing.T) {
 	leaders := waitForLeaderElection(t, peers)
 	assert.Len(t, leaders, 1, "Only 1 leader should have been elected")
 	assert.Equal(t, "p0", leaders[0])
-	assert.True(t, peers[len(peers)-1].isLeaderFromCallback, "Leadership callback result is wrong for %s", peers[len(peers)-1].id)
+	waitForBoolFunc(t, peers[len(peers)-1].isLeaderFromCallback, true, "Leadership callback result is wrong for %s", peers[len(peers)-1].id)
 
 	for _, p := range peers {
 		p.On("Peers").Return([]Peer{})
@@ -322,7 +339,7 @@ func TestPartition(t *testing.T) {
 	leaders = waitForMultipleLeadersElection(t, peers, 6)
 	assert.Len(t, leaders, 6)
 	for _, p := range peers {
-		assert.True(t, p.isLeaderFromCallback, "Leadership callback result is wrong for %s", p.id)
+		waitForBoolFunc(t, p.isLeaderFromCallback, true, "Leadership callback result is wrong for %s", p.id)
 	}
 
 	for _, p := range peers {
@@ -337,10 +354,10 @@ func TestPartition(t *testing.T) {
 	assert.Equal(t, "p0", leaders[0])
 	for _, p := range peers {
 		if p.id == leaders[0] {
-			assert.True(t, p.isLeaderFromCallback, "Leadership callback result is wrong for %s", p.id)
+			waitForBoolFunc(t, p.isLeaderFromCallback, true, "Leadership callback result is wrong for %s", p.id)
 		} else {
-			assert.False(t, p.isLeaderFromCallback, "Leadership callback result is wrong for %s", p.id)
-			assert.True(t, p.callbackInvoked, "Leadership callback wasn't invoked for %s", p.id)
+			waitForBoolFunc(t, p.isLeaderFromCallback, false, "Leadership callback result is wrong for %s", p.id)
+			waitForBoolFunc(t, p.isCallbackInvoked, true, "Leadership callback wasn't invoked for %s", p.id)
 		}
 	}
 
@@ -372,7 +389,7 @@ func TestConfigFromFile(t *testing.T) {
 	viper.Reset()
 	viper.SetConfigName("core")
 	viper.SetEnvPrefix("CORE")
-	viper.AddConfigPath("./../../peer")
+	config.AddDevConfigPath(nil)
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
@@ -382,4 +399,15 @@ func TestConfigFromFile(t *testing.T) {
 	assert.Equal(t, time.Second*10, getLeaderAliveThreshold())
 	assert.Equal(t, time.Second*5, getLeaderElectionDuration())
 	assert.Equal(t, getLeaderAliveThreshold()/2, getLeadershipDeclarationInterval())
+}
+
+func waitForBoolFunc(t *testing.T, f func() bool, expectedValue bool, msgAndArgs ...interface{}) {
+	end := time.Now().Add(testTimeout)
+	for time.Now().Before(end) {
+		if f() == expectedValue {
+			return
+		}
+		time.Sleep(testPollInterval)
+	}
+	assert.Fail(t, fmt.Sprintf("Should be %t", expectedValue), msgAndArgs...)
 }

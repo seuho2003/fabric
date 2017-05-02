@@ -19,9 +19,9 @@ package service
 import (
 	"sync"
 
-	peerComm "github.com/hyperledger/fabric/core/comm"
 	"github.com/hyperledger/fabric/core/committer"
 	"github.com/hyperledger/fabric/core/deliverservice"
+	"github.com/hyperledger/fabric/core/deliverservice/blocksprovider"
 	"github.com/hyperledger/fabric/gossip/api"
 	gossipCommon "github.com/hyperledger/fabric/gossip/common"
 	"github.com/hyperledger/fabric/gossip/election"
@@ -30,7 +30,6 @@ import (
 	"github.com/hyperledger/fabric/gossip/integration"
 	"github.com/hyperledger/fabric/gossip/state"
 	"github.com/hyperledger/fabric/gossip/util"
-	"github.com/hyperledger/fabric/peer/gossip/sa"
 	"github.com/hyperledger/fabric/protos/common"
 	proto "github.com/hyperledger/fabric/protos/gossip"
 	"github.com/spf13/viper"
@@ -69,7 +68,13 @@ type deliveryFactoryImpl struct {
 
 // Returns an instance of delivery client
 func (*deliveryFactoryImpl) Service(g GossipService, endpoints []string, mcs api.MessageCryptoService) (deliverclient.DeliverService, error) {
-	return deliverclient.NewDeliverService(g, endpoints, mcs)
+	return deliverclient.NewDeliverService(&deliverclient.Config{
+		CryptoSvc:   mcs,
+		Gossip:      g,
+		Endpoints:   endpoints,
+		ConnFactory: deliverclient.DefaultConnectionFactory,
+		ABCFactory:  deliverclient.DefaultABCFactory,
+	})
 }
 
 type gossipServiceImpl struct {
@@ -114,40 +119,29 @@ func (jcm *joinChannelMessage) AnchorPeersOf(org api.OrgIdentityType) []api.Anch
 var logger = util.GetLogger(util.LoggingServiceModule, "")
 
 // InitGossipService initialize gossip service
-func InitGossipService(peerIdentity []byte, endpoint string, s *grpc.Server, mcs api.MessageCryptoService, bootPeers ...string) {
-	InitGossipServiceCustomDeliveryFactory(peerIdentity, endpoint, s, &deliveryFactoryImpl{}, mcs, bootPeers...)
+func InitGossipService(peerIdentity []byte, endpoint string, s *grpc.Server, mcs api.MessageCryptoService,
+	secAdv api.SecurityAdvisor, secureDialOpts api.PeerSecureDialOpts, bootPeers ...string) {
+	// TODO: Remove this.
+	// TODO: This is a temporary work-around to make the gossip leader election module load its logger at startup
+	// TODO: in order for the flogging package to register this logger in time so it can set the log levels as requested in the config
+	util.GetLogger(util.LoggingElectionModule, "")
+	InitGossipServiceCustomDeliveryFactory(peerIdentity, endpoint, s, &deliveryFactoryImpl{},
+		mcs, secAdv, secureDialOpts, bootPeers...)
 }
 
-// InitGossipService initialize gossip service with customize delivery factory
+// InitGossipServiceCustomDeliveryFactory initialize gossip service with customize delivery factory
 // implementation, might be useful for testing and mocking purposes
-func InitGossipServiceCustomDeliveryFactory(peerIdentity []byte, endpoint string, s *grpc.Server, factory DeliveryServiceFactory, mcs api.MessageCryptoService, bootPeers ...string) {
+func InitGossipServiceCustomDeliveryFactory(peerIdentity []byte, endpoint string, s *grpc.Server,
+	factory DeliveryServiceFactory, mcs api.MessageCryptoService, secAdv api.SecurityAdvisor,
+	secureDialOpts api.PeerSecureDialOpts, bootPeers ...string) {
 	once.Do(func() {
 		logger.Info("Initialize gossip with endpoint", endpoint, "and bootstrap set", bootPeers)
-		dialOpts := []grpc.DialOption{}
-		if peerComm.TLSEnabled() {
-			dialOpts = append(dialOpts, grpc.WithTransportCredentials(peerComm.InitTLSForPeer()))
-		} else {
-			dialOpts = append(dialOpts, grpc.WithInsecure())
-		}
-
-		secAdv := sa.NewSecurityAdvisor()
-
-		if overrideEndpoint := viper.GetString("peer.gossip.endpoint"); overrideEndpoint != "" {
-			endpoint = overrideEndpoint
-		}
-
-		if viper.GetBool("peer.gossip.ignoreSecurity") {
-			logger.Info("This peer ignoring security in gossip")
-			sec := &secImpl{[]byte(endpoint)}
-			mcs = sec
-			secAdv = sec
-			peerIdentity = []byte(endpoint)
-		}
 
 		idMapper := identity.NewIdentityMapper(mcs)
 		idMapper.Put(mcs.GetPKIidOfCert(peerIdentity), peerIdentity)
 
-		gossip := integration.NewGossipComponent(peerIdentity, endpoint, s, secAdv, mcs, idMapper, dialOpts, bootPeers...)
+		gossip := integration.NewGossipComponent(peerIdentity, endpoint, s, secAdv,
+			mcs, idMapper, secureDialOpts, bootPeers...)
 		gossipServiceInstance = &gossipServiceImpl{
 			mcs:             mcs,
 			gossipSvc:       gossip,
@@ -186,23 +180,26 @@ func (g *gossipServiceImpl) InitializeChannel(chainID string, committer committe
 		}
 	}
 
+	// Delivery service might be nil only if it was not able to get connected
+	// to the ordering service
 	if g.deliveryService != nil {
+		// Parameters:
+		//              - peer.gossip.useLeaderElection
+		//              - peer.gossip.orgLeader
+		//
+		// are mutual exclusive, setting both to true is not defined, hence
+		// peer will panic and terminate
 		leaderElection := viper.GetBool("peer.gossip.useLeaderElection")
-		staticOrderConnection := viper.GetBool("peer.gossip.orgLeader")
+		isStaticOrgLeader := viper.GetBool("peer.gossip.orgLeader")
 
-		if leaderElection && staticOrderConnection {
-			msg := "Setting both orgLeader and useLeaderElection to true isn't supported, aborting execution"
-			logger.Panic(msg)
-		} else if leaderElection {
+		if leaderElection && isStaticOrgLeader {
+			logger.Panic("Setting both orgLeader and useLeaderElection to true isn't supported, aborting execution")
+		}
+
+		if leaderElection {
 			logger.Debug("Delivery uses dynamic leader election mechanism, channel", chainID)
-			connector := &leaderElectionDeliverConnector{
-				deliverer: g.deliveryService,
-				committer: committer,
-				chainID:   chainID,
-			}
-			electionService := g.newLeaderElectionComponent(gossipCommon.ChainID(connector.chainID), connector.leadershipStatusChange)
-			g.leaderElection[chainID] = electionService
-		} else if staticOrderConnection {
+			g.leaderElection[chainID] = g.newLeaderElectionComponent(chainID, g.onStatusChangeFactory(chainID, committer))
+		} else if isStaticOrgLeader {
 			logger.Debug("This peer is configured to connect to ordering service for blocks delivery, channel", chainID)
 			g.deliveryService.StartDeliverForChannel(chainID, committer)
 		} else {
@@ -222,13 +219,14 @@ func (g *gossipServiceImpl) configUpdated(config Config) {
 		return
 	}
 	jcm := &joinChannelMessage{seqNum: config.Sequence(), members2AnchorPeers: map[string][]api.AnchorPeer{}}
-	for orgID, appOrg := range config.Organizations() {
+	for _, appOrg := range config.Organizations() {
+		logger.Debug(appOrg.MSPID(), "anchor peers:", appOrg.AnchorPeers())
 		for _, ap := range appOrg.AnchorPeers() {
 			anchorPeer := api.AnchorPeer{
 				Host: ap.Host,
 				Port: int(ap.Port),
 			}
-			jcm.members2AnchorPeers[orgID] = append(jcm.members2AnchorPeers[orgID], anchorPeer)
+			jcm.members2AnchorPeers[appOrg.MSPID()] = append(jcm.members2AnchorPeers[appOrg.MSPID()], anchorPeer)
 		}
 	}
 
@@ -270,9 +268,9 @@ func (g *gossipServiceImpl) Stop() {
 	}
 }
 
-func (g *gossipServiceImpl) newLeaderElectionComponent(channel gossipCommon.ChainID, callback func(bool)) election.LeaderElectionService {
+func (g *gossipServiceImpl) newLeaderElectionComponent(chainID string, callback func(bool)) election.LeaderElectionService {
 	PKIid := g.idMapper.GetPKIidOfCert(g.peerIdentity)
-	adapter := election.NewAdapter(g, PKIid, channel)
+	adapter := election.NewAdapter(g, PKIid, gossipCommon.ChainID(chainID))
 	return election.NewLeaderElectionService(adapter, string(PKIid), callback)
 }
 
@@ -285,61 +283,26 @@ func (g *gossipServiceImpl) amIinChannel(myOrg string, config Config) bool {
 	return false
 }
 
+func (g *gossipServiceImpl) onStatusChangeFactory(chainID string, committer blocksprovider.LedgerInfo) func(bool) {
+	return func(isLeader bool) {
+		if isLeader {
+			if err := g.deliveryService.StartDeliverForChannel(chainID, committer); err != nil {
+				logger.Error("Delivery service is not able to start blocks delivery for chain, due to", err)
+			}
+		} else {
+			if err := g.deliveryService.StopDeliverForChannel(chainID); err != nil {
+				logger.Error("Delivery service is not able to stop blocks delivery for chain, due to", err)
+			}
+
+		}
+
+	}
+}
+
 func orgListFromConfig(config Config) []string {
 	var orgList []string
-	for orgName := range config.Organizations() {
-		orgList = append(orgList, orgName)
+	for _, appOrg := range config.Organizations() {
+		orgList = append(orgList, appOrg.MSPID())
 	}
 	return orgList
-}
-
-type secImpl struct {
-	identity []byte
-}
-
-func (*secImpl) OrgByPeerIdentity(api.PeerIdentityType) api.OrgIdentityType {
-	return api.OrgIdentityType("DEFAULT")
-}
-
-func (s *secImpl) GetPKIidOfCert(peerIdentity api.PeerIdentityType) gossipCommon.PKIidType {
-	return gossipCommon.PKIidType(peerIdentity)
-}
-
-func (s *secImpl) VerifyBlock(chainID gossipCommon.ChainID, signedBlock []byte) error {
-	return nil
-}
-
-func (s *secImpl) Sign(msg []byte) ([]byte, error) {
-	return msg, nil
-}
-
-func (s *secImpl) Verify(peerIdentity api.PeerIdentityType, signature, message []byte) error {
-	return nil
-}
-
-func (s *secImpl) VerifyByChannel(chainID gossipCommon.ChainID, peerIdentity api.PeerIdentityType, signature, message []byte) error {
-	return nil
-}
-
-func (s *secImpl) ValidateIdentity(peerIdentity api.PeerIdentityType) error {
-	return nil
-}
-
-type leaderElectionDeliverConnector struct {
-	deliverer deliverclient.DeliverService
-	chainID   string
-	committer committer.Committer
-}
-
-func (ledc *leaderElectionDeliverConnector) leadershipStatusChange(isLeader bool) {
-	if isLeader {
-		if err := ledc.deliverer.StartDeliverForChannel(ledc.chainID, ledc.committer); err != nil {
-			logger.Error("Delivery service is not able to start blocks delivery for chain, due to", err)
-		}
-	} else {
-		if err := ledc.deliverer.StopDeliverForChannel(ledc.chainID); err != nil {
-			logger.Error("Delivery service is not able to stop blocks delivery for chain, due to", err)
-		}
-
-	}
 }

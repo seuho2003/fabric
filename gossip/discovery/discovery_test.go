@@ -29,7 +29,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hyperledger/fabric/core/config"
 	"github.com/hyperledger/fabric/gossip/common"
+	"github.com/hyperledger/fabric/gossip/util"
 	proto "github.com/hyperledger/fabric/protos/gossip"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -41,6 +43,7 @@ import (
 var timeout = time.Second * time.Duration(15)
 
 func init() {
+	util.SetupTestLogging()
 	aliveTimeInterval := time.Duration(time.Millisecond * 100)
 	SetAliveTimeInterval(aliveTimeInterval)
 	SetAliveExpirationTimeout(10 * aliveTimeInterval)
@@ -325,6 +328,35 @@ func createDiscoveryInstanceThatGossips(port int, id string, bootstrapPeers []st
 
 func bootPeer(port int) string {
 	return fmt.Sprintf("localhost:%d", port)
+}
+
+func TestToString(t *testing.T) {
+	nm := NetworkMember{
+		Endpoint:         "a",
+		InternalEndpoint: "b",
+	}
+	assert.Equal(t, "b", nm.PreferredEndpoint())
+	nm = NetworkMember{
+		Endpoint: "a",
+	}
+	assert.Equal(t, "a", nm.PreferredEndpoint())
+
+	now := time.Now()
+	ts := &timestamp{
+		incTime: now,
+		seqNum:  uint64(42),
+	}
+	assert.Equal(t, fmt.Sprintf("%d, %d", now.UnixNano(), 42), fmt.Sprint(ts))
+}
+
+func TestBadInput(t *testing.T) {
+	inst := createDiscoveryInstance(2048, fmt.Sprintf("d%d", 0), []string{})
+	inst.Discovery.(*gossipDiscoveryImpl).handleMsgFromComm(nil)
+	inst.Discovery.(*gossipDiscoveryImpl).handleMsgFromComm((&proto.GossipMessage{
+		Content: &proto.GossipMessage_DataMsg{
+			DataMsg: &proto.DataMessage{},
+		},
+	}).NoopSign())
 }
 
 func TestConnect(t *testing.T) {
@@ -764,7 +796,7 @@ func TestConfigFromFile(t *testing.T) {
 	aliveExpirationCheckInterval = 0 * time.Second
 	viper.SetConfigName("core")
 	viper.SetEnvPrefix("CORE")
-	viper.AddConfigPath("./../../peer")
+	config.AddDevConfigPath(nil)
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
@@ -790,7 +822,96 @@ func TestFilterOutLocalhost(t *testing.T) {
 	assert.NotEqual(t, endpoints[2], endpoints[0])
 }
 
+func TestMsgStoreExpiration(t *testing.T) {
+	t.Parallel()
+	nodeNum := 4
+	bootPeers := []string{bootPeer(12611), bootPeer(12612)}
+	instances := []*gossipInstance{}
+
+	inst := createDiscoveryInstance(12611, "d1", bootPeers)
+	instances = append(instances, inst)
+
+	inst = createDiscoveryInstance(12612, "d2", bootPeers)
+	instances = append(instances, inst)
+
+	for i := 3; i <= nodeNum; i++ {
+		id := fmt.Sprintf("d%d", i)
+		inst = createDiscoveryInstance(12610+i, id, bootPeers)
+		instances = append(instances, inst)
+	}
+
+	assertMembership(t, instances, nodeNum-1)
+
+	waitUntilOrFailBlocking(t, instances[nodeNum-1].Stop)
+	waitUntilOrFailBlocking(t, instances[nodeNum-2].Stop)
+
+	assertMembership(t, instances, nodeNum-3)
+
+	checkMessages := func() bool {
+		for _, inst := range instances[:len(instances)-2] {
+			for _, downInst := range instances[len(instances)-2:] {
+				downCastInst := inst.Discovery.(*gossipDiscoveryImpl)
+				downCastInst.lock.RLock()
+				if _, exist := downCastInst.aliveLastTS[string(downInst.Discovery.(*gossipDiscoveryImpl).self.PKIid)]; exist {
+					downCastInst.lock.RUnlock()
+					return false
+				}
+				if _, exist := downCastInst.deadLastTS[string(downInst.Discovery.(*gossipDiscoveryImpl).self.PKIid)]; exist {
+					downCastInst.lock.RUnlock()
+					return false
+				}
+				if _, exist := downCastInst.id2Member[string(downInst.Discovery.(*gossipDiscoveryImpl).self.PKIid)]; exist {
+					downCastInst.lock.RUnlock()
+					return false
+				}
+				if downCastInst.aliveMembership.MsgByID(downInst.Discovery.(*gossipDiscoveryImpl).self.PKIid) != nil {
+					downCastInst.lock.RUnlock()
+					return false
+				}
+				if downCastInst.deadMembership.MsgByID(downInst.Discovery.(*gossipDiscoveryImpl).self.PKIid) != nil {
+					downCastInst.lock.RUnlock()
+					return false
+				}
+				downCastInst.lock.RUnlock()
+			}
+		}
+		return true
+	}
+
+	waitUntilTimeoutOrFail(t, checkMessages, timeout*2)
+
+	assertMembership(t, instances[:len(instances)-2], nodeNum-3)
+
+	peerToResponse := &NetworkMember{
+		Metadata:         []byte{},
+		PKIid:            []byte(fmt.Sprintf("localhost:%d", 12612)),
+		Endpoint:         fmt.Sprintf("localhost:%d", 12612),
+		InternalEndpoint: fmt.Sprintf("localhost:%d", 12612),
+	}
+
+	downCastInstance := instances[0].Discovery.(*gossipDiscoveryImpl)
+	memResp := downCastInstance.createMembershipResponse(peerToResponse)
+
+	downCastInstance.comm.SendToPeer(peerToResponse, (&proto.GossipMessage{
+		Tag:   proto.GossipMessage_EMPTY,
+		Nonce: uint64(0),
+		Content: &proto.GossipMessage_MemRes{
+			MemRes: memResp,
+		},
+	}).NoopSign())
+
+	time.Sleep(getAliveExpirationTimeout())
+
+	assert.True(t, checkMessages(), "Validating lost message with already dead and expired nodes failed")
+
+	stopInstances(t, instances[:len(instances)-2])
+}
+
 func waitUntilOrFail(t *testing.T, pred func() bool) {
+	waitUntilTimeoutOrFail(t, pred, timeout)
+}
+
+func waitUntilTimeoutOrFail(t *testing.T, pred func() bool, timeout time.Duration) {
 	start := time.Now()
 	limit := start.UnixNano() + timeout.Nanoseconds()
 	for time.Now().UnixNano() < limit {

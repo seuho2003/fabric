@@ -18,33 +18,60 @@ package localconfig
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
+
 	"strings"
 	"time"
 
+	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/common/viperutil"
+	logging "github.com/op/go-logging"
 
-	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 
+	"path/filepath"
+
 	bccsp "github.com/hyperledger/fabric/bccsp/factory"
+	cf "github.com/hyperledger/fabric/core/config"
 )
 
 const (
-	// SampleInsecureProfile references the sample profile which does not include any MSPs and uses solo for consensus
-	SampleInsecureProfile = "SampleInsecureSolo"
+	pkgLogID = "common/configtx/tool/localconfig"
 
-	// SampleSingleMSPSoloProfile references the sample profile which includes only the sample MSP and uses solo for consensus
-	SampleSingleMSPSoloProfile = "SampleSingleMSPSolo"
+	// Prefix identifies the prefix for the configtxgen-related ENV vars.
+	Prefix string = "CONFIGTX"
 )
 
-var logger = logging.MustGetLogger("configtx/tool/localconfig")
+var (
+	logger *logging.Logger
 
-// Prefix is the default config prefix for the orderer
-const Prefix string = "CONFIGTX"
+	configName string
+)
 
-// TopLevel contains the genesis structures for use by the provisional bootstrapper
+func init() {
+	logger = flogging.MustGetLogger(pkgLogID)
+	flogging.SetModuleLevel(pkgLogID, "error")
+
+	configName = strings.ToLower(Prefix)
+}
+
+const (
+	// SampleInsecureProfile references the sample profile which does not include any MSPs and uses solo for ordering.
+	SampleInsecureProfile = "SampleInsecureSolo"
+	// SampleSingleMSPSoloProfile references the sample profile which includes only the sample MSP and uses solo for ordering.
+	SampleSingleMSPSoloProfile = "SampleSingleMSPSolo"
+
+	// SampleConsortiumName is the sample consortium from the sample configtx.yaml
+	SampleConsortiumName = "SampleConsortium"
+	// SampleOrgName is the name of the sample org in the sample profiles
+	SampleOrgName = "SampleOrg"
+
+	// AdminRoleAdminPrincipal is set as AdminRole to cause the MSP role of type Admin to be used as the admin principal default
+	AdminRoleAdminPrincipal = "Role.ADMIN"
+	// MemberRoleAdminPrincipal is set as AdminRole to cause the MSP role of type Member to be used as the admin principal default
+	MemberRoleAdminPrincipal = "Role.MEMBER"
+)
+
+// TopLevel consists of the structs used by the configtxgen tool.
 type TopLevel struct {
 	Profiles      map[string]*Profile `yaml:"Profiles"`
 	Organizations []*Organization     `yaml:"Organizations"`
@@ -52,39 +79,52 @@ type TopLevel struct {
 	Orderer       *Orderer            `yaml:"Orderer"`
 }
 
-// TopLevel contains the genesis structures for use by the provisional bootstrapper
+// Profile encodes orderer/application configuration combinations for the configtxgen tool.
 type Profile struct {
-	Application *Application `yaml:"Application"`
-	Orderer     *Orderer     `yaml:"Orderer"`
+	Consortium  string                 `yaml:"Consortium"`
+	Application *Application           `yaml:"Application"`
+	Orderer     *Orderer               `yaml:"Orderer"`
+	Consortiums map[string]*Consortium `yaml:"Consortiums"`
 }
 
-// Application encodes the configuration needed for the config transaction
+// Consortium represents a group of organizations which may create channels with eachother
+type Consortium struct {
+	Organizations []*Organization `yaml:"Organizations"`
+}
+
+// Application encodes the application-level configuration needed in config transactions.
 type Application struct {
 	Organizations []*Organization `yaml:"Organizations"`
 }
 
+// Organization encodes the organization-level configuration needed in config transactions.
 type Organization struct {
-	Name   string             `yaml:"Name"`
-	ID     string             `yaml:"ID"`
-	MSPDir string             `yaml:"MSPDir"`
-	BCCSP  *bccsp.FactoryOpts `yaml:"BCCSP"`
+	Name           string             `yaml:"Name"`
+	ID             string             `yaml:"ID"`
+	MSPDir         string             `yaml:"MSPDir"`
+	AdminPrincipal string             `yaml:"AdminPrincipal"`
+	BCCSP          *bccsp.FactoryOpts `yaml:"BCCSP"`
 
-	// Note, the viper deserialization does not seem to care for
-	// embedding of types, so we use one organization structure for
-	// both orderers and applications
+	// Note: Viper deserialization does not seem to care for
+	// embedding of types, so we use one organization struct
+	// for both orderers and applications.
 	AnchorPeers []*AnchorPeer `yaml:"AnchorPeers"`
 }
 
+// AnchorPeer encodes the necessary fields to identify an anchor peer.
 type AnchorPeer struct {
 	Host string `yaml:"Host"`
 	Port int    `yaml:"Port"`
 }
 
+// ApplicationOrganization ...
+// TODO This should probably be removed
 type ApplicationOrganization struct {
 	Organization `yaml:"Organization"`
 }
 
-// Orderer contains config which is used for orderer genesis by the provisional bootstrapper
+// Orderer contains configuration which is used for the
+// bootstrapping of an orderer by the provisional bootstrapper.
 type Orderer struct {
 	OrdererType   string          `yaml:"OrdererType"`
 	Addresses     []string        `yaml:"Addresses"`
@@ -95,14 +135,14 @@ type Orderer struct {
 	MaxChannels   uint64          `yaml:"MaxChannels"`
 }
 
-// BatchSize contains configuration affecting the size of batches
+// BatchSize contains configuration affecting the size of batches.
 type BatchSize struct {
 	MaxMessageCount   uint32 `yaml:"MaxMessageSize"`
 	AbsoluteMaxBytes  uint32 `yaml:"AbsoluteMaxBytes"`
 	PreferredMaxBytes uint32 `yaml:"PreferredMaxBytes"`
 }
 
-// Kafka contains config for the Kafka orderer
+// Kafka contains configuration for the Kafka-based orderer.
 type Kafka struct {
 	Brokers []string `yaml:"Brokers"`
 }
@@ -111,7 +151,7 @@ var genesisDefaults = TopLevel{
 	Orderer: &Orderer{
 		OrdererType:  "solo",
 		Addresses:    []string{"127.0.0.1:7050"},
-		BatchTimeout: 10 * time.Second,
+		BatchTimeout: 2 * time.Second,
 		BatchSize: BatchSize{
 			MaxMessageCount:   10,
 			AbsoluteMaxBytes:  100000000,
@@ -123,67 +163,12 @@ var genesisDefaults = TopLevel{
 	},
 }
 
-func (g *Profile) completeInitialization() {
-	for {
-		switch {
-		case g.Orderer.OrdererType == "":
-			logger.Infof("Orderer.OrdererType unset, setting to %s", genesisDefaults.Orderer.OrdererType)
-			g.Orderer.OrdererType = genesisDefaults.Orderer.OrdererType
-		case g.Orderer.Addresses == nil:
-			logger.Infof("Orderer.Addresses unset, setting to %s", genesisDefaults.Orderer.Addresses)
-			g.Orderer.Addresses = genesisDefaults.Orderer.Addresses
-		case g.Orderer.BatchTimeout == 0:
-			logger.Infof("Orderer.BatchTimeout unset, setting to %s", genesisDefaults.Orderer.BatchTimeout)
-			g.Orderer.BatchTimeout = genesisDefaults.Orderer.BatchTimeout
-		case g.Orderer.BatchSize.MaxMessageCount == 0:
-			logger.Infof("Orderer.BatchSize.MaxMessageCount unset, setting to %s", genesisDefaults.Orderer.BatchSize.MaxMessageCount)
-			g.Orderer.BatchSize.MaxMessageCount = genesisDefaults.Orderer.BatchSize.MaxMessageCount
-		case g.Orderer.BatchSize.AbsoluteMaxBytes == 0:
-			logger.Infof("Orderer.BatchSize.AbsoluteMaxBytes unset, setting to %s", genesisDefaults.Orderer.BatchSize.AbsoluteMaxBytes)
-			g.Orderer.BatchSize.AbsoluteMaxBytes = genesisDefaults.Orderer.BatchSize.AbsoluteMaxBytes
-		case g.Orderer.BatchSize.PreferredMaxBytes == 0:
-			logger.Infof("Orderer.BatchSize.PreferredMaxBytes unset, setting to %s", genesisDefaults.Orderer.BatchSize.PreferredMaxBytes)
-			g.Orderer.BatchSize.PreferredMaxBytes = genesisDefaults.Orderer.BatchSize.PreferredMaxBytes
-		case g.Orderer.Kafka.Brokers == nil:
-			logger.Infof("Orderer.Kafka.Brokers unset, setting to %v", genesisDefaults.Orderer.Kafka.Brokers)
-			g.Orderer.Kafka.Brokers = genesisDefaults.Orderer.Kafka.Brokers
-		default:
-			return
-		}
-	}
-}
-
+// Load returns the orderer/application config combination that corresponds to a given profile.
 func Load(profile string) *Profile {
 	config := viper.New()
+	cf.InitViper(config, configName)
 
-	config.SetConfigName("configtx")
-	var cfgPath string
-
-	// Path to look for the config file in based on GOPATH
-	searchPath := []string{
-		os.Getenv("ORDERER_CFG_PATH"),
-		os.Getenv("PEER_CFG_PATH"),
-	}
-
-	for _, p := range filepath.SplitList(os.Getenv("GOPATH")) {
-		searchPath = append(searchPath, filepath.Join(p, "src/github.com/hyperledger/fabric/common/configtx/tool/"))
-	}
-
-	for _, genesisPath := range searchPath {
-		logger.Infof("Checking for configtx.yaml at: %s", genesisPath)
-		if _, err := os.Stat(filepath.Join(genesisPath, "configtx.yaml")); err != nil {
-			// The yaml file does not exist in this component of the path
-			continue
-		}
-		cfgPath = genesisPath
-	}
-
-	if cfgPath == "" {
-		logger.Fatalf("Could not find configtx.yaml in paths of %s.  Try setting ORDERER_CFG_PATH, PEER_CFG_PATH, or GOPATH correctly", searchPath)
-	}
-	config.AddConfigPath(cfgPath) // Path to look for the config file in
-
-	// for environment variables
+	// For environment variables
 	config.SetEnvPrefix(Prefix)
 	config.AutomaticEnv()
 	// This replacer allows substitution within the particular profile without having to fully qualify the name
@@ -192,22 +177,93 @@ func Load(profile string) *Profile {
 
 	err := config.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Error reading %s plugin config from %s: %s", Prefix, cfgPath, err))
+		logger.Panic("Error reading configuration: ", err)
 	}
+	logger.Debugf("Using config file: %s", config.ConfigFileUsed())
 
 	var uconf TopLevel
-
 	err = viperutil.EnhancedExactUnmarshal(config, &uconf)
 	if err != nil {
-		panic(fmt.Errorf("Error unmarshaling into structure: %s", err))
+		logger.Panic("Error unmarshaling config into struct: ", err)
 	}
 
 	result, ok := uconf.Profiles[profile]
 	if !ok {
-		logger.Panicf("Could not find profile %s", profile)
+		logger.Panic("Could not find profile: ", profile)
 	}
 
-	result.completeInitialization()
+	result.completeInitialization(filepath.Dir(config.ConfigFileUsed()))
+
+	logger.Infof("Loaded configuration: %s", config.ConfigFileUsed())
 
 	return result
+}
+
+func (p *Profile) completeInitialization(configDir string) {
+	if p.Orderer != nil {
+		for _, org := range p.Orderer.Organizations {
+			if org.AdminPrincipal == "" {
+				org.AdminPrincipal = AdminRoleAdminPrincipal
+			}
+			translatePaths(configDir, org)
+		}
+	}
+
+	if p.Application != nil {
+		for _, org := range p.Application.Organizations {
+			if org.AdminPrincipal == "" {
+				org.AdminPrincipal = AdminRoleAdminPrincipal
+			}
+			translatePaths(configDir, org)
+		}
+	}
+
+	if p.Consortiums != nil {
+		for _, consortium := range p.Consortiums {
+			for _, org := range consortium.Organizations {
+				if org.AdminPrincipal == "" {
+					org.AdminPrincipal = AdminRoleAdminPrincipal
+				}
+				translatePaths(configDir, org)
+			}
+		}
+	}
+
+	// Some profiles will not define orderer parameters
+	if p.Orderer == nil {
+		return
+	}
+
+	for {
+		switch {
+		case p.Orderer.OrdererType == "":
+			logger.Infof("Orderer.OrdererType unset, setting to %s", genesisDefaults.Orderer.OrdererType)
+			p.Orderer.OrdererType = genesisDefaults.Orderer.OrdererType
+		case p.Orderer.Addresses == nil:
+			logger.Infof("Orderer.Addresses unset, setting to %s", genesisDefaults.Orderer.Addresses)
+			p.Orderer.Addresses = genesisDefaults.Orderer.Addresses
+		case p.Orderer.BatchTimeout == 0:
+			logger.Infof("Orderer.BatchTimeout unset, setting to %s", genesisDefaults.Orderer.BatchTimeout)
+			p.Orderer.BatchTimeout = genesisDefaults.Orderer.BatchTimeout
+		case p.Orderer.BatchSize.MaxMessageCount == 0:
+			logger.Infof("Orderer.BatchSize.MaxMessageCount unset, setting to %s", genesisDefaults.Orderer.BatchSize.MaxMessageCount)
+			p.Orderer.BatchSize.MaxMessageCount = genesisDefaults.Orderer.BatchSize.MaxMessageCount
+		case p.Orderer.BatchSize.AbsoluteMaxBytes == 0:
+			logger.Infof("Orderer.BatchSize.AbsoluteMaxBytes unset, setting to %s", genesisDefaults.Orderer.BatchSize.AbsoluteMaxBytes)
+			p.Orderer.BatchSize.AbsoluteMaxBytes = genesisDefaults.Orderer.BatchSize.AbsoluteMaxBytes
+		case p.Orderer.BatchSize.PreferredMaxBytes == 0:
+			logger.Infof("Orderer.BatchSize.PreferredMaxBytes unset, setting to %s", genesisDefaults.Orderer.BatchSize.PreferredMaxBytes)
+			p.Orderer.BatchSize.PreferredMaxBytes = genesisDefaults.Orderer.BatchSize.PreferredMaxBytes
+		case p.Orderer.Kafka.Brokers == nil:
+			logger.Infof("Orderer.Kafka.Brokers unset, setting to %v", genesisDefaults.Orderer.Kafka.Brokers)
+			p.Orderer.Kafka.Brokers = genesisDefaults.Orderer.Kafka.Brokers
+		default:
+			return
+		}
+	}
+}
+
+func translatePaths(configDir string, org *Organization) {
+	cf.TranslatePathInPlace(configDir, &org.MSPDir)
+	cf.TranslatePathInPlace(configDir, &org.BCCSP.SwOpts.FileKeystore.KeyStorePath)
 }

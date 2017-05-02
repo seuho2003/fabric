@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger/fabric/bccsp"
 	"github.com/hyperledger/fabric/protos/msp"
 	"github.com/stretchr/testify/assert"
 )
@@ -90,11 +91,17 @@ func TestMSPWithIntermediateCAs(t *testing.T) {
 
 	sigid := &msp.SigningIdentityInfo{PublicSigner: []byte(signcert), PrivateSigner: keyinfo}
 
+	cryptoConfig := &msp.FabricCryptoConfig{
+		SignatureHashFamily:            bccsp.SHA2,
+		IdentityIdentifierHashFunction: bccsp.SHA256,
+	}
+
 	fmspconf := &msp.FabricMSPConfig{
 		RootCerts:         [][]byte{[]byte(cacert)},
 		IntermediateCerts: [][]byte{[]byte(intermediatecert)},
 		SigningIdentity:   sigid,
-		Name:              "DEFAULT"}
+		Name:              "DEFAULT",
+		CryptoConfig:      cryptoConfig}
 
 	fmpsjs, _ := proto.Marshal(fmspconf)
 
@@ -126,4 +133,36 @@ func TestMSPWithIntermediateCAs(t *testing.T) {
 	assert.NoError(t, err)
 	err = thisMSP.Validate(localMSPID.GetPublicVersion())
 	assert.Error(t, err)
+}
+
+func TestIntermediateCAIdentityValidity(t *testing.T) {
+	keyinfo := &msp.KeyInfo{KeyIdentifier: "PEER", KeyMaterial: []byte(key)}
+
+	sigid := &msp.SigningIdentityInfo{PublicSigner: []byte(signcert), PrivateSigner: keyinfo}
+
+	cryptoConfig := &msp.FabricCryptoConfig{
+		SignatureHashFamily:            bccsp.SHA2,
+		IdentityIdentifierHashFunction: bccsp.SHA256,
+	}
+
+	fmspconf := &msp.FabricMSPConfig{
+		RootCerts:         [][]byte{[]byte(cacert)},
+		IntermediateCerts: [][]byte{[]byte(intermediatecert)},
+		SigningIdentity:   sigid,
+		Name:              "DEFAULT",
+		CryptoConfig:      cryptoConfig}
+
+	fmpsjs, _ := proto.Marshal(fmspconf)
+
+	mspconf := &msp.MSPConfig{Config: fmpsjs, Type: int32(FABRIC)}
+
+	thisMSP, err := NewBccspMsp()
+	assert.NoError(t, err)
+
+	err = thisMSP.Setup(mspconf)
+	assert.NoError(t, err)
+
+	id, _, err := thisMSP.(*bccspmsp).getIdentityFromConf([]byte(intermediatecert))
+	assert.NoError(t, err)
+	assert.Error(t, id.Validate())
 }

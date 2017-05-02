@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/hyperledger/fabric/core/config"
 	"github.com/hyperledger/fabric/events/consumer"
 	"github.com/hyperledger/fabric/events/producer"
 	"github.com/hyperledger/fabric/protos/common"
@@ -101,6 +102,7 @@ func createTestBlock(t *testing.T) *common.Block {
 	taas := make([]*ehpb.TransactionAction, 1)
 	taas[0] = taa
 	tx := &ehpb.Transaction{Actions: taas}
+	ccid := &ehpb.ChaincodeID{Name: "ccid", Version: "v1"}
 
 	events := &ehpb.ChaincodeEvent{
 		ChaincodeId: "ccid",
@@ -115,7 +117,7 @@ func createTestBlock(t *testing.T) *common.Block {
 	if err != nil {
 		t.Fatalf("Failure while marshalling the ProposalResponsePayload")
 	}
-	ccaPayload.Action.ProposalResponsePayload, err = utils.GetBytesProposalResponsePayload(pHashBytes, pResponse, results, eventBytes)
+	ccaPayload.Action.ProposalResponsePayload, err = utils.GetBytesProposalResponsePayload(pHashBytes, pResponse, results, eventBytes, ccid)
 	if err != nil {
 		t.Fatalf("Failure while marshalling the ProposalResponsePayload")
 	}
@@ -333,7 +335,7 @@ func TestMain(m *testing.M) {
 	SetupTestConfig()
 	var opts []grpc.ServerOption
 	if viper.GetBool("peer.tls.enabled") {
-		creds, err := credentials.NewServerTLSFromFile(viper.GetString("peer.tls.cert.file"), viper.GetString("peer.tls.key.file"))
+		creds, err := credentials.NewServerTLSFromFile(config.GetPath("peer.tls.cert.file"), config.GetPath("peer.tls.key.file"))
 		if err != nil {
 			grpclog.Fatalf("Failed to generate credentials %v", err)
 		}

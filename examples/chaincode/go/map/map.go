@@ -55,11 +55,23 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		key := args[0]
 		value := args[1]
 
-		err := stub.PutState(key, []byte(value))
-		if err != nil {
+		if err := stub.PutState(key, []byte(value)); err != nil {
 			fmt.Printf("Error putting state %s", err)
 			return shim.Error(fmt.Sprintf("put operation failed. Error updating state: %s", err))
 		}
+
+		indexName := "compositeKeyTest"
+		compositeKeyTestIndex, err := stub.CreateCompositeKey(indexName, []string{key})
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		valueByte := []byte{0x00}
+		if err := stub.PutState(compositeKeyTestIndex, valueByte); err != nil {
+			fmt.Printf("Error putting state with compositeKey %s", err)
+			return shim.Error(fmt.Sprintf("put operation failed. Error updating state with compositeKey: %s", err))
+		}
+
 		return shim.Success(nil)
 
 	case "remove":
@@ -100,11 +112,15 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 
 		var keys []string
 		for keysIter.HasNext() {
-			key, _, iterErr := keysIter.Next()
+			response, iterErr := keysIter.Next()
 			if iterErr != nil {
 				return shim.Error(fmt.Sprintf("keys operation failed. Error accessing state: %s", err))
 			}
-			keys = append(keys, key)
+			keys = append(keys, response.Key)
+		}
+
+		for key, value := range keys {
+			fmt.Printf("key %d contains %s\n", key, value)
 		}
 
 		jsonKeys, err := json.Marshal(keys)
@@ -123,11 +139,38 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 
 		var keys []string
 		for keysIter.HasNext() {
-			key, _, iterErr := keysIter.Next()
+			response, iterErr := keysIter.Next()
 			if iterErr != nil {
 				return shim.Error(fmt.Sprintf("query operation failed. Error accessing state: %s", err))
 			}
-			keys = append(keys, key)
+			keys = append(keys, response.Key)
+		}
+
+		jsonKeys, err := json.Marshal(keys)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("query operation failed. Error marshaling JSON: %s", err))
+		}
+
+		return shim.Success(jsonKeys)
+	case "history":
+		key := args[0]
+		keysIter, err := stub.GetHistoryForKey(key)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("query operation failed. Error accessing state: %s", err))
+		}
+		defer keysIter.Close()
+
+		var keys []string
+		for keysIter.HasNext() {
+			response, iterErr := keysIter.Next()
+			if iterErr != nil {
+				return shim.Error(fmt.Sprintf("query operation failed. Error accessing state: %s", err))
+			}
+			keys = append(keys, response.TxId)
+		}
+
+		for key, txID := range keys {
+			fmt.Printf("key %d contains %s\n", key, txID)
 		}
 
 		jsonKeys, err := json.Marshal(keys)

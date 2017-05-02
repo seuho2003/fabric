@@ -30,11 +30,13 @@ import (
 
 	genesisconfig "github.com/hyperledger/fabric/common/configtx/tool/localconfig"
 	"github.com/hyperledger/fabric/common/configtx/tool/provisional"
+	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/common/localmsp"
 	"github.com/hyperledger/fabric/common/util"
 	"github.com/hyperledger/fabric/core"
 	"github.com/hyperledger/fabric/core/chaincode"
 	"github.com/hyperledger/fabric/core/comm"
+	"github.com/hyperledger/fabric/core/config"
 	"github.com/hyperledger/fabric/core/endorser"
 	"github.com/hyperledger/fabric/core/ledger/ledgermgmt"
 	"github.com/hyperledger/fabric/core/peer"
@@ -43,7 +45,7 @@ import (
 	"github.com/hyperledger/fabric/gossip/service"
 	"github.com/hyperledger/fabric/msp/mgmt"
 	"github.com/hyperledger/fabric/peer/common"
-	"github.com/hyperledger/fabric/peer/gossip/mcs"
+	peergossip "github.com/hyperledger/fabric/peer/gossip"
 	cb "github.com/hyperledger/fabric/protos/common"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/spf13/cobra"
@@ -155,11 +157,24 @@ func serve(args []string) error {
 		logger.Panicf("Failed serializing self identity: %v", err)
 	}
 
-	messageCryptoService := mcs.New(
+	messageCryptoService := peergossip.NewMCS(
 		peer.NewChannelPolicyManagerGetter(),
 		localmsp.NewSigner(),
 		mgmt.NewDeserializersManager())
-	service.InitGossipService(serializedIdentity, peerEndpoint.Address, peerServer.Server(), messageCryptoService, bootstrap...)
+	secAdv := peergossip.NewSecurityAdvisor(mgmt.NewDeserializersManager())
+
+	// callback function for secure dial options for gossip service
+	secureDialOpts := func() []grpc.DialOption {
+		var dialOpts []grpc.DialOption
+		if comm.TLSEnabled() {
+			dialOpts = append(dialOpts, grpc.WithTransportCredentials(comm.GetCASupport().GetPeerCredentials()))
+		} else {
+			dialOpts = append(dialOpts, grpc.WithInsecure())
+		}
+		return dialOpts
+	}
+	service.InitGossipService(serializedIdentity, peerEndpoint.Address, peerServer.Server(),
+		messageCryptoService, secAdv, secureDialOpts, bootstrap...)
 	defer service.GetGossipService().Stop()
 
 	//initialize system chaincodes
@@ -182,7 +197,7 @@ func serve(args []string) error {
 		func() {
 			defer func() {
 				if err := recover(); err != nil {
-					logger.Fatalf("Peer configured to start with the default test chain, but supporting configuration files did not match.  Please ensure that configtx.yaml contains the unmodified SampleSingleMSPSolo profile and that msp/sampleconfig is present.\n%s", err)
+					logger.Fatalf("Peer configured to start with the default test chain, but supporting configuration files did not match.  Please ensure that configtx.yaml contains the unmodified SampleSingleMSPSolo profile and that sampleconfig/msp is present.\n%s", err)
 				}
 			}()
 
@@ -195,11 +210,11 @@ func serve(args []string) error {
 
 		//this creates testchainid and sets up gossip
 		if err = peer.CreateChainFromBlock(block); err == nil {
-			fmt.Printf("create chain [%s]", chainID)
+			logger.Infof("create chain [%s]", chainID)
 			scc.DeploySysCCs(chainID)
 			logger.Infof("Deployed system chaincodes on %s", chainID)
 		} else {
-			fmt.Printf("create default chain [%s] failed with %s", chainID, err)
+			logger.Errorf("create default chain [%s] failed with %s", chainID, err)
 		}
 	}
 
@@ -220,8 +235,7 @@ func serve(args []string) error {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigs
-		fmt.Println()
-		fmt.Println(sig)
+		logger.Debugf("sig: %s", sig)
 		serve <- nil
 	}()
 
@@ -235,7 +249,7 @@ func serve(args []string) error {
 		serve <- grpcErr
 	}()
 
-	if err := writePid(viper.GetString("peer.fileSystemPath")+"/peer.pid", os.Getpid()); err != nil {
+	if err := writePid(config.GetPath("peer.fileSystemPath")+"/peer.pid", os.Getpid()); err != nil {
 		return err
 	}
 
@@ -258,11 +272,17 @@ func serve(args []string) error {
 	logger.Infof("Started peer with ID=[%s], network ID=[%s], address=[%s]",
 		peerEndpoint.Id, viper.GetString("peer.networkId"), peerEndpoint.Address)
 
-	// sets the logging level for the 'error' and 'msp' modules to the
-	// values from core.yaml. they can also be updated dynamically using
-	// "peer logging setlevel <module-name> <log-level>"
-	common.SetLogLevelFromViper("error")
-	common.SetLogLevelFromViper("msp")
+	// set the logging level for specific modules defined via environment
+	// variables or core.yaml
+	overrideLogModules := []string{"msp", "gossip", "ledger", "cauthdsl", "policies"}
+	for _, module := range overrideLogModules {
+		err = common.SetLogLevelFromViper(module)
+		if err != nil {
+			logger.Warningf("Error setting log level for module '%s': %s", module, err.Error())
+		}
+	}
+
+	flogging.SetPeerStartupModulesMap()
 
 	// Block until grpc server exits
 	return <-serve
@@ -278,7 +298,7 @@ func registerChaincodeSupport(grpcServer *grpc.Server) {
 	//get chaincode startup timeout
 	tOut, err := strconv.Atoi(viper.GetString("chaincode.startuptimeout"))
 	if err != nil { //what went wrong ?
-		fmt.Printf("could not retrive timeout var...setting to 5secs\n")
+		logger.Warning("could not retrieve timeout var...setting to 5secs")
 		tOut = 5000
 	}
 	ccStartupTimeout := time.Duration(tOut) * time.Millisecond
@@ -301,7 +321,7 @@ func createEventHubServer(secureConfig comm.SecureServerConfig) (comm.GRPCServer
 
 	grpcServer, err := comm.NewGRPCServerFromListener(lis, secureConfig)
 	if err != nil {
-		fmt.Println("Failed to return new GRPC server: ", err)
+		logger.Errorf("Failed to return new GRPC server: %s", err)
 		return nil, err
 	}
 	ehServer := producer.NewEventsServer(

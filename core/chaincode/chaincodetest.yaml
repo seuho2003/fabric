@@ -134,8 +134,8 @@ logging:
     #   info                                       - Set default to INFO
     #   warning:main,db=debug:chaincode=info       - Override default WARNING in main,db,chaincode
     #   chaincode=info:main=debug:db=debug:warning - Same as above
-    peer:      debug
-    crypto:    info
+    peer:      warning
+    crypto:    warning
     status:    warning
     stop:      warning
     login:     warning
@@ -331,7 +331,7 @@ vm:
                 file: /path/to/ca.pem
             key:
                 file: /path/to/server-key.pem
-
+        attachStdout: true
 ###############################################################################
 #
 #    Chaincode section
@@ -350,20 +350,34 @@ chaincode:
         name:
 
     # Generic builder environment, suitable for most chaincode types
-    builder: hyperledger/fabric-ccenv:$(ARCH)-$(PROJECT_VERSION)
+    builder: $(DOCKER_NS)/fabric-ccenv:$(ARCH)-$(PROJECT_VERSION)
 
     golang:
         # golang will never need more than baseos
-        runtime: hyperledger/fabric-baseos:$(ARCH)-$(BASE_VERSION)
+        runtime: $(BASE_DOCKER_NS)/fabric-baseos:$(ARCH)-$(BASE_VERSION)
 
     car:
         # car may need more facilities (JVM, etc) in the future as the catalog
         # of platforms are expanded.  For now, we can just use baseos
-        runtime: hyperledger/fabric-baseos:$(ARCH)-$(BASE_VERSION)
+        runtime: $(BASE_DOCKER_NS)/fabric-baseos:$(ARCH)-$(BASE_VERSION)
+
+    java:
+        # This is an image based on java:openjdk-8 with addition compiler
+        # tools added for java shim layer packaging.
+        # This image is packed with shim layer libraries that are necessary
+        # for Java chaincode runtime.
+        Dockerfile:  |
+            from $(DOCKER_NS)/fabric-javaenv:$(ARCH)-$(PROJECT_VERSION)
 
     # timeout in millisecs for starting up a container and waiting for Register
     # to come through. 1sec should be plenty for chaincode unit tests
     startuptimeout: 1000
+
+    # timeout in millisecs for invokes and initialize commands
+    # this timeout is used by all chaincodes in all the channels including
+    # system chaincodes. Default is 30000ms (30 seconds)
+    executetimeout: 30000
+
 
     #timeout in millisecs for deploying chaincode from a remote repository.
     deploytimeout: 60000
@@ -389,9 +403,11 @@ chaincode:
     # whitelist, add "myscc: enable" to the list
     system:
         cscc: enable
-        lccc: enable
+        lscc: enable
         escc: enable
         vscc: enable
+
+    logLevel: debug
 
 ###############################################################################
 #
@@ -412,13 +428,20 @@ ledger:
        couchDBAddress: 127.0.0.1:5984
        username:
        password:
-
-    # historyDatabase - options are true or false
-    # Indicates if the history of key updates should be stored in goleveldb
-    historyDatabase: true
+       # Number of retries for CouchDB errors
+       maxRetries: 3
+       # Number of retries for CouchDB errors during peer startup
+       maxRetriesOnStartup: 10
+       # CouchDB request timeout (unit: duration, e.g. 20s)
+       requestTimeout: 35s
 
     # Limit on the number of records to return per query
     queryLimit: 10000
+
+  history:
+    # enableHistoryDatabase - options are true or false
+    # Indicates if the history of key updates should be stored in goleveldb
+    enableHistoryDatabase: true
 
 
 ################################################################################

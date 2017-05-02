@@ -47,12 +47,12 @@ func upgradeCmd(cf *ChaincodeCmdFactory) *cobra.Command {
 
 //upgrade the command via Endorser
 func upgrade(cmd *cobra.Command, cf *ChaincodeCmdFactory) (*protcommon.Envelope, error) {
-	spec, err := getChaincodeSpecification(cmd)
+	spec, err := getChaincodeSpec(cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	cds, err := getChaincodeBytes(spec, false)
+	cds, err := getChaincodeDeploymentSpec(spec, false)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting chaincode code %s: %s", chainFuncName, err)
 	}
@@ -98,7 +98,7 @@ func upgrade(cmd *cobra.Command, cf *ChaincodeCmdFactory) (*protcommon.Envelope,
 func chaincodeUpgrade(cmd *cobra.Command, args []string, cf *ChaincodeCmdFactory) error {
 	var err error
 	if cf == nil {
-		cf, err = InitCmdFactory(true)
+		cf, err = InitCmdFactory(true, true)
 		if err != nil {
 			return err
 		}

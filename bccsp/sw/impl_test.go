@@ -974,8 +974,7 @@ func TestKeyImportFromX509ECDSAPublicKey(t *testing.T) {
 		},
 	}
 
-	cryptoSigner := &signer.CryptoSigner{}
-	err = cryptoSigner.Init(currentBCCSP, k)
+	cryptoSigner, err := signer.New(currentBCCSP, k)
 	if err != nil {
 		t.Fatalf("Failed initializing CyrptoSigner [%s]", err)
 	}
@@ -1095,7 +1094,7 @@ func TestECDSALowS(t *testing.T) {
 		t.Fatalf("Failed generating ECDSA signature [%s]", err)
 	}
 
-	R, S, err := unmarshalECDSASignature(signature)
+	_, S, err := unmarshalECDSASignature(signature)
 	if err != nil {
 		t.Fatalf("Failed unmarshalling signature [%s]", err)
 	}
@@ -1113,6 +1112,7 @@ func TestECDSALowS(t *testing.T) {
 	}
 
 	// Ensure that signature with high-S are rejected.
+	var R *big.Int
 	for {
 		R, S, err = ecdsa.Sign(rand.Reader, k.(*ecdsaPrivateKey).privKey, digest)
 		if err != nil {
@@ -1785,8 +1785,7 @@ func TestKeyImportFromX509RSAPublicKey(t *testing.T) {
 		},
 	}
 
-	cryptoSigner := &signer.CryptoSigner{}
-	err = cryptoSigner.Init(currentBCCSP, k)
+	cryptoSigner, err := signer.New(currentBCCSP, k)
 	if err != nil {
 		t.Fatalf("Failed initializing CyrptoSigner [%s]", err)
 	}

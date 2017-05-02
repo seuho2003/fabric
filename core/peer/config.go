@@ -37,6 +37,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/hyperledger/fabric/core/comm"
+	"github.com/hyperledger/fabric/core/config"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
@@ -51,10 +52,6 @@ var peerEndpoint *pb.PeerEndpoint
 var peerEndpointError error
 
 // Cached values of commonly used configuration constants.
-var syncStateSnapshotChannelSize int
-var syncStateDeltasChannelSize int
-var syncBlocksChannelSize int
-var validatorEnabled bool
 
 // Note: There is some kind of circular import issue that prevents us from
 // importing the "core" package into the "peer" package. The
@@ -97,11 +94,6 @@ func CacheConfiguration() (err error) {
 	localAddress, localAddressError = getLocalAddress()
 	peerEndpoint, peerEndpointError = getPeerEndpoint()
 
-	syncStateSnapshotChannelSize = viper.GetInt("peer.sync.state.snapshot.channelSize")
-	syncStateDeltasChannelSize = viper.GetInt("peer.sync.state.deltas.channelSize")
-	syncBlocksChannelSize = viper.GetInt("peer.sync.blocks.channelSize")
-	validatorEnabled = viper.GetBool("peer.validator.enabled")
-
 	securityEnabled = true
 
 	configurationCached = true
@@ -139,38 +131,6 @@ func GetPeerEndpoint() (*pb.PeerEndpoint, error) {
 	return peerEndpoint, peerEndpointError
 }
 
-// SyncStateSnapshotChannelSize returns the peer.sync.state.snapshot.channelSize property
-func SyncStateSnapshotChannelSize() int {
-	if !configurationCached {
-		cacheConfiguration()
-	}
-	return syncStateSnapshotChannelSize
-}
-
-// SyncStateDeltasChannelSize returns the peer.sync.state.deltas.channelSize property
-func SyncStateDeltasChannelSize() int {
-	if !configurationCached {
-		cacheConfiguration()
-	}
-	return syncStateDeltasChannelSize
-}
-
-// SyncBlocksChannelSize returns the peer.sync.blocks.channelSize property
-func SyncBlocksChannelSize() int {
-	if !configurationCached {
-		cacheConfiguration()
-	}
-	return syncBlocksChannelSize
-}
-
-// ValidatorEnabled returns the peer.validator.enabled property
-func ValidatorEnabled() bool {
-	if !configurationCached {
-		cacheConfiguration()
-	}
-	return validatorEnabled
-}
-
 // SecurityEnabled returns the securityEnabled property from cached configuration
 func SecurityEnabled() bool {
 	if !configurationCached {
@@ -186,8 +146,8 @@ func GetSecureConfig() (comm.SecureServerConfig, error) {
 	}
 	if secureConfig.UseTLS {
 		// get the certs from the file system
-		serverKey, err := ioutil.ReadFile(viper.GetString("peer.tls.key.file"))
-		serverCert, err := ioutil.ReadFile(viper.GetString("peer.tls.cert.file"))
+		serverKey, err := ioutil.ReadFile(config.GetPath("peer.tls.key.file"))
+		serverCert, err := ioutil.ReadFile(config.GetPath("peer.tls.cert.file"))
 		// must have both key and cert file
 		if err != nil {
 			return secureConfig, fmt.Errorf("Error loading TLS key and/or certificate (%s)", err)
@@ -195,8 +155,8 @@ func GetSecureConfig() (comm.SecureServerConfig, error) {
 		secureConfig.ServerCertificate = serverCert
 		secureConfig.ServerKey = serverKey
 		// check for root cert
-		if viper.GetString("peer.tls.rootcert.file") != "" {
-			rootCert, err := ioutil.ReadFile(viper.GetString("peer.tls.rootcert.file"))
+		if config.GetPath("peer.tls.rootcert.file") != "" {
+			rootCert, err := ioutil.ReadFile(config.GetPath("peer.tls.rootcert.file"))
 			if err != nil {
 				return secureConfig, fmt.Errorf("Error loading TLS root certificate (%s)", err)
 			}

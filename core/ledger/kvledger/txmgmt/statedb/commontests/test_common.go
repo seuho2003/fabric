@@ -25,6 +25,35 @@ import (
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/version"
 )
 
+// TestGetStateMultipleKeys tests read for given multiple keys
+func TestGetStateMultipleKeys(t *testing.T, dbProvider statedb.VersionedDBProvider) {
+	db, err := dbProvider.GetDBHandle("testgetmultiplekeys")
+	testutil.AssertNoError(t, err, "")
+
+	// Test that savepoint is nil for a new state db
+	sp, err := db.GetLatestSavePoint()
+	testutil.AssertNoError(t, err, "Error upon GetLatestSavePoint()")
+	testutil.AssertNil(t, sp)
+
+	batch := statedb.NewUpdateBatch()
+	expectedValues := make([]*statedb.VersionedValue, 2)
+	vv1 := statedb.VersionedValue{Value: []byte("value1"), Version: version.NewHeight(1, 1)}
+	expectedValues[0] = &vv1
+	vv2 := statedb.VersionedValue{Value: []byte("value2"), Version: version.NewHeight(1, 2)}
+	expectedValues[1] = &vv2
+	vv3 := statedb.VersionedValue{Value: []byte("value3"), Version: version.NewHeight(1, 3)}
+	vv4 := statedb.VersionedValue{Value: []byte{}, Version: version.NewHeight(1, 4)}
+	batch.Put("ns1", "key1", vv1.Value, vv1.Version)
+	batch.Put("ns1", "key2", vv2.Value, vv2.Version)
+	batch.Put("ns2", "key3", vv3.Value, vv3.Version)
+	batch.Put("ns2", "key4", vv4.Value, vv4.Version)
+	savePoint := version.NewHeight(2, 5)
+	db.ApplyUpdates(batch, savePoint)
+
+	actualValues, _ := db.GetStateMultipleKeys("ns1", []string{"key1", "key2"})
+	testutil.AssertEquals(t, actualValues, expectedValues)
+}
+
 // TestBasicRW tests basic read-write
 func TestBasicRW(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	db, err := dbProvider.GetDBHandle("testbasicrw")
@@ -208,20 +237,22 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	batch.Put("ns1", "key9", []byte(jsonValue9), version.NewHeight(1, 9))
 	jsonValue10 := "{\"asset_name\": \"marble10\",\"color\": \"green\",\"size\": 10,\"owner\": \"mary\"}"
 	batch.Put("ns1", "key10", []byte(jsonValue10), version.NewHeight(1, 10))
+	jsonValue11 := "{\"asset_name\": \"marble11\",\"color\": \"cyan\",\"size\": 1000007,\"owner\": \"joe\"}"
+	batch.Put("ns1", "key11", []byte(jsonValue11), version.NewHeight(1, 11))
 
 	//add keys for a separate namespace
-	batch.Put("ns2", "key1", []byte(jsonValue1), version.NewHeight(1, 11))
-	batch.Put("ns2", "key2", []byte(jsonValue2), version.NewHeight(1, 12))
-	batch.Put("ns2", "key3", []byte(jsonValue3), version.NewHeight(1, 13))
-	batch.Put("ns2", "key4", []byte(jsonValue4), version.NewHeight(1, 14))
-	batch.Put("ns2", "key5", []byte(jsonValue5), version.NewHeight(1, 15))
-	batch.Put("ns2", "key6", []byte(jsonValue6), version.NewHeight(1, 16))
-	batch.Put("ns2", "key7", []byte(jsonValue7), version.NewHeight(1, 17))
-	batch.Put("ns2", "key8", []byte(jsonValue8), version.NewHeight(1, 18))
-	batch.Put("ns2", "key9", []byte(jsonValue9), version.NewHeight(1, 19))
-	batch.Put("ns2", "key10", []byte(jsonValue10), version.NewHeight(1, 20))
+	batch.Put("ns2", "key1", []byte(jsonValue1), version.NewHeight(1, 12))
+	batch.Put("ns2", "key2", []byte(jsonValue2), version.NewHeight(1, 13))
+	batch.Put("ns2", "key3", []byte(jsonValue3), version.NewHeight(1, 14))
+	batch.Put("ns2", "key4", []byte(jsonValue4), version.NewHeight(1, 15))
+	batch.Put("ns2", "key5", []byte(jsonValue5), version.NewHeight(1, 16))
+	batch.Put("ns2", "key6", []byte(jsonValue6), version.NewHeight(1, 17))
+	batch.Put("ns2", "key7", []byte(jsonValue7), version.NewHeight(1, 18))
+	batch.Put("ns2", "key8", []byte(jsonValue8), version.NewHeight(1, 19))
+	batch.Put("ns2", "key9", []byte(jsonValue9), version.NewHeight(1, 20))
+	batch.Put("ns2", "key10", []byte(jsonValue10), version.NewHeight(1, 21))
 
-	savePoint := version.NewHeight(2, 21)
+	savePoint := version.NewHeight(2, 22)
 	db.ApplyUpdates(batch, savePoint)
 
 	// query for owner=jerry, use namespace "ns1"
@@ -232,8 +263,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err := itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord := queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord := string(versionedQueryRecord.Record)
+	versionedQueryRecord := queryResult1.(*statedb.VersionedKV)
+	stringRecord := string(versionedQueryRecord.Value)
 	bFoundRecord := strings.Contains(stringRecord, "jerry")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -250,8 +281,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord = queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "jerry")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -290,8 +321,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord = queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "jerry")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -308,8 +339,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord = queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "jerry")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -335,8 +366,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord = queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "fred")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -353,8 +384,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord = queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "fred")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -380,8 +411,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord = queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "green")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -389,8 +420,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult2, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult2)
-	versionedQueryRecord = queryResult2.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult2.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "green")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -407,8 +438,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult1)
-	versionedQueryRecord = queryResult1.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "green")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -416,8 +447,8 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult2, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNotNil(t, queryResult2)
-	versionedQueryRecord = queryResult2.(*statedb.VersionedQueryRecord)
-	stringRecord = string(versionedQueryRecord.Record)
+	versionedQueryRecord = queryResult2.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
 	bFoundRecord = strings.Contains(stringRecord, "green")
 	testutil.AssertEquals(t, bFoundRecord, true)
 
@@ -434,5 +465,26 @@ func TestQuery(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	queryResult1, err = itr.Next()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertNil(t, queryResult1)
+
+	// query with integer with digit-count equals 7 and response received is also received
+	// with same digit-count and there is no float transformation
+	itr, err = db.ExecuteQuery("ns1", "{\"selector\":{\"$and\":[{\"size\":{\"$eq\": 1000007}}]}}")
+	testutil.AssertNoError(t, err, "")
+
+	// verify one jerry result
+	queryResult1, err = itr.Next()
+	testutil.AssertNoError(t, err, "")
+	testutil.AssertNotNil(t, queryResult1)
+	versionedQueryRecord = queryResult1.(*statedb.VersionedKV)
+	stringRecord = string(versionedQueryRecord.Value)
+	bFoundRecord = strings.Contains(stringRecord, "joe")
+	testutil.AssertEquals(t, bFoundRecord, true)
+	bFoundRecord = strings.Contains(stringRecord, "1000007")
+	testutil.AssertEquals(t, bFoundRecord, true)
+
+	// verify no more results
+	queryResult2, err = itr.Next()
+	testutil.AssertNoError(t, err, "")
+	testutil.AssertNil(t, queryResult2)
 
 }

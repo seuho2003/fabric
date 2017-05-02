@@ -17,31 +17,35 @@ package cscc
 
 import (
 	"fmt"
-	"net"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/golang/protobuf/proto"
 	configtxtest "github.com/hyperledger/fabric/common/configtx/test"
 	"github.com/hyperledger/fabric/common/localmsp"
+	"github.com/hyperledger/fabric/common/mocks/scc"
+	"github.com/hyperledger/fabric/common/policies"
 	"github.com/hyperledger/fabric/core/chaincode"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric/core/common/sysccprovider"
 	"github.com/hyperledger/fabric/core/deliverservice"
 	"github.com/hyperledger/fabric/core/deliverservice/blocksprovider"
 	"github.com/hyperledger/fabric/core/ledger/ledgermgmt"
 	"github.com/hyperledger/fabric/core/peer"
+	"github.com/hyperledger/fabric/core/policy"
 	"github.com/hyperledger/fabric/gossip/api"
 	"github.com/hyperledger/fabric/gossip/service"
 	"github.com/hyperledger/fabric/msp/mgmt"
 	"github.com/hyperledger/fabric/msp/mgmt/testtools"
-	"github.com/hyperledger/fabric/peer/gossip/mcs"
+	peergossip "github.com/hyperledger/fabric/peer/gossip"
+	"github.com/hyperledger/fabric/peer/gossip/mocks"
 	"github.com/hyperledger/fabric/protos/common"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc"
 )
 
 type mockDeliveryClient struct {
@@ -71,6 +75,12 @@ func (*mockDeliveryClientFactory) Service(g service.GossipService, endpoints []s
 	return &mockDeliveryClient{}, nil
 }
 
+func TestMain(m *testing.M) {
+	msptesttools.LoadMSPSetupForTesting()
+
+	os.Exit(m.Run())
+}
+
 func TestConfigerInit(t *testing.T) {
 	e := new(PeerConfiger)
 	stub := shim.NewMockStub("PeerConfiger", e)
@@ -81,22 +91,6 @@ func TestConfigerInit(t *testing.T) {
 	}
 }
 
-func setupEndpoint(t *testing.T) {
-	peerAddress := peer.GetLocalIP()
-	if peerAddress == "" {
-		peerAddress = "0.0.0.0"
-	}
-	peerAddress = peerAddress + ":21213"
-	t.Logf("Local peer IP address: %s", peerAddress)
-	var opts []grpc.ServerOption
-	grpcServer := grpc.NewServer(opts...)
-	getPeerEndpoint := func() (*pb.PeerEndpoint, error) {
-		return &pb.PeerEndpoint{Id: &pb.PeerID{Name: "cscctestpeer"}, Address: peerAddress}, nil
-	}
-	ccStartupTimeout := time.Duration(30000) * time.Millisecond
-	pb.RegisterChaincodeSupportServer(grpcServer, chaincode.NewChaincodeSupport(getPeerEndpoint, false, ccStartupTimeout))
-}
-
 func TestConfigerInvokeJoinChainMissingParams(t *testing.T) {
 	viper.Set("peer.fileSystemPath", "/tmp/hyperledgertest/")
 	os.Mkdir("/tmp/hyperledgertest", 0755)
@@ -105,10 +99,14 @@ func TestConfigerInvokeJoinChainMissingParams(t *testing.T) {
 	e := new(PeerConfiger)
 	stub := shim.NewMockStub("PeerConfiger", e)
 
-	setupEndpoint(t)
+	if res := stub.MockInit("1", nil); res.Status != shim.OK {
+		fmt.Println("Init failed", string(res.Message))
+		t.FailNow()
+	}
+
 	// Failed path: Not enough parameters
 	args := [][]byte{[]byte("JoinChain")}
-	if res := stub.MockInvoke("1", args); res.Status == shim.OK {
+	if res := stub.MockInvoke("2", args); res.Status == shim.OK {
 		t.Fatalf("cscc invoke JoinChain should have failed with invalid number of args: %v", args)
 	}
 }
@@ -121,17 +119,23 @@ func TestConfigerInvokeJoinChainWrongParams(t *testing.T) {
 	e := new(PeerConfiger)
 	stub := shim.NewMockStub("PeerConfiger", e)
 
-	setupEndpoint(t)
+	if res := stub.MockInit("1", nil); res.Status != shim.OK {
+		fmt.Println("Init failed", string(res.Message))
+		t.FailNow()
+	}
 
 	// Failed path: wrong parameter type
 	args := [][]byte{[]byte("JoinChain"), []byte("action")}
-	if res := stub.MockInvoke("1", args); res.Status == shim.OK {
+	if res := stub.MockInvoke("2", args); res.Status == shim.OK {
 		t.Fatalf("cscc invoke JoinChain should have failed with null genesis block.  args: %v", args)
 	}
 }
 
 func TestConfigerInvokeJoinChainCorrectParams(t *testing.T) {
+	sysccprovider.RegisterSystemChaincodeProviderFactory(&scc.MocksccProviderFactory{})
+
 	viper.Set("peer.fileSystemPath", "/tmp/hyperledgertest/")
+	viper.Set("chaincode.executetimeout", "3000")
 	os.Mkdir("/tmp/hyperledgertest", 0755)
 
 	peer.MockInitialize()
@@ -142,19 +146,32 @@ func TestConfigerInvokeJoinChainCorrectParams(t *testing.T) {
 	e := new(PeerConfiger)
 	stub := shim.NewMockStub("PeerConfiger", e)
 
-	setupEndpoint(t)
+	peerEndpoint := "localhost:13611"
+	getPeerEndpoint := func() (*pb.PeerEndpoint, error) {
+		return &pb.PeerEndpoint{Id: &pb.PeerID{Name: "cscctestpeer"}, Address: peerEndpoint}, nil
+	}
+	ccStartupTimeout := time.Duration(30000) * time.Millisecond
+	chaincode.NewChaincodeSupport(getPeerEndpoint, false, ccStartupTimeout)
 
-	// Initialize gossip service
-	grpcServer := grpc.NewServer()
-	socket, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "", 13611))
-	assert.NoError(t, err)
-	go grpcServer.Serve(socket)
-	defer grpcServer.Stop()
+	// Init the policy checker
+	policyManagerGetter := &policy.MockChannelPolicyManagerGetter{
+		Managers: map[string]policies.Manager{
+			"mytestchainid": &policy.MockChannelPolicyManager{MockPolicy: &policy.MockPolicy{Deserializer: &policy.MockIdentityDeserializer{[]byte("Alice"), []byte("msg1")}}},
+		},
+	}
 
-	msptesttools.LoadMSPSetupForTesting("../../../msp/sampleconfig")
+	identityDeserializer := &policy.MockIdentityDeserializer{[]byte("Alice"), []byte("msg1")}
+
+	e.policyChecker = policy.NewPolicyChecker(
+		policyManagerGetter,
+		identityDeserializer,
+		&policy.MockMSPPrincipalGetter{Principal: []byte("Alice")},
+	)
+
 	identity, _ := mgmt.GetLocalSigningIdentityOrPanic().Serialize()
-	messageCryptoService := mcs.New(&mcs.MockChannelPolicyManagerGetter{}, localmsp.NewSigner(), mgmt.NewDeserializersManager())
-	service.InitGossipServiceCustomDeliveryFactory(identity, "localhost:13611", grpcServer, &mockDeliveryClientFactory{}, messageCryptoService)
+	messageCryptoService := peergossip.NewMCS(&mocks.ChannelPolicyManagerGetter{}, localmsp.NewSigner(), mgmt.NewDeserializersManager())
+	secAdv := peergossip.NewSecurityAdvisor(mgmt.NewDeserializersManager())
+	service.InitGossipServiceCustomDeliveryFactory(identity, peerEndpoint, nil, &mockDeliveryClientFactory{}, messageCryptoService, secAdv, nil)
 
 	// Successful path for JoinChain
 	blockBytes := mockConfigBlock()
@@ -162,9 +179,21 @@ func TestConfigerInvokeJoinChainCorrectParams(t *testing.T) {
 		t.Fatalf("cscc invoke JoinChain failed because invalid block")
 	}
 	args := [][]byte{[]byte("JoinChain"), blockBytes}
-	if res := stub.MockInvoke("1", args); res.Status != shim.OK {
-		t.Fatalf("cscc invoke JoinChain failed with: %v", err)
+	sProp, _ := utils.MockSignedEndorserProposalOrPanic("", &pb.ChaincodeSpec{}, []byte("Alice"), []byte("msg1"))
+	identityDeserializer.Msg = sProp.ProposalBytes
+	sProp.Signature = sProp.ProposalBytes
+	if res := stub.MockInvokeWithSignedProposal("2", args, sProp); res.Status != shim.OK {
+		t.Fatalf("cscc invoke JoinChain failed with: %v", res.Message)
 	}
+
+	// This call must fail
+	sProp.Signature = nil
+	res := stub.MockInvokeWithSignedProposal("3", args, sProp)
+	if res.Status == shim.OK {
+		t.Fatalf("cscc invoke JoinChain must fail : %v", res.Message)
+	}
+	assert.True(t, strings.HasPrefix(res.Message, "\"JoinChain\" request failed authorization check for channel"))
+	sProp.Signature = sProp.ProposalBytes
 
 	// Query the configuration block
 	//chainID := []byte{143, 222, 22, 192, 73, 145, 76, 110, 167, 154, 118, 66, 132, 204, 113, 168}
@@ -173,13 +202,14 @@ func TestConfigerInvokeJoinChainCorrectParams(t *testing.T) {
 		t.Fatalf("cscc invoke JoinChain failed with: %v", err)
 	}
 	args = [][]byte{[]byte("GetConfigBlock"), []byte(chainID)}
-	if res := stub.MockInvoke("1", args); res.Status != shim.OK {
-		t.Fatalf("cscc invoke GetConfigBlock failed with: %v", err)
+	policyManagerGetter.Managers["mytestchainid"].(*policy.MockChannelPolicyManager).MockPolicy.(*policy.MockPolicy).Deserializer.(*policy.MockIdentityDeserializer).Msg = sProp.ProposalBytes
+	if res := stub.MockInvokeWithSignedProposal("2", args, sProp); res.Status != shim.OK {
+		t.Fatalf("cscc invoke GetConfigBlock failed with: %v", res.Message)
 	}
 
 	// get channels for the peer
 	args = [][]byte{[]byte(GetChannels)}
-	res := stub.MockInvoke("1", args)
+	res = stub.MockInvokeWithSignedProposal("2", args, sProp)
 	if res.Status != shim.OK {
 		t.FailNow()
 	}
@@ -200,27 +230,45 @@ func TestConfigerInvokeUpdateConfigBlock(t *testing.T) {
 	e := new(PeerConfiger)
 	stub := shim.NewMockStub("PeerConfiger", e)
 
-	setupEndpoint(t)
+	// Init the policy checker
+	policyManagerGetter := &policy.MockChannelPolicyManagerGetter{
+		Managers: map[string]policies.Manager{
+			"mytestchainid": &policy.MockChannelPolicyManager{MockPolicy: &policy.MockPolicy{Deserializer: &policy.MockIdentityDeserializer{[]byte("Alice"), []byte("msg1")}}},
+		},
+	}
+
+	identityDeserializer := &policy.MockIdentityDeserializer{[]byte("Alice"), []byte("msg1")}
+
+	e.policyChecker = policy.NewPolicyChecker(
+		policyManagerGetter,
+		identityDeserializer,
+		&policy.MockMSPPrincipalGetter{Principal: []byte("Alice")},
+	)
+
+	sProp, _ := utils.MockSignedEndorserProposalOrPanic("", &pb.ChaincodeSpec{}, []byte("Alice"), []byte("msg1"))
+	identityDeserializer.Msg = sProp.ProposalBytes
+	sProp.Signature = sProp.ProposalBytes
+	policyManagerGetter.Managers["mytestchainid"].(*policy.MockChannelPolicyManager).MockPolicy.(*policy.MockPolicy).Deserializer.(*policy.MockIdentityDeserializer).Msg = sProp.ProposalBytes
 
 	// Failed path: Not enough parameters
 	args := [][]byte{[]byte("UpdateConfigBlock")}
-	if res := stub.MockInvoke("1", args); res.Status == shim.OK {
+	if res := stub.MockInvokeWithSignedProposal("2", args, sProp); res.Status == shim.OK {
 		t.Fatalf("cscc invoke UpdateConfigBlock should have failed with invalid number of args: %v", args)
 	}
 
 	// Failed path: wrong parameter type
 	args = [][]byte{[]byte("UpdateConfigBlock"), []byte("action")}
-	if res := stub.MockInvoke("1", args); res.Status == shim.OK {
+	if res := stub.MockInvokeWithSignedProposal("2", args, sProp); res.Status == shim.OK {
 		t.Fatalf("cscc invoke UpdateConfigBlock should have failed with null genesis block - args: %v", args)
 	}
 
-	// Successful path for JoinChain
+	// Successful path for UpdateConfigBlock
 	blockBytes := mockConfigBlock()
 	if blockBytes == nil {
 		t.Fatalf("cscc invoke UpdateConfigBlock failed because invalid block")
 	}
 	args = [][]byte{[]byte("UpdateConfigBlock"), blockBytes}
-	if res := stub.MockInvoke("1", args); res.Status != shim.OK {
+	if res := stub.MockInvokeWithSignedProposal("2", args, sProp); res.Status != shim.OK {
 		t.Fatalf("cscc invoke UpdateConfigBlock failed with: %v", res.Message)
 	}
 
@@ -231,7 +279,7 @@ func TestConfigerInvokeUpdateConfigBlock(t *testing.T) {
 		t.Fatalf("cscc invoke UpdateConfigBlock failed with: %v", err)
 	}
 	args = [][]byte{[]byte("GetConfigBlock"), []byte(chainID)}
-	if res := stub.MockInvoke("1", args); res.Status != shim.OK {
+	if res := stub.MockInvokeWithSignedProposal("2", args, sProp); res.Status != shim.OK {
 		t.Fatalf("cscc invoke GetConfigBlock failed with: %v", err)
 	}
 

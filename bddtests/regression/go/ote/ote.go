@@ -20,7 +20,7 @@ package main
 // ======================
 //
 // This file ote.go contains main(), for executing from command line
-// using environment variables to override those in orderer/orderer.yaml
+// using environment variables to override those in sampleconfig/orderer.yaml
 // or to set OTE test configuration parameters.
 //
 // Function ote() is called by main after reading environment variables,
@@ -453,7 +453,7 @@ func startProducer(serverAddr string, chainID string, ordererIndex int, channelI
                 b.broadcast([]byte(fmt.Sprintf("Testing %v", time.Now())))
                 err = b.getAck()
                 if err == nil {
-                        (*txSentCntrP)++ 
+                        (*txSentCntrP)++
                         if printProgressLogs && (*txSentCntrP)%printLogCnt == 0 {
                                 mult++
                                 if debugflag1 {
