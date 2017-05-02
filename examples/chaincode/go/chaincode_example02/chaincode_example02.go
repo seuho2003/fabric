@@ -36,6 +36,7 @@ type SimpleChaincode struct {
 
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("ex02 Init")
+	fmt.Println("hello world");
 	_, args := stub.GetFunctionAndParameters()
 	var A, B string    // Entities
 	var Aval, Bval int // Asset holdings
@@ -68,7 +69,14 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-
+	compositeKey, err := stub.CreateCompositeKey("objectType", [2]string{"A","B"})
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	err = stub.PutState(compositeKey, "hello world");
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 	return shim.Success(nil)
 }
 
