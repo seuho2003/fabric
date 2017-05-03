@@ -17,6 +17,7 @@ services:
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/localMspConfig/keystore/ordererSigner.pem
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/localMspConfig/signcerts/orderer0Signer.pem
       - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/localMspConfig/cacerts/ordererOrg0.pem]
+      - ORDERER_GENERAL_LEDGERTYPE=json
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
@@ -30,13 +31,13 @@ services:
 ##    CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
 ## 3) couch container names in "depends_on" section
 
-#  couchdb0:
-#    container_name: couchdb0
-#    image: hyperledger/fabric-couchdb
+  couchdb0:
+    container_name: couchdb0
+    image: hyperledger/fabric-couchdb
 ##   Uncomment the port mapping if you want to expose the CouchDB service,
 ##   for example to utilize Fauxton User Interface in dev environments.
-#    ports:
-#      - "5984:5984"
+    ports:
+      - "5984:5984"
 
   peer0:
     container_name: peer0
@@ -52,8 +53,8 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/msp/keystore/peer0Signer.pem
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/msp/cacerts/peerOrg0.pem
       # - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0
-      # - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      # - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
     volumes:
         - /var/run/:/host/var/run/
         - ./crypto/peer/peer0/localMspConfig:/etc/hyperledger/fabric/msp
@@ -62,15 +63,15 @@ services:
       - 7053:7053
     depends_on:
       - orderer0
-      # - couchdb0
+      - couchdb0
 
-#  couchdb1:
-#    container_name: couchdb1
-#    image: hyperledger/fabric-couchdb
+  couchdb1:
+    container_name: couchdb1
+    image: hyperledger/fabric-couchdb
 ##   Uncomment the port mapping if you want to expose the CouchDB service,
 ##   for example to utilize Fauxton User Interface in dev environments.
-#    ports:
-#      - "6984:5984"
+    ports:
+      - "6984:5984"
 
   peer1:
     container_name: peer1
@@ -87,8 +88,8 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/msp/keystore/peer1Signer.pem
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/msp/cacerts/peerOrg0.pem
       # - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer1
-      # - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      # - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
     volumes:
         - /var/run/:/host/var/run/
         - ./crypto/peer/peer1/localMspConfig:/etc/hyperledger/fabric/msp
@@ -100,13 +101,13 @@ services:
       - peer0
       # - couchdb1
 
-#  couchdb2:
-#    container_name: couchdb2
-#    image: hyperledger/fabric-couchdb
+  couchdb2:
+    container_name: couchdb2
+    image: hyperledger/fabric-couchdb
 ##   Uncomment the port mapping if you want to expose the CouchDB service,
 ##   for example to utilize Fauxton User Interface in dev environments.
-#    ports:
-#      - "7984:5984"
+    ports:
+      - "7984:5984"
 
   peer2:
     container_name: peer2
@@ -135,15 +136,15 @@ services:
       - orderer0
       - peer0
       - peer1
-      # - couchdb2
+      - couchdb2
 
-#  couchdb3:
-#    container_name: couchdb3
-#    image: hyperledger/fabric-couchdb
+  couchdb3:
+    container_name: couchdb3
+    image: hyperledger/fabric-couchdb
 ##   Uncomment the port mapping if you want to expose the CouchDB service,
 ##   for example to utilize Fauxton User Interface in dev environments.
-#    ports:
-#      - "8984:5984"
+    ports:
+      - "8984:5984"
 
   peer3:
     container_name: peer3
@@ -173,7 +174,7 @@ services:
       - peer0
       - peer1
       - peer2
-      # - couchdb3
+      - couchdb3
 
   cli:
     container_name: cli
@@ -196,12 +197,12 @@ services:
       - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peer/peer0/localMspConfig
 
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; '
-    #command: /bin/bash
+    #command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; '
+    command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
         - ./examples/:/opt/gopath/src/github.com/hyperledger/fabric/examples/
-        - ../chaincode/go/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
+        #- ../chaincode/go/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
         - ./crypto:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
         - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
     depends_on:
