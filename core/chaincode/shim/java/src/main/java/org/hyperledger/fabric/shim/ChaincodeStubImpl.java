@@ -16,6 +16,8 @@ limitations under the License.
 
 package org.hyperledger.fabric.shim;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperledger.fabric.protos.peer.ChaincodeEventPackage.ChaincodeEvent;
 import org.hyperledger.fabric.protos.peer.ProposalResponsePackage.Response;
+import org.hyperledger.fabric.shim.ledger.CompositeKey;
 
 import com.google.protobuf.ByteString;
 
@@ -54,10 +57,26 @@ class ChaincodeStubImpl implements ChaincodeStub {
 	 * @see org.hyperledger.fabric.shim.ChaincodeStub#getArgsAsStrings()
 	 */
 	@Override
-	public List<String> getArgsAsStrings() {
+	public List<String> getStringArgs() {
 		return args.stream().map(x -> x.toStringUtf8()).collect(Collectors.toList());
 	}
 
+	/* (non-Javadoc)
+	 * @see org.hyperledger.fabric.shim.ChaincodeStub#getFunction()
+	 */
+	@Override
+	public String getFunction() {
+		return getStringArgs().size() > 0 ? getStringArgs().get(0) : null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.hyperledger.fabric.shim.ChaincodeStub#getParameters()
+	 */
+	@Override
+	public List<String> getParameters() {
+		return getStringArgs().stream().skip(1).collect(toList());
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.hyperledger.fabric.shim.ChaincodeStub#setEvent(java.lang.String, byte[])
 	 */
@@ -93,19 +112,19 @@ class ChaincodeStubImpl implements ChaincodeStub {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.hyperledger.fabric.shim.ChaincodeStub#getState(java.lang.String)
+	 * @see org.hyperledger.fabric.shim.ChaincodeStub#getState(String)
 	 */
 	@Override
-	public String getState(String key) {
-		return handler.handleGetState(key, txid).toStringUtf8();
+	public byte[] getState(String key) {
+		return handler.handleGetState(key, txid).toByteArray();
 	}
 
 	/* (non-Javadoc)
-	 * @see org.hyperledger.fabric.shim.ChaincodeStub#putState(java.lang.String, java.lang.String)
+	 * @see org.hyperledger.fabric.shim.ChaincodeStub#putRawState(java.lang.String, com.google.protobuf.ByteString)
 	 */
 	@Override
-	public void putState(String key, String value) {
-		handler.handlePutState(key, ByteString.copyFromUtf8(value), txid);
+	public void putState(String key, byte[] value) {
+		handler.handlePutState(key, ByteString.copyFrom(value), txid);
 	}
 
 	/* (non-Javadoc)
@@ -115,17 +134,21 @@ class ChaincodeStubImpl implements ChaincodeStub {
 	public void delState(String key) {
 		handler.handleDeleteState(key, txid);
 	}
+
 	/* (non-Javadoc)
 	 * @see org.hyperledger.fabric.shim.ChaincodeStub#createCompositeKey(java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public String createCompositeKey(String objectType, String[] attributes) {
-		String compositeKey = new String();
-		compositeKey = compositeKey + objectType;
-		for (String attribute : attributes) {
-			compositeKey = compositeKey + attribute.length() + attribute;
-		}
-		return compositeKey;
+	public CompositeKey createCompositeKey(String objectType, String... attributes) {
+		return new CompositeKey(objectType, attributes);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.hyperledger.fabric.shim.ChaincodeStub#splitCompositeKey(java.lang.String)
+	 */
+	@Override
+	public CompositeKey splitCompositeKey(String compositeKey) {
+		return CompositeKey.parseCompositeKey(compositeKey);
 	}
 
 	/* (non-Javadoc)
@@ -141,24 +164,6 @@ class ChaincodeStubImpl implements ChaincodeStub {
 			compositeName = chaincodeName;
 		}
 		return handler.handleInvokeChaincode(compositeName, args, this.txid);
-	}
-
-	// ------RAW CALLS------
-
-	/* (non-Javadoc)
-	 * @see org.hyperledger.fabric.shim.ChaincodeStub#getRawState(java.lang.String)
-	 */
-	@Override
-	public ByteString getRawState(String key) {
-		return handler.handleGetState(key, txid);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.hyperledger.fabric.shim.ChaincodeStub#putRawState(java.lang.String, com.google.protobuf.ByteString)
-	 */
-	@Override
-	public void putRawState(String key, ByteString value) {
-		handler.handlePutState(key, value, txid);
 	}
 
 }

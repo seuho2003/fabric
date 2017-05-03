@@ -37,14 +37,14 @@ public class Example04 extends ChaincodeBase {
 		// expects to be called with: { "init", key, value }
 		try {
 
-			final List<String> args = stub.getArgsAsStrings();
+			final List<String> args = stub.getStringArgs();
 			if(args.size() != 3) {
 				return newBadRequestResponse("Incorrect number of arguments. Expecting \"init\" plus 2 more.");
 			}
 
 			final String key = args.get(1);
 			final int value = Integer.parseInt(args.get(2));
-			stub.putState(key, String.valueOf(value));
+			stub.putStringState(key, String.valueOf(value));
 
 		} catch (NumberFormatException e) {
 			return newBadRequestResponse("Expecting integer value for sum");
@@ -59,9 +59,8 @@ public class Example04 extends ChaincodeBase {
 	public Response invoke(ChaincodeStub stub) {
 		// expects to be called with: { "invoke"|"query", chaincodeName, key }
 		try {
-			final List<String> argList = stub.getArgsAsStrings();
-			final String function = argList.get(0);
-			final String[] args = argList.stream().skip(1).toArray(String[]::new);
+			final String function = stub.getFunction();
+			final String[] args = stub.getParameters().stream().toArray(String[]::new);
 
 			switch (function) {
 			case "invoke":
@@ -87,7 +86,7 @@ public class Example04 extends ChaincodeBase {
 		case 2:
 		case 3: {
 			final String key = args[0];
-			final int value = Integer.parseInt(stub.getState(key));
+			final int value = Integer.parseInt(stub.getStringState(key));
 			return newSuccessResponse(
 					Json.createObjectBuilder()
 						.add("Name", key)
@@ -145,15 +144,10 @@ public class Example04 extends ChaincodeBase {
 		}
 
 		// update the ledger to indicate a successful invoke
-		stub.putState(key, String.valueOf(value));
+		stub.putStringState(key, String.valueOf(value));
 
 		// return the called chaincode's response
 		return response;
-	}
-
-	@Override
-	public String getChaincodeID() {
-		return "Example04";
 	}
 
 	public static void main(String[] args) throws Exception {

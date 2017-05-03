@@ -32,20 +32,15 @@ public class Example06 extends ChaincodeBase {
 	
 	@Override
 	public Response invoke(ChaincodeStub stub) {
-		if(stub.getArgsAsStrings().isEmpty())
+		if(stub.getArgs().isEmpty())
 			return newBadRequestResponse(format("No arguments specified."));
 		
-		switch (stub.getArgsAsStrings().get(0)) {
+		switch (stub.getStringArgs().get(0)) {
 		case "runtimeException":
 			throw new RuntimeException("Exception thrown as requested.");
 		default:
 			return newBadRequestResponse(format("Invalid arguments specified"));
 		}
-	}
-	
-	@Override
-	public String getChaincodeID() {
-		return "Example06";
 	}
 
 	public static void main(String[] args) throws Exception {

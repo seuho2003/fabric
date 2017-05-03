@@ -35,14 +35,14 @@ public class Example05 extends ChaincodeBase {
 		// expects to be called with: { "init", key, value }
 		try {
 			
-			final List<String> args = stub.getArgsAsStrings();
+			final List<String> args = stub.getStringArgs();
 			if(args.size() != 3) {
 				return newBadRequestResponse("Incorrect number of arguments. Expecting \"init\" plus 2 more.");
 			}
 			
 			final String key = args.get(1);
 			final int value = Integer.parseInt(args.get(2));
-			stub.putState(key, String.valueOf(value));
+			stub.putStringState(key, String.valueOf(value));
 			
 		} catch (NumberFormatException e) {
 			return newBadRequestResponse("Expecting integer value for sum");
@@ -57,9 +57,8 @@ public class Example05 extends ChaincodeBase {
 	public Response invoke(ChaincodeStub stub) {
 		// expects to be called with: { "invoke"|"query", chaincodeName, key }
 		try {
-			final List<String> argList = stub.getArgsAsStrings();
-			final String function = argList.get(0);
-			final String[] args = argList.stream().skip(1).toArray(String[]::new);
+			final String function = stub.getFunction();
+			final String[] args = stub.getParameters().stream().toArray(String[]::new);
 			
 			switch (function) {
 			case "invoke":
@@ -124,15 +123,10 @@ public class Example05 extends ChaincodeBase {
 		final int sum = a + b;
 		
 		// write new sum to the ledger
-		stub.putState(key, String.valueOf(sum));
+		stub.putStringState(key, String.valueOf(sum));
 		
 		// return sum as string in payload
 		return newSuccessResponse(String.valueOf(sum).getBytes(UTF_8));
-	}
-
-	@Override
-	public String getChaincodeID() {
-		return "Example05";
 	}
 
 	public static void main(String[] args) throws Exception {

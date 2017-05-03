@@ -43,9 +43,8 @@ public class LinkExample extends ChaincodeBase {
 	@Override
 	public Response invoke(ChaincodeStub stub) {
         try {
-            final List<String> argList = stub.getArgsAsStrings();
-            final String function = argList.get(0);
-            final List<String> args = argList.subList(0, argList.size());
+            final String function = stub.getFunction();
+            final List<String> args = stub.getParameters();
             
             switch (function) {
             case "init":
@@ -75,11 +74,6 @@ public class LinkExample extends ChaincodeBase {
 
 	public static void main(String[] args) throws Exception {
 		new LinkExample().start(args);
-	}
-
-	@Override
-	public String getChaincodeID() {
-		return "link";
 	}
 
 }

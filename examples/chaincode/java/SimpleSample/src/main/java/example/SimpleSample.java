@@ -22,8 +22,6 @@ import static org.hyperledger.fabric.shim.ChaincodeHelper.newBadRequestResponse;
 import static org.hyperledger.fabric.shim.ChaincodeHelper.newInternalServerErrorResponse;
 import static org.hyperledger.fabric.shim.ChaincodeHelper.newSuccessResponse;
 
-import java.util.List;
-
 import javax.json.Json;
 
 import org.apache.commons.logging.Log;
@@ -44,26 +42,25 @@ public class SimpleSample extends ChaincodeBase {
 
 	@Override
 	public Response init(ChaincodeStub stub) {
-		final List<String> args = stub.getArgsAsStrings();
-		if(!args.get(0).equals("init")) {
-			return newBadRequestResponse(format("Unknown function: %s", args.get(0)));
+		final String function = stub.getFunction();
+		if(!function.equals("init")) {
+			return newBadRequestResponse(format("Unknown function: %s", function));
 		}
-		return init(stub, args.stream().skip(1).toArray(String[]::new));
+		return init(stub, stub.getParameters().stream().toArray(String[]::new));
 	}
 
 	@Override
 	public Response invoke(ChaincodeStub stub) {
 		try {
-			final List<String> argList = stub.getArgsAsStrings();
-			final String function = argList.get(0);
-			final String[] args = argList.stream().skip(1).toArray(String[]::new);
+			final String function = stub.getFunction();
+			final String[] args = stub.getParameters().stream().toArray(String[]::new);
 
 			switch (function) {
 			case "transfer":
 				return transfer(stub, args);
 			case "put":
 				for (int i = 0; i < args.length; i += 2)
-					stub.putState(args[i], args[i + 1]);
+					stub.putStringState(args[i], args[i + 1]);
 				return newSuccessResponse();
 			case "del":
 				for (String arg : args)
@@ -91,8 +88,8 @@ public class SimpleSample extends ChaincodeBase {
 		final String amount = args[2];
 		
 		// get state of the from/to keys
-		final String fromKeyState = stub.getState(fromKey);
-		final String toKeyState = stub.getState(toKey);
+		final String fromKeyState = stub.getStringState(fromKey);
+		final String toKeyState = stub.getStringState(toKey);
 		
 		// parse states as integers
 		int fromAccountBalance = Integer.parseInt(fromKeyState);
@@ -111,8 +108,8 @@ public class SimpleSample extends ChaincodeBase {
 		int newFromAccountBalance = fromAccountBalance - transferAmount;
 		int newToAccountBalance = toAccountBalance + transferAmount;
 		log.info(String.format("New holding values will be: %s = %d, %s = %d", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
-		stub.putState(fromKey, Integer.toString(newFromAccountBalance));
-		stub.putState(toKey, Integer.toString(newToAccountBalance));
+		stub.putStringState(fromKey, Integer.toString(newFromAccountBalance));
+		stub.putStringState(toKey, Integer.toString(newToAccountBalance));
 		log.info("Transfer complete.");
 	
 		return newSuccessResponse(format("Successfully transferred %d assets from %s to %s.", transferAmount, fromKey, toKey));
@@ -126,8 +123,8 @@ public class SimpleSample extends ChaincodeBase {
 		final String account1Balance = args[1];
 		final String account2Balance = args[3];
 		
-		stub.putState(accountKey1, new Integer(account1Balance).toString());
-		stub.putState(accountKey2, new Integer(account2Balance).toString());
+		stub.putStringState(accountKey1, new Integer(account1Balance).toString());
+		stub.putStringState(accountKey2, new Integer(account2Balance).toString());
 		
 		return newSuccessResponse();
 	}
@@ -139,15 +136,10 @@ public class SimpleSample extends ChaincodeBase {
 		
 		return newSuccessResponse(Json.createObjectBuilder()
 			.add("Name", accountKey)
-			.add("Amount", Integer.parseInt(stub.getState(accountKey)))
+			.add("Amount", Integer.parseInt(stub.getStringState(accountKey)))
 			.build().toString().getBytes(UTF_8)
 		);
 
-	}
-
-	@Override
-	public String getChaincodeID() {
-		return "SimpleSample";
 	}
 
 	public static void main(String[] args) throws Exception {

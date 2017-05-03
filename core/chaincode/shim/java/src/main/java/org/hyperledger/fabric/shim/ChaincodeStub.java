@@ -15,15 +15,15 @@ limitations under the License.
 */
 package org.hyperledger.fabric.shim;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.hyperledger.fabric.protos.peer.ChaincodeEventPackage.ChaincodeEvent;
 import org.hyperledger.fabric.protos.peer.ProposalResponsePackage.Response;
-
-import com.google.protobuf.ByteString;
+import org.hyperledger.fabric.shim.ledger.CompositeKey;
 
 public interface ChaincodeStub {
 
@@ -41,9 +41,31 @@ public interface ChaincodeStub {
 	 * {@link Chaincode#init(ChaincodeStub)} or
 	 * {@link Chaincode#invoke(ChaincodeStub)}.
 	 * 
-	 * @return a list of arguments cast to a UTF-8 string
+	 * @return a list of arguments cast to UTF-8 strings
 	 */
-	List<String> getArgsAsStrings();
+	List<String> getStringArgs();
+
+	/**
+	 * A convenience method that returns the first argument of the chaincode
+	 * invocation for use as a function name.
+	 * 
+	 * The bytes of the first argument are decoded as a UTF-8 string.  
+	 * 
+	 * @return the function name
+	 */
+	String getFunction();
+
+	/**
+	 * A convenience method that returns all except the first argument of the
+	 * chaincode invocation for use as the parameters to the function returned
+	 * by #{@link ChaincodeStub#getFunction()}.
+	 * 
+	 * The bytes of the arguments are decoded as a UTF-8 strings and returned as
+	 * a list of string parameters..
+	 * 
+	 * @return a list of parameters
+	 */
+	List<String> getParameters();
 
 	/**
 	 * Returns the transaction id
@@ -63,31 +85,30 @@ public interface ChaincodeStub {
 	Response invokeChaincode(String chaincodeName, List<byte[]> args, String channel);
 
 	/**
-	 * Get the state of the provided key from the ledger, and returns is as a
-	 * string
+	 * Returns the byte array value specified by the key, from the ledger.
 	 *
 	 * @param key
-	 *            the key of the desired state
-	 * @return the String value of the requested state
+	 *            name of the value
+	 * @return value 
+	 *            the value read from the ledger
 	 */
-	String getState(String key);
+	byte[] getState(String key);
 
 	/**
-	 * Puts the given state into a ledger, automatically wrapping it in a
-	 * ByteString
+	 * Writes the specified value and key into the ledger
 	 *
 	 * @param key
-	 *            reference key
+	 *            name of the value
 	 * @param value
-	 *            value to be put
+	 *            the value to write to the ledger
 	 */
-	void putState(String key, String value);
+	void putState(String key, byte[] value);
 
 	/**
-	 * Deletes the state of the given key from the ledger
+	 * Removes the specified key from the ledger
 	 *
 	 * @param key
-	 *            key of the state to be deleted
+	 *            name of the value to be deleted
 	 */
 	void delState(String key);
 
@@ -97,14 +118,22 @@ public interface ChaincodeStub {
 	 *
 	 * @param objectType
 	 * @param attributes
-	 * @return
+	 * @return a composite key
 	 */
-	String createCompositeKey(String objectType, String[] attributes);
+	CompositeKey createCompositeKey(String objectType, String... attributes);
+
+	/**
+	 * Parses a composite key from a string.
+	 *
+	 * @param compositeKey a composite key string
+	 * @return a composite key
+	 */
+	CompositeKey splitCompositeKey(String compositeKey);
 
 	/**
 	 * Defines the CHAINCODE type event that will be posted to interested
 	 * clients when the chaincode's result is committed to the ledger.
-	 * 
+	 *
 	 * @param name
 	 *            Name of event. Cannot be null or empty string.
 	 * @param payload
@@ -135,7 +164,7 @@ public interface ChaincodeStub {
 	 * @return
 	 */
 	default Response invokeChaincodeWithStringArgs(String chaincodeName, List<String> args, String channel) {
-		return invokeChaincode(chaincodeName, args.stream().map(x->x.getBytes(StandardCharsets.UTF_8)).collect(Collectors.toList()), channel);
+		return invokeChaincode(chaincodeName, args.stream().map(x->x.getBytes(UTF_8)).collect(toList()), channel);
 	}
 
 	/**
@@ -169,16 +198,29 @@ public interface ChaincodeStub {
 	}
 
 	/**
+	 * Returns the byte array value specified by the key and decoded as a UTF-8
+	 * encoded string, from the ledger.
+	 *
 	 * @param key
-	 * @return
+	 *            name of the value
+	 * @return value 
+	 *            the value read from the ledger
 	 */
-	ByteString getRawState(String key);
+	default String getStringState(String key) {
+		return new String(getState(key), UTF_8);
+	}
 
 	/**
+	 * Writes the specified value and key into the ledger
+	 *
 	 * @param key
+	 *            name of the value
 	 * @param value
+	 *            the value to write to the ledger
 	 */
-	void putRawState(String key, ByteString value);
+	default void putStringState(String key, String value) {
+		putState(key, value.getBytes(UTF_8));
+	}
 
 	/**
 	 * Returns the CHAINCODE type event that will be posted to interested
