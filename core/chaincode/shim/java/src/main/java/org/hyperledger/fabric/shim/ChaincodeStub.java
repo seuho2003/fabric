@@ -24,6 +24,8 @@ import java.util.List;
 import org.hyperledger.fabric.protos.peer.ChaincodeEventPackage.ChaincodeEvent;
 import org.hyperledger.fabric.protos.peer.ProposalResponsePackage.Response;
 import org.hyperledger.fabric.shim.ledger.CompositeKey;
+import org.hyperledger.fabric.shim.ledger.KeyValue;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
 
 public interface ChaincodeStub {
 
@@ -31,7 +33,7 @@ public interface ChaincodeStub {
 	 * Returns the arguments corresponding to the call to
 	 * {@link Chaincode#init(ChaincodeStub)} or
 	 * {@link Chaincode#invoke(ChaincodeStub)}.
-	 * 
+	 *
 	 * @return a list of arguments
 	 */
 	List<byte[]> getArgs();
@@ -40,7 +42,7 @@ public interface ChaincodeStub {
 	 * Returns the arguments corresponding to the call to
 	 * {@link Chaincode#init(ChaincodeStub)} or
 	 * {@link Chaincode#invoke(ChaincodeStub)}.
-	 * 
+	 *
 	 * @return a list of arguments cast to UTF-8 strings
 	 */
 	List<String> getStringArgs();
@@ -48,9 +50,9 @@ public interface ChaincodeStub {
 	/**
 	 * A convenience method that returns the first argument of the chaincode
 	 * invocation for use as a function name.
-	 * 
-	 * The bytes of the first argument are decoded as a UTF-8 string.  
-	 * 
+	 *
+	 * The bytes of the first argument are decoded as a UTF-8 string.
+	 *
 	 * @return the function name
 	 */
 	String getFunction();
@@ -59,10 +61,10 @@ public interface ChaincodeStub {
 	 * A convenience method that returns all except the first argument of the
 	 * chaincode invocation for use as the parameters to the function returned
 	 * by #{@link ChaincodeStub#getFunction()}.
-	 * 
+	 *
 	 * The bytes of the arguments are decoded as a UTF-8 strings and returned as
 	 * a list of string parameters..
-	 * 
+	 *
 	 * @return a list of parameters
 	 */
 	List<String> getParameters();
@@ -76,10 +78,13 @@ public interface ChaincodeStub {
 
 	/**
 	 * Invoke another chaincode using the same transaction context.
-	 * 
-	 * @param chaincodeName Name of chaincode to be invoked.
-	 * @param args Arguments to pass on to the called chaincode.
-	 * @param channel If not specified, the caller's channel is assumed.  
+	 *
+	 * @param chaincodeName
+	 *            Name of chaincode to be invoked.
+	 * @param args
+	 *            Arguments to pass on to the called chaincode.
+	 * @param channel
+	 *            If not specified, the caller's channel is assumed.
 	 * @return
 	 */
 	Response invokeChaincode(String chaincodeName, List<byte[]> args, String channel);
@@ -89,8 +94,7 @@ public interface ChaincodeStub {
 	 *
 	 * @param key
 	 *            name of the value
-	 * @return value 
-	 *            the value read from the ledger
+	 * @return value the value read from the ledger
 	 */
 	byte[] getState(String key);
 
@@ -113,22 +117,63 @@ public interface ChaincodeStub {
 	void delState(String key);
 
 	/**
+	 * Returns all existing keys, and their values, that are lexicographically
+	 * between <code>startkey</code> (inclusive) and the <code>endKey</code>
+	 * (exclusive).
+	 *
+	 * @param startKey
+	 * @param endKey
+	 * @return an {@link Iterable} of {@link KeyValue}
+	 */
+	QueryResultsIterator<KeyValue> getStateByRange(String startKey, String endKey);
+
+	/**
+	 * Returns all existing keys, and their values, that are prefixed by the
+	 * specified partial {@link CompositeKey}.
+	 *
+	 * If a full composite key is specified, it will not match itself, resulting
+	 * in no keys being returned.
+	 *
+	 * @param compositeKey
+	 *            partial composite key
+	 * @return an {@link Iterable} of {@link KeyValue}
+	 */
+	QueryResultsIterator<KeyValue> getStateByPartialCompositeKey(String compositeKey);
+
+	/**
 	 * Given a set of attributes, this method combines these attributes to
 	 * return a composite key.
 	 *
 	 * @param objectType
 	 * @param attributes
 	 * @return a composite key
+	 * @throws CompositeKeyFormatException
+	 *             if any parameter contains either a U+000000 or U+10FFFF code
+	 *             point.
 	 */
 	CompositeKey createCompositeKey(String objectType, String... attributes);
 
 	/**
 	 * Parses a composite key from a string.
 	 *
-	 * @param compositeKey a composite key string
+	 * @param compositeKey
+	 *            a composite key string
 	 * @return a composite key
 	 */
 	CompositeKey splitCompositeKey(String compositeKey);
+
+	/**
+	 * Perform a rich query against the state database.
+	 *
+	 * @param query
+	 *            query string in a syntax supported by the underlying state
+	 *            database
+	 * @return
+	 * @throws UnsupportedOperationException
+	 *             if the underlying state database does not support rich
+	 *             queries.
+	 */
+	QueryResultsIterator<KeyValue> getQueryResult(String query);
 
 	/**
 	 * Defines the CHAINCODE type event that will be posted to interested
@@ -143,9 +188,11 @@ public interface ChaincodeStub {
 
 	/**
 	 * Invoke another chaincode using the same transaction context.
-	 * 
-	 * @param chaincodeName Name of chaincode to be invoked.
-	 * @param args Arguments to pass on to the called chaincode.
+	 *
+	 * @param chaincodeName
+	 *            Name of chaincode to be invoked.
+	 * @param args
+	 *            Arguments to pass on to the called chaincode.
 	 * @return
 	 */
 	default Response invokeChaincode(String chaincodeName, List<byte[]> args) {
@@ -154,28 +201,34 @@ public interface ChaincodeStub {
 
 	/**
 	 * Invoke another chaincode using the same transaction context.
-	 * 
-	 * This is a convenience version of {@link #invokeChaincode(String, List, String)}.
-	 * The string args will be encoded into as UTF-8 bytes. 
-	 * 
-	 * @param chaincodeName Name of chaincode to be invoked.
-	 * @param args Arguments to pass on to the called chaincode.
-	 * @param channel If not specified, the caller's channel is assumed.  
+	 *
+	 * This is a convenience version of
+	 * {@link #invokeChaincode(String, List, String)}. The string args will be
+	 * encoded into as UTF-8 bytes.
+	 *
+	 * @param chaincodeName
+	 *            Name of chaincode to be invoked.
+	 * @param args
+	 *            Arguments to pass on to the called chaincode.
+	 * @param channel
+	 *            If not specified, the caller's channel is assumed.
 	 * @return
 	 */
 	default Response invokeChaincodeWithStringArgs(String chaincodeName, List<String> args, String channel) {
-		return invokeChaincode(chaincodeName, args.stream().map(x->x.getBytes(UTF_8)).collect(toList()), channel);
+		return invokeChaincode(chaincodeName, args.stream().map(x -> x.getBytes(UTF_8)).collect(toList()), channel);
 	}
 
 	/**
 	 * Invoke another chaincode using the same transaction context.
-	 * 
+	 *
 	 * This is a convenience version of {@link #invokeChaincode(String, List)}.
-	 * The string args will be encoded into as UTF-8 bytes. 
-	 * 
-	 * 
-	 * @param chaincodeName Name of chaincode to be invoked.
-	 * @param args Arguments to pass on to the called chaincode.
+	 * The string args will be encoded into as UTF-8 bytes.
+	 *
+	 *
+	 * @param chaincodeName
+	 *            Name of chaincode to be invoked.
+	 * @param args
+	 *            Arguments to pass on to the called chaincode.
 	 * @return
 	 */
 	default Response invokeChaincodeWithStringArgs(String chaincodeName, List<String> args) {
@@ -184,13 +237,15 @@ public interface ChaincodeStub {
 
 	/**
 	 * Invoke another chaincode using the same transaction context.
-	 * 
+	 *
 	 * This is a convenience version of {@link #invokeChaincode(String, List)}.
-	 * The string args will be encoded into as UTF-8 bytes. 
-	 * 
-	 * 
-	 * @param chaincodeName Name of chaincode to be invoked.
-	 * @param args Arguments to pass on to the called chaincode.
+	 * The string args will be encoded into as UTF-8 bytes.
+	 *
+	 *
+	 * @param chaincodeName
+	 *            Name of chaincode to be invoked.
+	 * @param args
+	 *            Arguments to pass on to the called chaincode.
 	 * @return
 	 */
 	default Response invokeChaincodeWithStringArgs(final String chaincodeName, final String... args) {
@@ -203,8 +258,7 @@ public interface ChaincodeStub {
 	 *
 	 * @param key
 	 *            name of the value
-	 * @return value 
-	 *            the value read from the ledger
+	 * @return value the value read from the ledger
 	 */
 	default String getStringState(String key) {
 		return new String(getState(key), UTF_8);
@@ -225,6 +279,7 @@ public interface ChaincodeStub {
 	/**
 	 * Returns the CHAINCODE type event that will be posted to interested
 	 * clients when the chaincode's result is committed to the ledger.
+	 *
 	 * @return the chaincode event or null
 	 */
 	ChaincodeEvent getEvent();
