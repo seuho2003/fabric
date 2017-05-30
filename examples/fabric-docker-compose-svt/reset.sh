@@ -36,13 +36,11 @@ if test -d "$TMPDIR"; then
     :
 elif test -d "$TMP"; then
     TMPDIR=$TMP
-elif test -d /var/tmp; then
-    TMPDIR=/var/tmp
 else
     TMPDIR=/tmp
 fi
 echo "temp directory for the OS is:" $TMPDIR
-echo "deleting hfc directory: "$TMPDIR"hfc"
+echo "deleting hfc directory: "$TMPDIR"/hfc"
 rm -rf $TMPDIR/hfc
 cd $GOPATH/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/channel
 rm -rf *
