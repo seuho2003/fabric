@@ -69,8 +69,9 @@ function generateChannelArtifacts() {
 	echo "##########################################################"
 	echo "#########  Generating Orderer Genesis block ##############"
 	echo "##########################################################"
-	$CONFIGTXGEN -profile TwoOrgsOrdererGenesis -outputBlock ./channel-artifacts/orderer.genesis.block
-
+#	$CONFIGTXGEN -profile TwoOrgsOrdererGenesis -outputBlock ./channel-artifacts/orderer.genesis.block
+#    Use configtxlator to customize orderer genesis block
+    source configtxlator.sh
 	echo
 	echo "#################################################################"
 	echo "### Generating channel configuration transaction 'channel.tx' ###"
