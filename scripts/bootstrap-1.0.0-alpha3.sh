@@ -33,7 +33,7 @@ dockerCaPull() {
 : ${FABRIC_TAG:="$MARCH-$VERSION"}
 
 echo "===> Downloading platform binaries"
-curl https://nexus.hyperledger.org/content/repositories/snapshots/org/hyperledger/fabric/fabric-binary/${ARCH}-${VERSION}-SNAPSHOT/fabric-binary-${ARCH}-${VERSION}-20170606.184514-5.tar.gz | tar xz
+curl https://nexus.hyperledger.org/content/repositories/snapshots/org/hyperledger/fabric/fabric-binary/${ARCH}-${VERSION}-SNAPSHOT/fabric-binary-${ARCH}-${VERSION}-20170606.184448-5.tar.gz | tar xz
 
 echo "===> Pulling fabric Images"
 dockerFabricPull ${FABRIC_TAG}
