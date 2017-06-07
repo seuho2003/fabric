@@ -12,7 +12,7 @@ MARCH=`uname -m`
 
 dockerFabricPull() {
   local FABRIC_TAG=x86_64-1.0.0-alpha3-snapshot-52853f8
-  for IMAGES in peer orderer couchdb ccenv javaenv kafka zookeeper; do
+  for IMAGES in peer orderer couchdb ccenv javaenv kafka zookeeper tools; do
       echo "==> FABRIC IMAGE: $IMAGES"
       echo
       docker pull rameshthoomu/fabric-$IMAGES-x86_64:$FABRIC_TAG
